@@ -1,0 +1,1155 @@
+# Broken Loop Brewing - Cursor Rules
+
+## External Rule Files Reference
+
+### **PRIORITY: Simplicity-First Development**
+- **[Simplicity-First Development](.cursor/rules/simplicity-first-development.mdc)** - **ALWAYS prefer direct, simple solutions over complex abstractions** - CSS Module alternatives, component architecture, state management, TypeScript patterns
+
+### Core Development Patterns
+- **[API Integration Patterns](.cursor/rules/api-integration-patterns.mdc)** - HTTP client architecture, service layers, authentication, file upload handling
+- **[Form Handling & Validation](.cursor/rules/form-handling-validation.mdc)** - Form state management, validation strategies, accessibility
+- **[Data Loading & Async State](.cursor/rules/data-loading-async-state.mdc)** - Async state management, caching, error handling, real-time updates
+
+### Business Logic Integration
+- **[Company Information Integration](.cursor/rules/companyInformationIntegration.mdc)** - Business data management, SEO patterns, single source of truth
+
+### Code Quality Standards
+- **[React Component Best Practices](.cursor/rules/react-component-best-practices.mdc)** - Component architecture, TypeScript integration, patterns
+- **[TypeScript Best Practices](.cursor/rules/typescript-best-practices.mdc)** - Type safety, advanced patterns, utility types
+- **[Custom Hooks Best Practices](.cursor/rules/custom-hooks-best-practices.mdc)** - Hook architecture, patterns, testing
+
+### Styling & Design
+- **[CSS Best Practices](.cursor/rules/cssBestPractices.mdc)** - CSS Module standards, scoping, conventions
+- **[CSS Scoping Enforcement](.cursor/rules/cssScopingEnforcement.mdc)** - Component styling architecture, file structure
+- **[CSS No Important Rule](.cursor/rules/cssNoImportant.mdc)** - CSS specificity management, anti-patterns
+- **[Responsive Breakpoint Standards](.cursor/rules/responsiveBreakpointStandards.mdc)** - Responsive design patterns, breakpoints
+
+### Development Workflow
+- **[No Emojis Rule](.cursor/rules/no-emojis.md)** - Code style requirements, professionalism
+
+## Terminology Standards
+
+### Component Terms
+- **Component**: React functional component with TypeScript interfaces
+- **Element**: HTML element with semantic meaning
+- **Hook**: Custom React hook following naming conventions
+- **Pattern**: Reusable code structure with established conventions
+
+### State Terms
+- **Local State**: Component-level state using useState/useReducer
+- **Global State**: Application-wide state using Context/Zustand
+- **Server State**: Data from external sources with caching
+- **Form State**: Form-specific state management with validation
+
+### Styling Terms
+- **CSS Module**: Scoped CSS file with component-specific styles
+- **Custom Property**: CSS variable for consistent design tokens
+- **Breakpoint**: Responsive design threshold for layout changes
+- **Touch Target**: Minimum interactive element size (44px)
+
+## Project Overview
+This is a Vite + React + TypeScript website for Broken Loop Brewing, a craft brewery. The project uses CSS Modules, React Router, Framer Motion, and follows modern web development best practices.
+
+## Technology Stack
+- **Framework**: React 19.1.0 with TypeScript 5.8.3
+- **Build Tool**: Vite 6.3.5
+- **Styling**: CSS Modules with CSS Custom Properties
+- **Routing**: React Router DOM 7.6.2
+- **Icons**: Phosphor Icons
+- **Animations**: Framer Motion
+- **Content**: Markdown files with gray-matter frontmatter
+- **Deployment**: Vercel with analytics
+
+## AI Assistant Instructions
+
+### Response Format
+- Provide complete, working code solutions
+- Include all necessary imports and dependencies
+- Explain complex decisions with inline comments
+- Show before/after examples for refactoring
+- Always validate against existing project patterns
+
+### Code Generation Preferences
+- Prioritize TypeScript safety over convenience
+- Use existing project utilities and hooks when possible
+- Maintain consistency with established patterns
+- Include error handling in all suggestions
+- Test edge cases in proposed solutions
+
+### Context Awareness
+- Reference specific files when making suggestions
+- Maintain awareness of component hierarchies
+- Consider performance implications of suggestions
+- Respect existing architecture decisions
+- Flag potential breaking changes
+
+## Decision Trees & Context Awareness
+
+### When to Create New Components vs Modify Existing
+```mermaid
+graph TD
+    A[New Feature Request] --> B{Similar component exists?}
+    B -->|Yes| C{Can be extended with props?}
+    B -->|No| D[Create new component]
+    C -->|Yes| E[Add props to existing]
+    C -->|No| F{Shared logic > 70%?}
+    F -->|Yes| G[Extract common base component]
+    F -->|No| D
+```
+
+### Component Complexity Guidelines
+- **Simple** (< 50 lines): Single responsibility, minimal state
+- **Medium** (50-150 lines): Multiple related responsibilities, local state
+- **Complex** (> 150 lines): Consider splitting or using composition
+
+### State Management Decision Matrix
+| Scope | Complexity | Frequency | Solution |
+|-------|------------|-----------|----------|
+| Local | Low | Low | useState |
+| Local | High | High | useReducer |
+| Cross-component | Medium | Medium | Context |
+| Global | High | High | Zustand/Redux |
+| Server | Any | Any | React Query |
+
+## Code Style & Formatting
+
+### TypeScript Configuration
+- Use strict TypeScript settings configured in `tsconfig.app.json`:
+  ```json
+  {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+  }
+  ```
+- All TypeScript errors must be resolved before committing
+- Use `satisfies` operator for runtime type checking: `const config = { apiUrl: '...' } satisfies Config`
+- Prefer branded types for domain safety: `type BeerId = string & { readonly __brand: unique symbol }`
+
+### ESLint Rules
+- Follow the existing ESLint configuration in eslint.config.js
+- Use TypeScript ESLint recommended rules
+- Enable React Hooks rules
+- Use React Refresh plugin for development
+
+### Prettier Configuration
+- Line width: 80 characters
+- Tab width: 2 spaces (no tabs)
+- End of line: LF (Linux/Mac style)
+- Prose wrap: Always for markdown files
+- Format all supported files: JS, TS, JSON, MD, CSS
+
+## Component Architecture
+
+### File Structure
+```
+src/components/ComponentName/
+├── ComponentName.tsx          # Main component
+├── ComponentName.module.css   # CSS Module styles
+├── ComponentName.d.ts         # TypeScript declarations
+├── index.ts                   # Export file (optional)
+└── README.md                  # Component documentation (optional)
+```
+
+### Comprehensive Component Template
+```tsx
+import React, { forwardRef } from 'react';
+import styles from './ComponentName.module.css';
+import { ComponentNameProps } from './ComponentName.d.ts';
+
+/**
+ * ComponentName - Brief description of component purpose
+ * 
+ * @example
+ * <ComponentName variant="primary" size="large">Content</ComponentName>
+ * 
+ * @param variant - Visual variant of the component
+ * @param size - Size variant of the component
+ * @param children - Child elements to render
+ * @param className - Additional CSS classes
+ * @param onAction - Callback when action is triggered
+ */
+export const ComponentName = forwardRef<HTMLDivElement, ComponentNameProps>(({
+  variant = 'default',
+  size = 'medium',
+  children,
+  className = '',
+  onAction,
+  ...props
+}, ref) => {
+  // Memoized class names for performance
+  const componentClasses = React.useMemo(() => {
+    const baseClass = styles.component;
+    const variantClass = styles[`component${variant.charAt(0).toUpperCase() + variant.slice(1)}`];
+    const sizeClass = styles[`component${size.charAt(0).toUpperCase() + size.slice(1)}`];
+    
+    return [baseClass, variantClass, sizeClass, className].filter(Boolean).join(' ');
+  }, [variant, size, className]);
+
+  // Event handlers with error boundaries
+  const handleAction = React.useCallback((event: React.MouseEvent) => {
+    try {
+      onAction?.(event);
+    } catch (error) {
+      console.error('ComponentName: Error in action handler:', error);
+    }
+  }, [onAction]);
+
+  return (
+    <div
+      ref={ref}
+      className={componentClasses}
+      role={props.role || 'region'}
+      aria-label={props['aria-label'] || 'Component description'}
+      {...props}
+      onClick={handleAction}
+    >
+      {children}
+    </div>
+  );
+});
+
+ComponentName.displayName = 'ComponentName';
+```
+
+### Hook Template
+```tsx
+import { useState, useCallback, useMemo } from 'react';
+
+interface UseComponentNameOptions {
+  initialValue?: string;
+  onSuccess?: (value: string) => void;
+  onError?: (error: Error) => void;
+}
+
+interface UseComponentNameReturn {
+  value: string;
+  setValue: (value: string) => void;
+  loading: boolean;
+  error: string | null;
+  reset: () => void;
+}
+
+/**
+ * useComponentName - Hook for managing component state
+ * 
+ * @param options - Configuration options for the hook
+ * @returns Object containing state and actions
+ */
+export const useComponentName = (options: UseComponentNameOptions = {}): UseComponentNameReturn => {
+  const { initialValue = '', onSuccess, onError } = options;
+  
+  const [value, setValue] = useState(initialValue);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isValid = useMemo(() => value.length > 0 && value.length <= 100, [value]);
+
+  const reset = useCallback(() => {
+    setValue(initialValue);
+    setError(null);
+    setLoading(false);
+  }, [initialValue]);
+
+  const setValueWithValidation = useCallback((newValue: string) => {
+    try {
+      setValue(newValue);
+      setError(null);
+      if (isValid) onSuccess?.(newValue);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to set value';
+      setError(errorMessage);
+      onError?.(err instanceof Error ? err : new Error(errorMessage));
+    }
+  }, [isValid, onSuccess, onError]);
+
+  return { value, setValue: setValueWithValidation, loading, error, reset };
+};
+```
+
+## CSS Module Standards
+
+### File Naming Conventions
+- Component files: `ComponentName.tsx`
+- CSS Module files: `ComponentName.module.css`
+- TypeScript declarations: `ComponentName.d.ts`
+- Global CSS files: `globals.css`, `variables.css` (in src/styles/)
+
+### CSS Module Class Naming
+- Use camelCase: `.headerRow`, `.beerCard`, `.sectionTitle`
+- Be specific to the component: `.cardTitle` not `.title`
+- Use semantic names: `.primaryButton` not `.blueButton`
+- Follow BEM-like naming when appropriate: `.card`, `.cardTitle`, `.cardContent`
+
+### CSS Module Import/Usage Pattern
+```tsx
+// ✅ CORRECT - CSS Modules
+import styles from './Component.module.css';
+
+export function Component({ variant = 'default' }) {
+  const componentClass = variant === 'primary' 
+    ? styles.componentPrimary 
+    : styles.component;
+    
+  return (
+    <div className={componentClass}>
+      <h2 className={styles.title}>Title</h2>
+      <div className={styles.content}>Content</div>
+    </div>
+  );
+}
+
+// ❌ INCORRECT - Global classes
+export function Component() {
+  return (
+    <div className="component"> {/* ❌ Global class */}
+      <h2 className="title">Title</h2> {/* ❌ Global class */}
+    </div>
+  );
+}
+```
+
+### CSS Custom Properties Usage
+Always use the project's CSS custom properties:
+```css
+/* Colors */
+--color-primary: #1a4d5c;
+--color-secondary: #d4af37;
+--color-background: #ffffff;
+--color-text: #333333;
+--color-error: #dc3545;
+--color-success: #28a745;
+--color-warning: #ffc107;
+
+/* Spacing */
+--spacing-xs: 0.25rem;
+--spacing-sm: 0.5rem;
+--spacing-md: 1rem;
+--spacing-lg: 2rem;
+--spacing-xl: 4rem;
+
+/* Typography */
+--font-family: 'Arial', sans-serif;
+--font-size-xs: 0.75rem;
+--font-size-sm: 0.875rem;
+--font-size-base: 1rem;
+--font-size-lg: 1.25rem;
+--font-size-xl: 2rem;
+--font-size-xxl: 3rem;
+
+/* Layout */
+--container-max-width: 1200px;
+--container-padding-mobile: 1rem;
+--container-padding-tablet: 2rem;
+--container-padding-desktop: 2rem;
+--border-radius: 8px;
+--transition-speed: 0.3s;
+
+/* Z-index scale */
+--z-dropdown: 100;
+--z-modal: 1000;
+--z-header: 1100;
+--z-tooltip: 1200;
+
+/* Touch targets */
+--touch-target-min: 44px;
+```
+
+### Responsive Design Standards
+**Reference: [Responsive Breakpoint Standards](.cursor/rules/responsiveBreakpointStandards.mdc)**
+
+```css
+/* Mobile Portrait - 320px to 480px */
+@media (max-width: 480px) {
+  /* Single column, touch-optimized */
+}
+
+/* Mobile Landscape / Small Tablet - 481px to 768px */  
+@media (min-width: 481px) and (max-width: 768px) {
+  /* Still mobile layout but slightly larger */
+}
+
+/* Tablet - 769px to 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Desktop-style header, multi-column content */
+}
+
+/* Desktop Small - 1025px to 1200px */
+@media (min-width: 1025px) and (max-width: 1200px) {
+  /* Full desktop layout */
+}
+
+/* Desktop Large - 1201px+ */
+@media (min-width: 1201px) {
+  /* Maximum width containers, optimal spacing */
+}
+```
+
+### CSS Module Structure Template
+```css
+/* Component.module.css */
+
+/* Main component wrapper */
+.component {
+  /* Use variables for consistency */
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed) ease;
+}
+
+/* Child elements */
+.title {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.content {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+/* States */
+.component:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.component:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Variants */
+.componentPrimary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.componentSecondary {
+  background: var(--color-secondary);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .component {
+    padding: var(--spacing-md);
+  }
+  
+  .title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .component {
+    transition: none;
+  }
+  
+  .component:hover {
+    transform: none;
+  }
+}
+```
+
+## Error Handling Architecture
+
+### Error Classification System
+```typescript
+export enum ErrorType {
+  NETWORK = 'NETWORK',
+  VALIDATION = 'VALIDATION',
+  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHORIZATION = 'AUTHORIZATION',
+  NOT_FOUND = 'NOT_FOUND',
+  SERVER = 'SERVER',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export interface AppError {
+  type: ErrorType;
+  message: string;
+  code?: string;
+  details?: any;
+  retryable: boolean;
+  timestamp: number;
+  userMessage: string;
+}
+
+// Error factory functions
+export const createNetworkError = (message: string): AppError => ({
+  type: ErrorType.NETWORK,
+  message,
+  retryable: true,
+  timestamp: Date.now(),
+  userMessage: 'Connection issue. Please try again.',
+});
+
+export const createValidationError = (message: string, details?: any): AppError => ({
+  type: ErrorType.VALIDATION,
+  message,
+  details,
+  retryable: false,
+  timestamp: Date.now(),
+  userMessage: 'Please check your input and try again.',
+});
+```
+
+### Error Boundary Pattern
+```typescript
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
+}
+
+class ComponentErrorBoundary extends React.Component<
+  React.PropsWithChildren<{}>,
+  ErrorBoundaryState
+> {
+  constructor(props: React.PropsWithChildren<{}>) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log to monitoring service
+    console.error('Component Error Boundary caught an error:', error, errorInfo);
+    
+    // Send to error tracking service
+    if (typeof window !== 'undefined' && (window as any).errorTracking) {
+      (window as any).errorTracking.captureException(error, {
+        component: 'ComponentErrorBoundary',
+        errorInfo,
+      });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary">
+          <h2>Something went wrong</h2>
+          <p>We're sorry, but something unexpected happened.</p>
+          <button onClick={() => window.location.reload()}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+### Async Error Handling Pattern
+```typescript
+export function useAsyncErrorHandler<T>(
+  asyncFunction: () => Promise<T>,
+  options: {
+    onError?: (error: AppError) => void;
+    fallbackData?: T;
+    retryAttempts?: number;
+  } = {}
+) {
+  const { onError, fallbackData, retryAttempts = 3 } = options;
+  
+  const [state, setState] = useState<{
+    data: T | null;
+    loading: boolean;
+    error: AppError | null;
+    retryCount: number;
+  }>({
+    data: fallbackData || null,
+    loading: false,
+    error: null,
+    retryCount: 0,
+  });
+
+  const execute = useCallback(async (): Promise<T> => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const result = await asyncFunction();
+      setState(prev => ({
+        ...prev,
+        data: result,
+        loading: false,
+        error: null,
+        retryCount: 0,
+      }));
+      return result;
+    } catch (rawError) {
+      const error = classifyError(rawError);
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error,
+      }));
+
+      onError?.(error);
+      throw error;
+    }
+  }, [asyncFunction, onError]);
+
+  const retry = useCallback(async (): Promise<T> => {
+    if (state.retryCount >= retryAttempts) {
+      throw new Error('Maximum retry attempts reached');
+    }
+
+    setState(prev => ({ ...prev, retryCount: prev.retryCount + 1 }));
+    return execute();
+  }, [execute, state.retryCount, retryAttempts]);
+
+  return {
+    ...state,
+    execute,
+    retry,
+    canRetry: state.retryCount < retryAttempts,
+  };
+}
+```
+
+## Accessibility Standards
+
+### WCAG 2.1 AA Compliance Patterns
+
+#### Focus Management
+```typescript
+// Focus trap for modals
+const useFocusTrap = (isActive: boolean) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!isActive || !containerRef.current) return;
+    
+    const container = containerRef.current;
+    const focusableElements = container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    
+    firstElement?.focus();
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        const isShiftTab = e.shiftKey;
+        const isFirstElement = document.activeElement === firstElement;
+        const isLastElement = document.activeElement === lastElement;
+        
+        if ((isShiftTab && isFirstElement) || (!isShiftTab && isLastElement)) {
+          (isShiftTab ? lastElement : firstElement)?.focus();
+          e.preventDefault();
+        }
+      }
+    };
+    
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, [isActive]);
+  
+  return containerRef;
+};
+```
+
+#### Screen Reader Support
+```typescript
+// Announce dynamic content changes
+const useAnnouncement = () => {
+  const [announcement, setAnnouncement] = useState('');
+  
+  const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+    setAnnouncement(message);
+    setTimeout(() => setAnnouncement(''), 1000);
+  };
+  
+  return { announcement, announce };
+};
+
+// Usage in component
+const BeerList = () => {
+  const { announcement, announce } = useAnnouncement();
+  
+  const handleFilter = (results: Beer[]) => {
+    announce(`Found ${results.length} beers matching your criteria`);
+  };
+  
+  return (
+    <>
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
+      {/* Component content */}
+    </>
+  );
+};
+```
+
+#### Keyboard Navigation
+```typescript
+// Keyboard navigation hook
+const useKeyboardNavigation = (items: any[], onSelect: (item: any) => void) => {
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setFocusedIndex(prev => prev < items.length - 1 ? prev + 1 : 0);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        setFocusedIndex(prev => prev > 0 ? prev - 1 : items.length - 1);
+        break;
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < items.length) {
+          onSelect(items[focusedIndex]);
+        }
+        break;
+      case 'Escape':
+        setFocusedIndex(-1);
+        break;
+    }
+  }, [items, onSelect, focusedIndex]);
+  
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+  
+  return { focusedIndex, setFocusedIndex };
+};
+```
+
+### Color Contrast Requirements
+- **Normal text**: Minimum 4.5:1 contrast ratio
+- **Large text**: Minimum 3:1 contrast ratio
+- **UI components**: Minimum 3:1 contrast ratio
+- **Focus indicators**: Minimum 3:1 contrast ratio
+
+### ARIA Attribute Patterns
+```tsx
+// Proper ARIA usage
+<button
+  aria-expanded={isExpanded}
+  aria-controls="menu-content"
+  aria-label="Toggle menu"
+  onClick={toggleMenu}
+>
+  Menu
+</button>
+
+<div
+  id="menu-content"
+  aria-hidden={!isExpanded}
+  role="menu"
+>
+  {/* Menu content */}
+</div>
+```
+
+## Security Guidelines
+
+### OWASP Top 10 Considerations
+
+#### XSS Prevention
+```typescript
+// ✅ SAFE - Sanitize user input
+import DOMPurify from 'dompurify';
+
+const UserContent = ({ content }: { content: string }) => {
+  const sanitizedContent = DOMPurify.sanitize(content);
+  
+  return (
+    <div 
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      className="user-content"
+    />
+  );
+};
+
+// ❌ UNSAFE - Direct user input
+const UnsafeComponent = ({ content }: { content: string }) => {
+  return (
+    <div 
+      dangerouslySetInnerHTML={{ __html: content }} // ❌ Vulnerable to XSS
+    />
+  );
+};
+```
+
+#### Input Validation
+```typescript
+// ✅ SAFE - Validate all inputs
+import { z } from 'zod';
+
+const UserInputSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  age: z.number().min(18).max(120),
+});
+
+const validateUserInput = (data: unknown) => {
+  try {
+    return UserInputSchema.parse(data);
+  } catch (error) {
+    throw new Error('Invalid input data');
+  }
+};
+```
+
+#### CSRF Protection
+```typescript
+// ✅ SAFE - Include CSRF tokens
+const submitForm = async (formData: FormData) => {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  
+  const response = await fetch('/api/submit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken || '',
+    },
+    body: JSON.stringify(Object.fromEntries(formData)),
+  });
+  
+  return response.json();
+};
+```
+
+### Secure Data Handling
+```typescript
+// ✅ SAFE - Never store sensitive data in localStorage
+const useSecureStorage = () => {
+  const storeSecureData = (key: string, data: any) => {
+    // Use sessionStorage for temporary data only
+    sessionStorage.setItem(key, JSON.stringify(data));
+  };
+  
+  const getSecureData = (key: string) => {
+    const data = sessionStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  };
+  
+  const clearSecureData = (key: string) => {
+    sessionStorage.removeItem(key);
+  };
+  
+  return { storeSecureData, getSecureData, clearSecureData };
+};
+```
+
+## Performance & Optimization
+
+### React Performance Optimization
+- Use `React.memo()` for expensive components that receive stable props
+- Implement `useMemo()` for expensive calculations and object creation
+- Use `useCallback()` for function props to prevent unnecessary re-renders
+- Lazy load routes with `React.lazy()` and `Suspense`
+- Avoid creating objects/arrays in render functions
+
+### CSS Performance Optimization
+- Use `will-change` sparingly and only for elements that will actually change
+- Implement `contain` property for isolated components: `contain: layout style paint`
+- Use `transform` and `opacity` for animations (GPU-accelerated)
+- Avoid layout thrashing by batching DOM reads/writes with `requestAnimationFrame`
+- Use `content-visibility: auto` for off-screen content
+
+### Bundle Optimization
+- Use dynamic imports for code splitting: `const Component = lazy(() => import('./Component'))`
+- Minimize bundle size with tree shaking (ensure proper ES module exports)
+- Use appropriate chunking strategies for SPA
+- Implement route-based code splitting
+- Use `webpack-bundle-analyzer` to identify large dependencies
+
+### Core Web Vitals
+- **LCP (Largest Contentful Paint)**: < 2.5s
+- **FID (First Input Delay)**: < 100ms
+- **CLS (Cumulative Layout Shift)**: < 0.1
+
+### Performance Budgets
+- **JavaScript bundle**: < 250KB gzipped
+- **CSS bundle**: < 50KB gzipped
+- **Time to Interactive**: < 3.5s on 3G
+- **First Contentful Paint**: < 2s
+
+### Project-Specific Performance Metrics
+```typescript
+// Performance budgets for Broken Loop Brewing website
+const performanceBudgets = {
+  // Bundle sizes
+  js: { max: 250000, warn: 225000 }, // 250KB max, 225KB warning
+  css: { max: 50000, warn: 45000 },  // 50KB max, 45KB warning
+  
+  // Core Web Vitals
+  lcp: { max: 2500, warn: 2000 },    // Largest Contentful Paint (ms)
+  fid: { max: 100, warn: 80 },       // First Input Delay (ms)
+  cls: { max: 0.1, warn: 0.08 },     // Cumulative Layout Shift
+  
+  // Page load metrics
+  fcp: { max: 2000, warn: 1500 },    // First Contentful Paint (ms)
+  tti: { max: 3500, warn: 3000 },    // Time to Interactive (ms)
+  
+  // Image optimization
+  imageMaxSize: { max: 500000, warn: 400000 }, // 500KB max image size
+  
+  // API response times
+  apiResponse: { max: 1000, warn: 800 }, // 1s max API response
+} as const;
+
+// Usage in performance monitoring
+const checkPerformanceBudget = (metric: keyof typeof performanceBudgets, value: number) => {
+  const budget = performanceBudgets[metric];
+  if (value > budget.max) {
+    console.error(`Performance budget exceeded: ${metric} = ${value}`);
+  } else if (value > budget.warn) {
+    console.warn(`Performance budget warning: ${metric} = ${value}`);
+  }
+};
+```
+
+## Testing Strategy
+
+### Unit Testing Patterns
+```typescript
+// Component testing with providers
+const renderWithProviders = (
+  ui: React.ReactElement,
+  {
+    preloadedState = {},
+    ...renderOptions
+  }: ExtendedRenderOptions = {}
+) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <BrowserRouter>
+      <ThemeProvider>
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+  
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
+};
+
+// Mock factories
+const createMockBeer = (overrides: Partial<Beer> = {}): Beer => ({
+  id: 'test-beer',
+  name: 'Test Beer',
+  abv: 5.0,
+  ibu: 30,
+  ...overrides,
+});
+
+// Component test example
+describe('BeerCard', () => {
+  it('renders beer information correctly', () => {
+    const beer = createMockBeer({ name: 'Test IPA' });
+    const { getByText } = renderWithProviders(<BeerCard beer={beer} />);
+    
+    expect(getByText('Test IPA')).toBeInTheDocument();
+  });
+  
+  it('handles loading state', () => {
+    const { getByTestId } = renderWithProviders(<BeerCard loading />);
+    
+    expect(getByTestId('loading-skeleton')).toBeInTheDocument();
+  });
+  
+  it('handles error state', () => {
+    const { getByText } = renderWithProviders(
+      <BeerCard error="Failed to load beer" />
+    );
+    
+    expect(getByText('Failed to load beer')).toBeInTheDocument();
+  });
+});
+```
+
+### Hook Testing
+```typescript
+// Hook testing with renderHook
+import { renderHook, act } from '@testing-library/react';
+
+describe('useBeers', () => {
+  it('loads beers successfully', async () => {
+    const { result } = renderHook(() => useBeers());
+    
+    expect(result.current.loading).toBe(true);
+    
+    await act(async () => {
+      await result.current.reload();
+    });
+    
+    expect(result.current.loading).toBe(false);
+    expect(result.current.beers).toHaveLength(3);
+  });
+  
+  it('handles errors gracefully', async () => {
+    // Mock failed API call
+    jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('API Error'));
+    
+    const { result } = renderHook(() => useBeers());
+    
+    await act(async () => {
+      await result.current.reload();
+    });
+    
+    expect(result.current.error).toBe('Failed to load beers');
+  });
+});
+```
+
+### Integration Testing
+```typescript
+// Integration test example
+describe('Beer List Flow', () => {
+  it('allows user to filter and view beer details', async () => {
+    const { getByPlaceholderText, getByText, findByText } = renderWithProviders(
+      <BeerListPage />
+    );
+    
+    // Filter beers
+    const searchInput = getByPlaceholderText('Search beers...');
+    fireEvent.change(searchInput, { target: { value: 'IPA' } });
+    
+    // Wait for filtered results
+    const beerCard = await findByText('Hoppy Trails IPA');
+    fireEvent.click(beerCard);
+    
+    // Verify navigation to detail page
+    expect(getByText('Beer Details')).toBeInTheDocument();
+  });
+});
+```
+
+## Development Workflow
+
+### Scripts
+- `npm run dev`: Start development server with host binding
+- `npm run build`: TypeScript build + Vite build
+- `npm run lint`: ESLint checking
+- `npm run format`: Prettier formatting
+- `npm run format:check`: Check formatting without changes
+- `npm run test`: Run unit tests
+- `npm run test:coverage`: Run tests with coverage
+- `npm run test:e2e`: Run end-to-end tests
+
+### Git Workflow
+- Feature branches: `feature/component-name`
+- Commit format: `type(scope): description`
+- Pre-commit hooks: lint, format, type-check
+- Pull request template with checklist
+
+### Code Review Checklist
+- [ ] TypeScript strict mode compliance
+- [ ] CSS Module naming conventions
+- [ ] Accessibility requirements met
+- [ ] Mobile responsiveness verified
+- [ ] Performance impact assessed
+- [ ] Error boundaries implemented
+- [ ] Security considerations addressed
+- [ ] Test coverage adequate
+
+## Anti-Patterns to Avoid
+
+### React Anti-Patterns
+- **NEVER** use array indices as keys in lists
+- **AVOID** mutating state directly
+- **DON'T** create components inside other components
+- **NEVER** use `useEffect` for derived state
+- **AVOID** excessive prop drilling (use context after 3 levels)
+
+### TypeScript Anti-Patterns
+- **NEVER** use `any` type (use `unknown` if necessary)
+- **AVOID** type assertions without proper checking
+- **DON'T** ignore TypeScript errors with `@ts-ignore`
+- **NEVER** use `Function` type (use proper function signatures)
+
+### CSS Anti-Patterns
+- **NEVER use `!important`** - it's considered an anti-pattern
+- **AVOID** fixed pixel values for responsive design
+- **DON'T** use deeply nested selectors (> 3 levels)
+- **NEVER** use global CSS for component-specific styles
+- Avoid inline styles
+
+### Code Anti-Patterns
+- Don't use emojis in code
+- Avoid any types in TypeScript
+- Don't ignore TypeScript errors
+- Avoid prop drilling - use context or state management when needed
+
+### Development Anti-Patterns
+- Don't stop making changes and ask for permission before proceeding
+- Avoid making multiple unrelated changes in one request
+- Don't rely on past interactions without re-providing context
+- Avoid vague error descriptions like "it's broken"
+
+## Validation Rules
+
+### Before Committing
+- [ ] All TypeScript errors resolved
+- [ ] ESLint passes without warnings
+- [ ] Prettier formatting applied
+- [ ] All imports are used
+- [ ] CSS custom properties used correctly
+- [ ] Mobile responsiveness verified
+- [ ] Accessibility requirements met
+- [ ] Security considerations addressed
+- [ ] Test coverage adequate
+
+### Code Quality Gates
+- No `console.log` statements in production builds
+- All functions have proper TypeScript types
+- CSS classes follow naming conventions
+- All images have proper alt text
+- All interactive elements are keyboard accessible
+- Error boundaries are implemented where needed
+- Input validation is implemented
+- XSS prevention measures are in place
+
+## Documentation Standards
+- Include JSDoc comments for complex functions
+- Document component props with TypeScript interfaces
+- Maintain README files for complex components
+- Document any non-obvious implementation decisions
+- Keep documentation up-to-date with code changes
+- Use consistent terminology across all documentation
+- Include examples for complex patterns
+- Document breaking changes clearly
+
+## Maintenance & Updates
+
+### Rule File Updates
+- Update frequency: Quarterly review and updates
+- Change documentation: Document all rule changes with rationale
+- Version tracking: Maintain changelog for rule updates
+- Review cycles: Monthly review of rule effectiveness
+
+### Cross-Reference Maintenance
+- Verify all external rule file links are current
+- Update cross-references when external files change
+- Maintain consistency across all rule files
+- Regular audit of rule file relationships
+
+**Remember: This file serves as the single source of truth for development guidelines. Always reference external rule files for detailed patterns and maintain consistency across all development practices.** 

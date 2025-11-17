@@ -1,0 +1,22 @@
+# Exclude lib and init directories from Vite processing
+init/
+/lib/
+
+# Exclude unnecessary scripts but keep build-content-data.js
+scripts/extract-*.cjs
+scripts/extract-*.js
+scripts/generatePasswordHash.js
+scripts/kellerbier-test.cjs
+scripts/test-patterns.cjs
+
+# Exclude build artifacts
+dist/
+build/
+.cache/
+
+# Exclude development files
+*.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

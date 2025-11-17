@@ -1,0 +1,324 @@
+/* Page Container */
+.pageContainer {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.pageContent {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+/* Page Header */
+.pageHeader {
+  background: var(--color-primary);
+  color: white;
+  text-align: center;
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.pageTitle {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxxl);
+  font-weight: 700;
+  color: white;
+  margin: 0 0 var(--spacing-md) 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: var(--line-height-tight);
+}
+
+.pageSubtitle {
+  font-size: var(--font-size-lg);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: var(--line-height-relaxed);
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Filter Navigation */
+.filterNav {
+  margin-bottom: var(--spacing-xl);
+}
+
+.filterButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.filterButton {
+  position: relative;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-height: 44px;
+}
+
+.filterButton:hover:not(:disabled) {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.filterButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filterButtonActive {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.filterButtonActive:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: white;
+}
+
+.filterCount {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  min-width: 20px;
+  text-align: center;
+}
+
+.filterButtonActive .filterCount {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Beer Section */
+.beerSection {
+  margin-top: var(--spacing-xl);
+}
+
+.sectionInfo {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.sectionTitle {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxl);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;
+  margin: 0 0 var(--spacing-xl) 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 3px;
+  background: var(--color-secondary);
+  margin: var(--spacing-md) auto 0;
+  border-radius: var(--border-radius-sm);
+}
+
+.resultsCount {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Category Sections for "All Beers" view */
+.categorySection {
+  margin-bottom: var(--spacing-xxl);
+}
+
+.categorySection:not(:first-child) {
+  margin-top: var(--spacing-xxl);
+  padding-top: var(--spacing-xl);
+}
+
+.categoryTitle {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxl);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;
+  margin: 0 0 var(--spacing-xl) 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.categoryTitle::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--color-secondary);
+  margin: var(--spacing-md) auto 0;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Beer Grid */
+.beerGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+  align-items: stretch;
+  margin-top: var(--spacing-lg);
+}
+
+/* States */
+.loadingState,
+.errorState,
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.loadingState h1,
+.errorState h1,
+.emptyState h3 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.loadingState p,
+.errorState p,
+.emptyState p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.resetButton {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-height: 44px;
+}
+
+.resetButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pageContent {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+  
+  .pageHeader {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  
+  .pageTitle {
+    font-size: var(--font-size-xxl);
+  }
+  
+  .pageSubtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .filterButtons {
+    justify-content: center;
+    gap: var(--spacing-xs);
+  }
+  
+  .filterButton {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .sectionTitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .categoryTitle {
+    font-size: var(--font-size-xl);
+  }
+  
+  /* Mobile & Tablet: 2 columns with improved styling */
+  .beerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1079px) {
+  /* Small Desktop: 4 columns */
+  .beerGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1080px) {
+  /* Desktop: 4 columns with larger gaps */
+  .beerGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .filterButtons {
+    gap: var(--spacing-xs);
+  }
+  
+  .filterButton {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .pageTitle {
+    font-size: var(--font-size-xl);
+    letter-spacing: 1px;
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .categoryTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+  }
+}
+
+/* Focus States for Accessibility */
+.filterButton:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.resetButton:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+} 

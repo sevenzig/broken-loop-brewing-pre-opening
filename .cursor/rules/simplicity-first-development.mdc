@@ -1,0 +1,473 @@
+---
+description: "Always prefer direct, simple solutions over complex abstractions"
+globs: src/**/*.tsx,src/**/*.ts,src/**/*.css
+alwaysApply: true
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-08-13"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: simplicity,development,architecture,css,typescript,react
+---
+
+# Simplicity-First Development
+
+## Purpose and Scope
+
+This rule enforces a preference for direct, simple solutions over complex abstractions. When faced with multiple implementation options, choose the one that is most straightforward, reliable, and maintainable. Based on debugging experiences, complex solutions often introduce multiple failure points that are difficult to debug and maintain.
+
+## Standards and Requirements
+
+### Core Principle
+**Always prefer direct, simple solutions over complex abstractions.** Simple solutions are more reliable, easier to understand, and less prone to unexpected issues.
+
+### CSS Module Complexity Avoidance
+
+#### ❌ AVOID: Complex CSS Module + Pseudo-Element Combinations
+```css
+/* Complex approach that can fail */
+.loading::after {
+  content: '';
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom-color: white;
+  border-radius: 50%;
+  animation: buttonSpin 1s linear infinite;
+}
+
+@keyframes buttonSpin {
+  to { transform: rotate(360deg); }
+}
+```
+
+#### ✅ PREFER: Direct DOM Elements with Inline Styles
+```tsx
+// Simple, reliable approach
+{loading && (
+  <div 
+    style={{
+      position: 'absolute',
+      border: '2px solid transparent',
+      borderTop: `2px solid ${spinnerColor}`,
+      borderRadius: '50%',
+      animation: 'buttonSpin 1s linear infinite'
+    }}
+  />
+)}
+```
+
+### Component Architecture Simplicity
+
+#### ❌ AVOID: Over-Engineered Component Patterns
+```tsx
+// Complex with multiple abstractions
+const ComplexButton = forwardRef<HTMLButtonElement, ComplexButtonProps>(({
+  variant = 'default',
+  size = 'medium',
+  loading = false,
+  disabled = false,
+  children,
+  className = '',
+  onClick,
+  ...props
+}, ref) => {
+  const componentClasses = useMemo(() => {
+    const baseClass = styles.button;
+    const variantClass = styles[`button${variant.charAt(0).toUpperCase() + variant.slice(1)}`];
+    const sizeClass = styles[`button${size.charAt(0).toUpperCase() + size.slice(1)}`];
+    const loadingClass = loading ? styles.loading : '';
+    const disabledClass = disabled ? styles.disabled : '';
+    
+    return [baseClass, variantClass, sizeClass, loadingClass, disabledClass, className]
+      .filter(Boolean).join(' ');
+  }, [variant, size, loading, disabled, className]);
+
+  const handleClick = useCallback((event: React.MouseEvent) => {
+    if (loading || disabled) return;
+    onClick?.(event);
+  }, [loading, disabled, onClick]);
+
+  return (
+    <button
+      ref={ref}
+      className={componentClasses}
+      disabled={disabled || loading}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+      {loading && <LoadingSpinner />}
+    </button>
+  );
+});
+```
+
+#### ✅ PREFER: Simple, Direct Implementation
+```tsx
+// Simple, readable approach
+interface ButtonProps {
+  variant?: 'primary' | 'secondary';
+  loading?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+export const Button = ({ 
+  variant = 'primary', 
+  loading = false, 
+  disabled = false, 
+  children, 
+  onClick 
+}: ButtonProps) => {
+  const buttonClass = variant === 'primary' ? styles.primary : styles.secondary;
+  
+  return (
+    <button
+      className={buttonClass}
+      disabled={disabled || loading}
+      onClick={onClick}
+    >
+      {children}
+      {loading && (
+        <div 
+          style={{
+            marginLeft: '8px',
+            border: '2px solid transparent',
+            borderTop: '2px solid currentColor',
+            borderRadius: '50%',
+            width: '16px',
+            height: '16px',
+            animation: 'spin 1s linear infinite'
+          }}
+        />
+      )}
+    </button>
+  );
+};
+```
+
+### State Management Simplicity
+
+#### ❌ AVOID: Complex State Management for Simple Cases
+```tsx
+// Over-engineered state management
+const useComplexFormState = () => {
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  const [validation, setValidation] = useState({});
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  
+  const handleChange = useCallback((field: string, value: string) => {
+    dispatch({ type: 'SET_FIELD', field, value });
+    setTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field, value);
+  }, []);
+  
+  return { state, validation, errors, touched, handleChange };
+};
+```
+
+#### ✅ PREFER: Simple State When Possible
+```tsx
+// Simple state for simple forms
+const useSimpleForm = () => {
+  const [values, setValues] = useState({});
+  const [errors, setErrors] = useState({});
+  
+  const handleChange = (field: string, value: string) => {
+    setValues(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+  
+  return { values, errors, handleChange };
+};
+```
+
+### TypeScript Simplicity
+
+#### ❌ AVOID: Overly Complex Type Definitions
+```tsx
+// Complex type with multiple layers
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
+type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonState = 'default' | 'hover' | 'active' | 'disabled' | 'loading';
+
+interface ComplexButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'size'> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  state?: ButtonState;
+  loading?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  className?: string;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+```
+
+#### ✅ PREFER: Simple, Clear Types
+```tsx
+// Simple, focused types
+interface ButtonProps {
+  variant?: 'primary' | 'secondary';
+  size?: 'small' | 'medium' | 'large';
+  loading?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+```
+
+### CSS Architecture Simplicity
+
+#### ❌ AVOID: Complex CSS Module Patterns
+```css
+/* Complex BEM-like naming with multiple modifiers */
+.button {
+  /* base styles */
+}
+
+.button--primary {
+  /* primary variant */
+}
+
+.button--primary--large {
+  /* primary + large combination */
+}
+
+.button--primary--large--loading {
+  /* primary + large + loading combination */
+}
+
+.button--primary--large--loading--disabled {
+  /* too many combinations */
+}
+```
+
+#### ✅ PREFER: Simple CSS Module Structure
+```css
+/* Simple, clear class names */
+.button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.secondary {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+```
+
+### Hook Simplicity
+
+#### ❌ AVOID: Complex Hook with Multiple Responsibilities
+```tsx
+// Hook doing too many things
+const useComplexDataHook = (options: {
+  url: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  body?: any;
+  headers?: Record<string, string>;
+  cache?: boolean;
+  retryAttempts?: number;
+  onSuccess?: (data: any) => void;
+  onError?: (error: Error) => void;
+  onLoading?: (loading: boolean) => void;
+}) => {
+  const [state, setState] = useState({
+    data: null,
+    loading: false,
+    error: null,
+    retryCount: 0
+  });
+  
+  const execute = useCallback(async () => {
+    // Complex implementation with retry logic, caching, etc.
+  }, [options]);
+  
+  const retry = useCallback(() => {
+    // Retry logic
+  }, []);
+  
+  const reset = useCallback(() => {
+    // Reset logic
+  }, []);
+  
+  return { ...state, execute, retry, reset };
+};
+```
+
+#### ✅ PREFER: Simple, Focused Hooks
+```tsx
+// Simple hook with single responsibility
+const useData = (url: string) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return { data, loading, error, fetchData };
+};
+```
+
+## Examples
+
+### Good Examples
+
+```tsx
+// Simple loading state with inline styles
+{loading && (
+  <div style={{ 
+    border: '2px solid transparent', 
+    borderTop: '2px solid white', 
+    borderRadius: '50%', 
+    animation: 'spin 1s linear infinite' 
+  }} />
+)}
+```
+
+```tsx
+// Simple form validation
+const [errors, setErrors] = useState({});
+const validate = (field: string, value: string) => {
+  if (!value) setErrors(prev => ({ ...prev, [field]: 'Required' }));
+};
+```
+
+```tsx
+// Simple conditional rendering
+{variant === 'primary' && <PrimaryButton />}
+{loading && <LoadingSpinner />}
+```
+
+### Bad Examples
+
+```css
+/* Complex CSS Module + Pseudo-element + Animation */
+.loading::after {
+  content: '';
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom-color: white;
+  border-radius: 50%;
+  animation: buttonSpin 1s linear infinite;
+}
+```
+*Fails: Uses complex pseudo-element approach that can be unreliable and difficult to debug.*
+
+```tsx
+// Complex conditional classes
+const className = [
+  styles.base,
+  variant && styles[variant],
+  size && styles[size],
+  loading && styles.loading,
+  disabled && styles.disabled
+].filter(Boolean).join(' ');
+```
+*Fails: Over-engineered class name generation when simple conditional rendering would work better.*
+
+```tsx
+// Complex state management for simple cases
+const [state, dispatch] = useReducer(formReducer, initialState);
+const [validation, setValidation] = useState({});
+const [errors, setErrors] = useState({});
+const [touched, setTouched] = useState({});
+```
+*Fails: Uses complex reducer pattern when simple useState would be sufficient.*
+
+## Implementation Guidelines
+
+### Decision Framework
+
+#### When to Choose Simple Over Complex
+
+1. **Start Simple**: Always begin with the simplest possible implementation
+2. **Add Complexity Only When Needed**: Only add complexity when the simple solution doesn't meet requirements
+3. **Question Every Abstraction**: Ask "Do we really need this abstraction?"
+4. **Prefer Direct Solutions**: Choose direct DOM manipulation over complex CSS Module patterns
+5. **Use Inline Styles for Dynamic Content**: When CSS Modules cause issues, use inline styles
+
+#### Complexity Red Flags
+
+- **Multiple Layers**: If you need more than 2-3 layers of abstraction, reconsider
+- **Generated Class Names**: If CSS Module class names are causing issues, use inline styles
+- **Pseudo-Elements**: If pseudo-elements aren't working, use real DOM elements
+- **Complex State**: If state management is getting complex, break it down
+- **Over-Engineering**: If you're building for future cases that don't exist yet, stop
+
+#### When Complexity is Acceptable
+
+- **Performance Requirements**: When simple solutions don't meet performance needs
+- **Accessibility Requirements**: When complex patterns are needed for accessibility
+- **Security Requirements**: When security demands more complex implementations
+- **Proven Patterns**: When using well-established, tested patterns
+
+### Implementation Checklist
+
+Before implementing any solution, ask:
+
+- [ ] Is this the simplest possible approach?
+- [ ] Can I solve this with fewer abstractions?
+- [ ] Am I over-engineering for future cases?
+- [ ] Would a direct DOM approach work better?
+- [ ] Are CSS Modules causing unnecessary complexity?
+- [ ] Can I use inline styles instead of complex CSS?
+- [ ] Is this state management more complex than needed?
+- [ ] Are these TypeScript types more complex than necessary?
+
+### Remember
+
+**Simple solutions are:**
+- More reliable
+- Easier to debug
+- Easier to maintain
+- Less prone to unexpected issues
+- Faster to implement
+- Easier to understand for other developers
+
+**Complex solutions often:**
+- Introduce multiple failure points
+- Are harder to debug
+- Require more maintenance
+- Can break in unexpected ways
+- Take longer to implement
+- Are harder for others to understand
+
+**When in doubt, choose simple.**
+Simple code is faster to write, easier to debug, and kinder to future maintainers.
+
+## Related Rules
+
+* @css-best-practices.mdc
+* @react-component-best-practices.mdc
+* @typescript-best-practices.mdc

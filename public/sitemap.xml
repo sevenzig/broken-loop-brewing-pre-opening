@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>https://brokenloopbrewing.com/</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Beer Menu -->
+  <url>
+    <loc>https://brokenloopbrewing.com/beer</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Food Menu -->
+  <url>
+    <loc>https://brokenloopbrewing.com/food</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Events -->
+  <url>
+    <loc>https://brokenloopbrewing.com/events</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- About -->
+  <url>
+    <loc>https://brokenloopbrewing.com/about</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://brokenloopbrewing.com/contact</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Hours/Info -->
+  <url>
+    <loc>https://brokenloopbrewing.com/hours</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Store -->
+  <url>
+    <loc>https://brokenloopbrewing.com/store</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Button Demo -->
+  <url>
+    <loc>https://brokenloopbrewing.com/button-demo</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/button-examples</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Responsive Test Page -->
+  <url>
+    <loc>https://brokenloopbrewing.com/responsive-test</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <!-- Debug Page (noindex) -->
+  <url>
+    <loc>https://brokenloopbrewing.com/debug</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.1</priority>
+  </url>
+
+  <!-- Individual Beer Pages -->
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/classic-american-lager</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/berry-bliss-sour</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/golden-abbey-tripel</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/bohemian-pilsner</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/bavarian-cloud-hefeweizen</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/wild-cherry-barrel-sour</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/nut-brown-english-ale</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/midnight-stout</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/midnight-barrel-imperial-stout</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/hoppy-trails-ipa</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/hazy-horizon-ipa</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beers/golden-wheat</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Individual Food Pages -->
+  <url>
+    <loc>https://brokenloopbrewing.com/food/loaded-nachos</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/smoked-wings</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/pulled-pork-plate</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/brisket-sandwich</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/smoked-mac-cheese</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/bourbon-baked-beans</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/food/pitmaster-platter</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Individual Event Pages -->
+  <url>
+    <loc>https://brokenloopbrewing.com/events/trivia-thursdays</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/events/live-music-saturday</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/events/beer-tasting-flight</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Beer Style Guide Pages -->
+  <url>
+    <loc>https://brokenloopbrewing.com/beer/style-guide/5d-german-pils</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beer/style-guide/34c-experimental-beer</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beer/style-guide/34b-mixed-style-beer</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beer/style-guide/25b-saison</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://brokenloopbrewing.com/beer/style-guide/24a-witbier</loc>
+    <lastmod>2024-06-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <!-- ... (add more style guide pages as needed) ... -->
+</urlset>

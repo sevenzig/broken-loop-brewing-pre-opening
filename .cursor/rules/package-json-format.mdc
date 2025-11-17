@@ -1,0 +1,244 @@
+---
+description: "Standardized package.json structure, field ordering, and metadata requirements"
+globs: package.json,packages/*/package.json
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-08-14"
+lastUpdated: "2025-08-14"
+author: "Claude AI <https://claude.ai>"
+tags: package.json, bun, metadata, dependencies, scripts
+---
+
+# Package.json Format Standards
+
+## Purpose and Scope
+This rule establishes consistent package.json formatting, field ordering, and metadata standards to ensure 
+maintainable, discoverable, and properly configured Node.js packages across all projects.
+
+## Standards and Requirements
+
+### 1. Required Core Fields
+Every package.json must contain these fields in the specified order:
+- `name` - Package name following npm naming conventions
+- `version` - Semantic version (MAJOR.MINOR.PATCH)
+- `description` - Clear, concise package description
+- `type` - Explicitly set to "module" or "commonjs"
+- `main` - Entry point for CommonJS
+- `module` - Entry point for ES modules (if applicable)
+- `types` - TypeScript declaration file path (if applicable)
+
+### 2. Field Ordering Standard
+Fields must appear in this exact order:
+1. Core identification (name, version, description)
+2. Module system (type, main, module, types, exports)
+3. Scripts and tooling (scripts, dependencies, devDependencies)
+4. Repository and author info (repository, author, license)
+5. Additional metadata (keywords, files, engines)
+
+### 3. Script Naming Conventions
+- Use lowercase with hyphens: `build-prod`, not `buildProd`
+- Standard script names: `dev`, `build`, `test`, `lint`, `format`
+- Prefix environment-specific scripts: `build:prod`, `test:unit`
+
+### 4. Dependency Management
+- Pin exact versions for tools and build dependencies in devDependencies
+- Use semantic ranges for runtime dependencies only when appropriate
+- Group related dependencies logically
+- Remove unused dependencies regularly
+
+### 5. Metadata Requirements
+- `license` field must be SPDX-compliant
+- `repository` must include type and URL
+- `author` should include name and contact information
+- `keywords` should be relevant and discoverable
+
+## Examples
+
+### Good Examples
+
+```json
+{
+  "name": "@company/awesome-package",
+  "version": "1.2.3",
+  "description": "A lightweight utility library for data transformation",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:prod": "NODE_ENV=production npm run build",
+    "test": "vitest",
+    "test:unit": "vitest run --reporter=verbose",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "typescript": "5.1.6",
+    "vite": "4.4.9",
+    "vitest": "0.34.3",
+    "eslint": "8.47.0",
+    "prettier": "3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/company/awesome-package.git"
+  },
+  "author": "Jane Doe <jane@company.com>",
+  "license": "MIT",
+  "keywords": [
+    "utility",
+    "data",
+    "transform",
+    "typescript"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
+```
+
+```json
+{
+  "name": "simple-app",
+  "version": "0.1.0",
+  "description": "A simple React application",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.0.4",
+    "vite": "4.4.9",
+    "eslint": "8.47.0"
+  },
+  "author": "John Smith <john@example.com>",
+  "license": "MIT"
+}
+```
+
+### Bad Examples
+
+```json
+{
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "name": "my-app",
+  "scripts": {
+    "start": "react-scripts start"
+  },
+  "version": "1.0.0"
+}
+```
+*Fails: wrong field ordering, missing required fields, no description*
+
+```json
+{
+  "name": "MyAwesomePackage",
+  "version": "v1.2.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "buildProd": "webpack --mode=production",
+    "testUnit": "jest --config=jest.unit.config.js"
+  },
+  "license": "Custom License"
+}
+```
+*Fails: PascalCase name, version prefix, empty description, camelCase scripts, non-SPDX license*
+
+```json
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "dependencies": {
+    "lodash": "*",
+    "express": ">=4.0.0",
+    "axios": "1.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
+```
+*Fails: wildcard dependency, overly broad range, inconsistent versioning strategy*
+
+## Implementation Guidelines
+
+### Package Naming
+- Use kebab-case for package names
+- Include scope for organizational packages: `@company/package-name`
+- Avoid trademark conflicts and reserved names
+- Keep names descriptive but concise
+
+### Version Management
+- Follow semantic versioning strictly
+- Use `npm version` commands to update versions
+- Tag releases in version control
+- Document breaking changes in major versions
+
+### Script Organization
+- Group related scripts with consistent prefixes
+- Use `pre` and `post` hooks appropriately
+- Avoid complex inline scripts - extract to separate files
+- Document custom scripts in README
+
+### Dependency Best Practices
+- Audit dependencies regularly with `npm audit`
+- Use exact versions for critical tools and build dependencies
+- Prefer peer dependencies for plugins and extensions
+- Remove unused dependencies during cleanup cycles
+
+### File Inclusion
+- Use `files` field to explicitly control published files
+- Include only necessary files in published packages
+- Use `.npmignore` for complex exclusion patterns
+- Test published package contents with `npm pack`
+
+### Engine Constraints
+- Specify minimum Node.js version based on features used
+- Include npm/yarn version constraints when needed
+- Test against specified engine versions in CI
+- Document runtime requirements in README
+
+## Related Rules
+* @vite-standards.mdc
+* @typescript-best-practices.mdc
+* @git-commit-standards.mdc
+
+## Changelog
+* **1.0.0 (2025-08-14)**: Initial release with comprehensive package.json formatting standards.
+
+<!--
+ Package.json Format Standards
+ Copyright (c) 2025 Claude AI <https://claude.ai>
+ SPDX-License-Identifier: MIT
+-->

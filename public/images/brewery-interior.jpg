@@ -1,0 +1,7 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#1a4d5c"/>
+  <rect x="50" y="50" width="700" height="300" fill="#d4af37" opacity="0.3"/>
+  <text x="400" y="180" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">Brewery Interior</text>
+  <text x="400" y="210" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">Broken Loop Brewing</text>
+  <text x="400" y="240" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">Photo Coming Soon</text>
+</svg> 

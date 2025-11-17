@@ -1,0 +1,339 @@
+---
+description: "Comprehensive TypeScript standards for strict type safety and best practices"
+globs: src/**/*.ts,src/**/*.tsx,tests/**/*.ts,tests/**/*.tsx
+alwaysApply: true
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: typescript,react,strict-typing,type-safety
+---
+
+# TypeScript Best Practices
+
+## Purpose and Scope
+
+This rule enforces comprehensive TypeScript standards for strict type safety, proper interface definitions, and best practices across all React components and utility functions. It ensures consistent typing patterns, prevents runtime errors, and maintains code quality through rigorous type checking and proper TypeScript configuration.
+
+## Standards and Requirements
+
+### Core TypeScript Rules - MANDATORY
+
+#### 1. Interface and Type Definitions
+- **ALWAYS** define interfaces for component props
+- **ALWAYS** define interfaces for data structures
+- **PREFER** interfaces over types for object shapes
+- **USE** types for unions, primitives, and computed types
+
+#### 2. React Component Typing - REQUIRED PATTERNS
+- **ALWAYS** use React.FC with proper prop interfaces
+- **ALWAYS** type event handlers explicitly
+- **ALWAYS** extend HTML element props when appropriate
+- **NEVER** use any type for component props
+
+#### 3. State Management Typing
+- **ALWAYS** use explicit types with useState
+- **ALWAYS** define interfaces for complex state
+- **ALWAYS** type async operations properly
+- **NEVER** use any for state variables
+
+#### 4. API and Data Fetching Types
+- **ALWAYS** define response interfaces
+- **ALWAYS** type async functions with Promise<T>
+- **ALWAYS** handle errors with typed error interfaces
+- **NEVER** use any for API responses
+
+#### 5. Custom Hook Typing
+- **ALWAYS** define return type interfaces
+- **ALWAYS** type hook parameters explicitly
+- **ALWAYS** use generics for reusable hooks
+- **NEVER** return any from hooks
+
+### Advanced TypeScript Patterns
+
+#### 6. Utility Types Usage
+- **USE** Omit, Pick, Partial for type transformations
+- **USE** Record for key-value mappings
+- **USE** ReturnType for function return types
+- **USE** Parameters for function parameter types
+
+#### 7. Generic Constraints
+- **ALWAYS** use extends for generic constraints
+- **ALWAYS** define minimum required properties
+- **USE** conditional types for complex logic
+- **NEVER** use any in generic constraints
+
+#### 8. Form and Event Handling
+- **ALWAYS** type form data interfaces
+- **ALWAYS** use proper event types
+- **ALWAYS** handle form validation with types
+- **NEVER** use any for event handlers
+
+### Forbidden Patterns - DO NOT USE
+
+#### ❌ NEVER Do These
+- Use `any` type anywhere in the codebase
+- Use non-null assertion without proper validation
+- Use `as any` to bypass type checking
+- Ignore TypeScript errors with `@ts-ignore`
+- Use `Function` type (too loose)
+- Use `object` type (too vague)
+
+#### ✅ USE These Instead
+- Define proper interfaces for all data structures
+- Use type guards for safe property access
+- Use proper type assertions with validation
+- Fix actual type issues instead of ignoring them
+- Use specific function signatures
+- Use specific object interfaces
+
+### File Organization and Imports
+
+#### 9. Type-Only Imports
+- **USE** `import type` for type-only imports
+- **SEPARATE** runtime and type imports
+- **USE** mixed imports when appropriate
+- **NEVER** import types in runtime code
+
+#### 10. Export Patterns
+- **EXPORT** interfaces and types explicitly
+- **USE** named exports for types
+- **USE** default exports for implementations
+- **NEVER** export any types
+
+### Development Environment Rules
+
+#### 11. TSConfig Compliance
+- **ENABLE** `strict: true` in tsconfig.json
+- **ENABLE** `noUnusedLocals` and `noUnusedParameters`
+- **ENABLE** `noImplicitReturns`
+- **USE** path mapping for clean imports
+
+#### 12. ESLint TypeScript Rules
+- **ENFORCE** `@typescript-eslint/no-explicit-any`
+- **ENFORCE** `@typescript-eslint/no-unused-vars`
+- **ENFORCE** `@typescript-eslint/prefer-as-const`
+- **ENFORCE** `@typescript-eslint/no-non-null-assertion`
+
+## Examples
+
+### Good Examples
+
+```typescript
+// Component Props Interface
+interface ComponentProps {
+  title: string;
+  subtitle?: string;
+  isActive?: boolean;
+  onAction?: () => void;
+  children?: React.ReactNode;
+  className?: string;
+}
+
+// Functional Component with Props
+const Component: React.FC<ComponentProps> = ({ 
+  title, 
+  variant = 'default' 
+}) => {
+  return <div>{title}</div>;
+};
+
+// State Management with Types
+const [user, setUser] = useState<User | null>(null);
+const [loading, setLoading] = useState<boolean>(false);
+
+// API Response Types
+interface ApiResponse<T> {
+  data: T;
+  status: 'success' | 'error';
+  message?: string;
+}
+
+// Custom Hook with Return Type
+interface UseLocalStorageReturn<T> {
+  value: T;
+  setValue: (value: T) => void;
+  removeValue: () => void;
+}
+
+// Type-Only Imports
+import type { User, ApiResponse } from '@types/api';
+import type { ComponentProps } from 'react';
+
+// Utility Types Usage
+type PublicUser = Omit<User, 'password'>;
+type UserUpdate = Partial<Pick<User, 'name' | 'email'>>;
+
+// Generic Constraints
+function updateItem<T extends Identifiable>(
+  items: T[], 
+  updatedItem: T
+): T[] {
+  return items.map(item => 
+    item.id === updatedItem.id ? updatedItem : item
+  );
+}
+
+// Form Event Handling
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+};
+
+// Result Pattern for Error Handling
+type Result<T, E = Error> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+// Type Guards
+function isUser(obj: unknown): obj is User {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'name' in obj &&
+    'email' in obj
+  );
+}
+```
+
+### Bad Examples
+
+```typescript
+// Using any type
+const data: any = fetchData();
+```
+*Fails: Uses any type which defeats TypeScript's purpose and can cause runtime errors.*
+
+```typescript
+// Non-null assertion without validation
+const user = getUser()!;
+```
+*Fails: Uses non-null assertion without proper validation, could crash at runtime.*
+
+```typescript
+// Bypassing type checking
+const result = (data as any).someProperty;
+```
+*Fails: Uses as any to bypass type checking instead of fixing the actual type issue.*
+
+```typescript
+// Ignoring TypeScript errors
+// @ts-ignore
+const broken = someFunction();
+```
+*Fails: Ignores TypeScript errors instead of fixing the underlying type issues.*
+
+```typescript
+// Using Function type
+const callback: Function = () => {};
+```
+*Fails: Uses Function type which is too loose and provides no type safety.*
+
+```typescript
+// Using object type
+const config: object = {};
+```
+*Fails: Uses object type which is too vague and provides no useful type information.*
+
+```typescript
+// Missing prop interface
+const Component = ({ title, onClick }) => {
+  return <div onClick={onClick}>{title}</div>;
+};
+```
+*Fails: Missing proper TypeScript interface for component props.*
+
+```typescript
+// Untyped state
+const [data, setData] = useState([]);
+```
+*Fails: Uses untyped state which can lead to runtime errors and poor IDE support.*
+```
+
+## Implementation Guidelines
+
+### Error Prevention Checklist
+
+Before committing code, verify:
+- [ ] All components have properly typed props
+- [ ] No `any` types are used anywhere
+- [ ] All async functions have proper return types
+- [ ] Event handlers are properly typed
+- [ ] State variables have explicit types when needed
+- [ ] API responses are properly typed
+- [ ] Error handling uses typed patterns
+- [ ] Import statements use type-only imports where appropriate
+- [ ] No TypeScript errors in the terminal
+- [ ] ESLint TypeScript rules pass
+
+### Common Patterns Summary
+
+```typescript
+// Component Props
+interface Props {
+  required: string;
+  optional?: number;
+  callback: (value: string) => void;
+  children?: React.ReactNode;
+}
+
+// API Types
+interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+}
+
+// State Types
+const [data, setData] = useState<User[]>([]);
+const [loading, setLoading] = useState<boolean>(false);
+
+// Custom Hooks
+function useCustomHook<T>(initial: T): [T, (value: T) => void] {
+  // Implementation
+}
+
+// Error Handling
+try {
+  const result = await apiCall();
+  // Handle success
+} catch (error) {
+  const apiError = error as ApiError;
+  // Handle typed error
+}
+```
+
+### Performance and Optimization
+
+- Use `React.memo()` for expensive components with stable props
+- Implement `useMemo()` for expensive calculations
+- Use `useCallback()` for function props to prevent re-renders
+- Avoid creating objects/arrays in render functions
+
+### Validation and Runtime Checks
+
+- Implement type guards for runtime validation
+- Use branded types for domain safety
+- Validate API responses with runtime checks
+- Use Zod or similar for schema validation
+
+## Related Rules
+
+* @react-component-best-practices.mdc
+* @custom-hooks-best-practices.mdc
+* @css-best-practices.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive TypeScript standards, strict typing requirements, and forbidden patterns.
+
+<!--
+ TypeScript Best Practices
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
+```
+
+

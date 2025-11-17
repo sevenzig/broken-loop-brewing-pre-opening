@@ -1,0 +1,5 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#b0b0b0"/>
+  <text x="200" y="190" font-family="Arial, sans-serif" font-size="16" fill="#666" text-anchor="middle">Jake Thompson</text>
+  <text x="200" y="210" font-family="Arial, sans-serif" font-size="14" fill="#666" text-anchor="middle">Taproom Manager</text>
+</svg> 

@@ -1,0 +1,919 @@
+---
+description: "Comprehensive standards for React custom hooks architecture and patterns"
+globs: src/hooks/**/*.ts,src/hooks/**/*.tsx,src/components/**/*.tsx
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: react,hooks,typescript,architecture,patterns
+---
+
+# Custom Hooks Best Practices
+
+## Purpose and Scope
+
+This rule enforces comprehensive standards for React custom hooks architecture, patterns, and implementation. It ensures consistent hook design, proper TypeScript integration, error handling, performance optimization, and maintainable code structure across the application. The rule establishes clear naming conventions, file organization, and development patterns for all custom hooks.
+
+## Standards and Requirements
+
+### Hook Architecture Standards
+
+#### Naming Conventions - STRICTLY ENFORCE
+```typescript
+// ✅ CORRECT - Consistent naming patterns
+export function useBeers() { ... }           // Collection hook
+export function useBeer(id: string) { ... }  // Single item hook
+export function useFilteredBeers(filter: FilterFn) { ... } // Filtered collection
+
+export function useFood() { ... }            // Collection hook
+export function useFoodItem(slug: string) { ... } // Single item hook
+export function useFilteredFood(filter: FilterFn) { ... } // Filtered collection
+
+// ✅ CORRECT - Utility hooks
+export function useLocalStorage<T>(key: string, defaultValue: T) { ... }
+export function useSessionStorage<T>(key: string, defaultValue: T) { ... }
+export function useDebounce<T>(value: T, delay: number) { ... }
+
+// ❌ WRONG - Inconsistent naming
+export function getBeerData() { ... }        // Missing 'use' prefix
+export function useBeersList() { ... }       // Inconsistent with collection pattern
+export function useGetBeer() { ... }         // Redundant 'get'
+```
+
+#### File Structure Requirements
+```
+src/hooks/
+├── useBeers.ts              # Collection management
+├── useFood.ts               # Collection management
+├── useEvents.ts             # Collection management
+├── useLocalStorage.ts       # Storage utility
+├── useSessionStorage.ts     # Storage utility
+├── useDebounce.ts          # Performance utility
+├── useForm.ts              # Form management
+└── index.ts                # Barrel export
+```
+
+### Hook Structure Standards
+
+#### Collection Hook Template
+```typescript
+import { useState, useEffect, useMemo } from 'react';
+import type { LoaderFunction, FilterFunction, StatsFunction } from './types';
+
+interface UseCollectionReturn<T> {
+  // Data
+  allItems: T[];
+  featuredItems: T[];
+  filteredItems: T[];
+  stats: CollectionStats;
+  
+  // State
+  loading: boolean;
+  error: string | null;
+  
+  // Actions
+  reload: () => Promise<void>;
+  clearError: () => void;
+}
+
+export function useCollection<T>(
+  loader: LoaderFunction<T>,
+  filters: Record<string, FilterFunction<T>>,
+  statsCalculator: StatsFunction<T>
+): UseCollectionReturn<T> {
+  const [allItems, setAllItems] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const items = await loader();
+      setAllItems(items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+      console.error('Error loading collection:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Memoized computed values
+  const featuredItems = useMemo(() => 
+    filters.featured ? filters.featured(allItems) : [], 
+    [allItems, filters.featured]
+  );
+
+  const stats = useMemo(() => 
+    statsCalculator(allItems), 
+    [allItems, statsCalculator]
+  );
+
+  const clearError = () => setError(null);
+
+  return {
+    // Data
+    allItems,
+    featuredItems,
+    filteredItems: allItems, // Override in specific implementations
+    stats,
+    
+    // State
+    loading,
+    error,
+    
+    // Actions
+    reload: loadData,
+    clearError,
+  };
+}
+```
+
+#### Single Item Hook Template
+```typescript
+import { useState, useEffect } from 'react';
+
+interface UseSingleItemReturn<T> {
+  item: T | null;
+  loading: boolean;
+  error: string | null;
+  reload: () => Promise<void>;
+}
+
+export function useSingleItem<T>(
+  id: string | undefined,
+  loader: (id: string) => Promise<T | null>,
+  entityName: string
+): UseSingleItemReturn<T> {
+  const [item, setItem] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadItem = async () => {
+    if (!id) {
+      setError(`${entityName} ID is required`);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const foundItem = await loader(id);
+      
+      if (!foundItem) {
+        setError(`${entityName} with ID "${id}" not found`);
+      } else {
+        setItem(foundItem);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to load ${entityName.toLowerCase()}`);
+      console.error(`Error loading ${entityName.toLowerCase()} ${id}:`, err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadItem();
+  }, [id]);
+
+  return {
+    item,
+    loading,
+    error,
+    reload: loadItem,
+  };
+}
+```
+
+### Error Handling Standards
+
+#### Error State Management
+```typescript
+// ✅ CORRECT - Comprehensive error handling
+export function useDataWithErrorHandling<T>() {
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const loadData = async (isRetry = false) => {
+    try {
+      setLoading(true);
+      if (!isRetry) {
+        setError(null);
+      }
+      
+      const result = await fetchData();
+      setData(result);
+      setRetryCount(0); // Reset retry count on success
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      
+      // Log error with context
+      console.error('Data loading failed:', {
+        error: err,
+        retryCount,
+        timestamp: new Date().toISOString(),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const retry = () => {
+    if (retryCount < 3) {
+      setRetryCount(prev => prev + 1);
+      loadData(true);
+    }
+  };
+
+  const clearError = () => {
+    setError(null);
+    setRetryCount(0);
+  };
+
+  return {
+    data,
+    loading,
+    error,
+    retryCount,
+    canRetry: retryCount < 3,
+    retry,
+    clearError,
+    reload: () => loadData(false),
+  };
+}
+
+// ❌ WRONG - Poor error handling
+export function useBadErrorHandling() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData().then(setData).catch(console.log); // Silent failure
+    setLoading(false);
+  }, []);
+
+  return { data, loading }; // No error state
+}
+```
+
+#### Error Recovery Patterns
+```typescript
+// ✅ CORRECT - Graceful degradation
+export function useDataWithFallback<T>(
+  primaryLoader: () => Promise<T[]>,
+  fallbackLoader?: () => Promise<T[]>,
+  fallbackData?: T[]
+) {
+  const [data, setData] = useState<T[]>(fallbackData || []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setUsingFallback(false);
+      
+      const result = await primaryLoader();
+      setData(result);
+    } catch (primaryError) {
+      console.warn('Primary data source failed, trying fallback:', primaryError);
+      
+      if (fallbackLoader) {
+        try {
+          const fallbackResult = await fallbackLoader();
+          setData(fallbackResult);
+          setUsingFallback(true);
+        } catch (fallbackError) {
+          setError('Both primary and fallback data sources failed');
+          if (fallbackData) {
+            setData(fallbackData);
+            setUsingFallback(true);
+          }
+        }
+      } else if (fallbackData) {
+        setData(fallbackData);
+        setUsingFallback(true);
+      } else {
+        setError(primaryError instanceof Error ? primaryError.message : 'Data loading failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    usingFallback,
+    reload: loadData,
+  };
+}
+```
+
+### Performance Optimization
+
+#### Memoization Patterns
+```typescript
+// ✅ CORRECT - Proper memoization in hooks
+export function useOptimizedData<T>(
+  rawData: T[],
+  filters: FilterConfig,
+  sortConfig: SortConfig
+) {
+  // Memoize expensive filtering
+  const filteredData = useMemo(() => {
+    if (!rawData.length) return [];
+    
+    return rawData.filter(item => {
+      return Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        return item[key as keyof T] === value;
+      });
+    });
+  }, [rawData, filters]);
+
+  // Memoize expensive sorting
+  const sortedData = useMemo(() => {
+    if (!filteredData.length) return [];
+    
+    return [...filteredData].sort((a, b) => {
+      const aValue = a[sortConfig.field as keyof T];
+      const bValue = b[sortConfig.field as keyof T];
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      return sortConfig.direction === 'asc' 
+        ? (aValue as any) - (bValue as any)
+        : (bValue as any) - (aValue as any);
+    });
+  }, [filteredData, sortConfig]);
+
+  // Memoize statistics calculation
+  const stats = useMemo(() => {
+    return {
+      total: rawData.length,
+      filtered: filteredData.length,
+      categories: rawData.reduce((acc, item) => {
+        const category = item.category as string;
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+    };
+  }, [rawData, filteredData]);
+
+  return {
+    data: sortedData,
+    stats,
+  };
+}
+
+// ❌ WRONG - Unnecessary memoization
+export function useOverMemoized(simpleValue: string) {
+  const memoizedValue = useMemo(() => simpleValue, [simpleValue]); // Unnecessary
+  return memoizedValue;
+}
+```
+
+#### Debouncing and Throttling
+```typescript
+// ✅ CORRECT - Debounced search hook
+export function useDebouncedSearch<T>(
+  searchTerm: string,
+  searchFunction: (term: string) => Promise<T[]>,
+  delay: number = 300
+) {
+  const [results, setResults] = useState<T[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Debounce the search term
+  const debouncedSearchTerm = useMemo(() => {
+    const handler = setTimeout(() => searchTerm, delay);
+    return () => clearTimeout(handler);
+  }, [searchTerm, delay]);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setResults([]);
+      return;
+    }
+
+    const performSearch = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const searchResults = await searchFunction(searchTerm);
+        setResults(searchResults);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Search failed');
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(performSearch, delay);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, searchFunction, delay]);
+
+  return {
+    results,
+    loading,
+    error,
+    hasSearched: searchTerm.trim().length > 0,
+  };
+}
+```
+
+### TypeScript Integration
+
+#### Generic Hook Patterns
+```typescript
+// ✅ CORRECT - Properly typed generic hooks
+export function useAsyncData<T, P = void>(
+  asyncFunction: (params: P) => Promise<T>,
+  params: P,
+  options: {
+    immediate?: boolean;
+    onSuccess?: (data: T) => void;
+    onError?: (error: Error) => void;
+  } = {}
+) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(options.immediate ?? true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const execute = useCallback(async (executeParams?: P) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await asyncFunction(executeParams ?? params);
+      setData(result);
+      options.onSuccess?.(result);
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error);
+      options.onError?.(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [asyncFunction, params, options]);
+
+  useEffect(() => {
+    if (options.immediate) {
+      execute();
+    }
+  }, [execute, options.immediate]);
+
+  return {
+    data,
+    loading,
+    error,
+    execute,
+    reset: () => {
+      setData(null);
+      setError(null);
+      setLoading(false);
+    },
+  };
+}
+
+// Hook return type inference
+export type UseAsyncDataReturn<T> = ReturnType<typeof useAsyncData<T>>;
+```
+
+#### Interface Definitions
+```typescript
+// ✅ CORRECT - Comprehensive hook interfaces
+export interface UseCollectionOptions<T> {
+  immediate?: boolean;
+  cacheKey?: string;
+  cacheDuration?: number;
+  onSuccess?: (data: T[]) => void;
+  onError?: (error: Error) => void;
+  retryAttempts?: number;
+  retryDelay?: number;
+}
+
+export interface UseCollectionReturn<T> {
+  // Data
+  data: T[];
+  filteredData: T[];
+  stats: CollectionStats;
+  
+  // State
+  loading: boolean;
+  error: string | null;
+  isEmpty: boolean;
+  hasMore: boolean;
+  
+  // Actions
+  reload: () => Promise<void>;
+  loadMore: () => Promise<void>;
+  retry: () => Promise<void>;
+  clearError: () => void;
+  
+  // Filters
+  setFilter: (key: string, value: any) => void;
+  clearFilters: () => void;
+  
+  // Sorting
+  setSortBy: (field: keyof T, direction: 'asc' | 'desc') => void;
+}
+```
+
+### Caching Strategies
+
+#### Memory Caching
+```typescript
+// ✅ CORRECT - Hook with caching
+const dataCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
+export function useCachedData<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttl: number = 5 * 60 * 1000 // 5 minutes default
+) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async (forceRefresh = false) => {
+    // Check cache first
+    if (!forceRefresh) {
+      const cached = dataCache.get(key);
+      if (cached && Date.now() - cached.timestamp < cached.ttl) {
+        setData(cached.data);
+        setLoading(false);
+        return;
+      }
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await fetcher();
+      
+      // Cache the result
+      dataCache.set(key, {
+        data: result,
+        timestamp: Date.now(),
+        ttl,
+      });
+      
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [key]);
+
+  return {
+    data,
+    loading,
+    error,
+    refresh: () => loadData(true),
+    clearCache: () => dataCache.delete(key),
+  };
+}
+```
+
+### Hook Composition Patterns
+
+#### Combining Hooks
+```typescript
+// ✅ CORRECT - Composable hooks
+export function useEntityManagement<T extends { id: string }>(
+  entityName: string,
+  loader: () => Promise<T[]>,
+  validator: (item: T) => boolean
+) {
+  // Compose multiple hooks
+  const {
+    data: allItems,
+    loading: loadingAll,
+    error: loadError,
+    reload,
+  } = useAsyncData(loader, undefined, { immediate: true });
+
+  const {
+    results: searchResults,
+    loading: searching,
+    error: searchError,
+  } = useDebouncedSearch('', async (term) => {
+    return allItems?.filter(item => 
+      JSON.stringify(item).toLowerCase().includes(term.toLowerCase())
+    ) || [];
+  });
+
+  const validItems = useMemo(() => {
+    return allItems?.filter(validator) || [];
+  }, [allItems, validator]);
+
+  return {
+    // Data
+    allItems: allItems || [],
+    validItems,
+    searchResults,
+    
+    // State
+    loading: loadingAll,
+    searching,
+    error: loadError || searchError,
+    
+    // Actions
+    reload,
+    
+    // Stats
+    stats: {
+      total: allItems?.length || 0,
+      valid: validItems.length,
+      invalid: (allItems?.length || 0) - validItems.length,
+    },
+  };
+}
+```
+
+### Testing Patterns
+
+#### Hook Testing Setup
+```typescript
+// ✅ CORRECT - Testable hook structure
+export function useTestableHook<T>(
+  fetcher: () => Promise<T>,
+  options: { onSuccess?: (data: T) => void } = {}
+) {
+  const [state, setState] = useState({
+    data: null as T | null,
+    loading: true,
+    error: null as string | null,
+  });
+
+  const loadData = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const data = await fetcher();
+      setState({ data, loading: false, error: null });
+      options.onSuccess?.(data);
+    } catch (err) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Unknown error',
+      }));
+    }
+  }, [fetcher, options]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  return {
+    ...state,
+    reload: loadData,
+  };
+}
+
+// Test helper
+export const createMockFetcher = <T>(data: T, delay = 0, shouldFail = false) => {
+  return jest.fn(() => 
+    new Promise<T>((resolve, reject) => {
+      setTimeout(() => {
+        if (shouldFail) {
+          reject(new Error('Mock error'));
+        } else {
+          resolve(data);
+        }
+      }, delay);
+    })
+  );
+};
+```
+
+## Examples
+
+### Good Examples
+
+```typescript
+// ✅ CORRECT - Well-structured collection hook
+export function useBeers() {
+  const [beers, setBeers] = useState<Beer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadBeers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await beerLoader.loadAll();
+      setBeers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load beers');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBeers();
+  }, [loadBeers]);
+
+  return {
+    beers,
+    loading,
+    error,
+    reload: loadBeers,
+  };
+}
+```
+
+```typescript
+// ✅ CORRECT - Properly typed utility hook
+export function useLocalStorage<T>(key: string, defaultValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  const setStoredValue = useCallback((newValue: T) => {
+    try {
+      setValue(newValue);
+      window.localStorage.setItem(key, JSON.stringify(newValue));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }, [key]);
+
+  return [value, setStoredValue] as const;
+}
+```
+
+### Bad Examples
+
+```typescript
+// ❌ WRONG - Breaking rules of hooks
+export function useBadHook(condition: boolean) {
+  if (condition) {
+    const [state, setState] = useState(false); // Conditional hook
+  }
+  return null;
+}
+*Fails: Conditional hook usage violates rules of hooks.*
+
+```typescript
+// ❌ WRONG - Poor error handling
+export function useBadErrorHandling() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData().then(setData).catch(console.log); // Silent failure
+    setLoading(false);
+  }, []);
+
+  return { data, loading }; // No error state
+}
+*Fails: No error handling, silent failures, missing error state.*
+
+```typescript
+// ❌ WRONG - Unnecessary memoization
+export function useOverMemoized(simpleValue: string) {
+  const memoizedValue = useMemo(() => simpleValue, [simpleValue]); // Unnecessary
+  return memoizedValue;
+}
+*Fails: Unnecessary memoization of simple value adds overhead without benefit.*
+```
+
+## Implementation Guidelines
+
+### Hook Development Checklist
+
+#### Before Creating a Hook
+- [ ] Hook has a single, clear responsibility
+- [ ] Hook name starts with 'use' and follows naming conventions
+- [ ] Hook is generic enough to be reusable
+- [ ] Hook doesn't break rules of hooks
+
+#### During Development
+- [ ] All state is properly typed with TypeScript
+- [ ] Error handling is comprehensive with fallbacks
+- [ ] Loading states are managed consistently
+- [ ] Dependencies in useEffect are complete and correct
+- [ ] Expensive computations are memoized appropriately
+- [ ] Cleanup functions are implemented where needed
+
+#### Before Code Review
+- [ ] Hook has proper TypeScript interfaces
+- [ ] Hook is tested with unit tests
+- [ ] Hook handles edge cases gracefully
+- [ ] Hook follows established patterns in codebase
+- [ ] Hook documentation is complete
+- [ ] No console.log statements remain
+- [ ] Hook performance is optimized
+
+#### Performance Checklist
+- [ ] Unnecessary re-renders are prevented
+- [ ] Expensive operations are memoized
+- [ ] Debouncing/throttling is used where appropriate
+- [ ] Memory leaks are prevented with proper cleanup
+- [ ] Caching is implemented for expensive operations
+
+### Forbidden Patterns
+
+#### ❌ AVOID These Anti-Patterns
+```typescript
+// ❌ WRONG - Hooks that break rules of hooks
+export function useBadHook(condition: boolean) {
+  if (condition) {
+    const [state, setState] = useState(false); // Conditional hook
+  }
+  return null;
+}
+
+// ❌ WRONG - Hooks with side effects in render
+export function useBadSideEffect() {
+  const [count, setCount] = useState(0);
+  setCount(count + 1); // Side effect in render
+  return count;
+}
+
+// ❌ WRONG - Hooks that don't handle cleanup
+export function useBadCleanup() {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('Running...');
+    }, 1000);
+    // Missing cleanup
+  }, []);
+}
+
+// ❌ WRONG - Hooks with missing dependencies
+export function useBadDependencies(userId: string) {
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    fetchUser(userId).then(setUser);
+  }, []); // Missing userId dependency
+  
+  return user;
+}
+
+// ❌ WRONG - Hooks that mutate props/state directly
+export function useBadMutation(items: any[]) {
+  items.push('new item'); // Mutating props
+  return items;
+}
+```
+
+## Related Rules
+
+* @react-component-best-practices.mdc
+* @typescript-best-practices.mdc
+* @css-best-practices.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive custom hooks standards, patterns, and anti-patterns.
+
+<!--
+ Custom Hooks Best Practices
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
+
+**Remember: Custom hooks should be predictable, reusable, and follow consistent patterns. They are the building blocks of your application's data layer and should be treated with the same rigor as components.**

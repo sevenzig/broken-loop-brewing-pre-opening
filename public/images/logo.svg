@@ -1,0 +1,24 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#1a1a1a" stroke="#D4AF37" stroke-width="4"/>
+  
+  <!-- Broken loop design -->
+  <path d="M 50 100 C 50 70, 70 50, 100 50 C 130 50, 150 70, 150 100 C 150 130, 130 150, 100 150 C 80 150, 65 140, 60 125" 
+        fill="none" stroke="#D4AF37" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Break in the loop -->
+  <path d="M 55 120 L 65 130" stroke="#D4AF37" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 65 120 L 55 130" stroke="#D4AF37" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Brewery elements - hops -->
+  <ellipse cx="75" cy="80" rx="8" ry="12" fill="#8FBC8F" transform="rotate(-20 75 80)"/>
+  <ellipse cx="125" cy="80" rx="8" ry="12" fill="#8FBC8F" transform="rotate(20 125 80)"/>
+  
+  <!-- Text -->
+  <text x="100" y="170" text-anchor="middle" fill="#D4AF37" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    BROKEN LOOP
+  </text>
+  <text x="100" y="185" text-anchor="middle" fill="#D4AF37" font-family="Arial, sans-serif" font-size="12">
+    BREWING
+  </text>
+</svg> 

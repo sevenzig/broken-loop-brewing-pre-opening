@@ -1,0 +1,196 @@
+/**
+ * Protected Route Component Styles
+ * Modal overlay and authentication protection styling
+ */
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: var(--spacing-md);
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border, #e5e7eb);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Protected Content (blurred when modal is open) */
+.protectedContent {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+  transition: filter var(--transition-speed) ease;
+}
+
+/* Permission Denied */
+.permissionDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: var(--spacing-xl);
+  text-align: center;
+  gap: var(--spacing-md);
+}
+
+.permissionIcon {
+  color: var(--color-error, #ef4444);
+  margin-bottom: var(--spacing-sm);
+}
+
+.permissionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.permissionMessage {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.permissionDetails {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--color-background-secondary, #f9fafb);
+  border-radius: var(--border-radius);
+  text-align: left;
+}
+
+.permissionDetails p {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.permissionDetails ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.permissionDetails li {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, #6b7280);
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.permissionDetails li:last-child {
+  border-bottom: none;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  padding: var(--spacing-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modalOpen {
+  opacity: 1;
+}
+
+.modalClosing {
+  opacity: 0;
+}
+
+.modalContent {
+  position: relative;
+  background: transparent;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modalOpen .modalContent {
+  transform: scale(1);
+}
+
+.modalClosing .modalContent {
+  transform: scale(0.95);
+}
+
+
+
+/* Modal Body */
+.modalBody {
+  padding: 0;
+}
+
+/* Mobile Modal Adjustments */
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: var(--spacing-md);
+  }
+  
+  .modalContent {
+    max-height: 95vh;
+    border-radius: 8px;
+  }
+}
+
+/* Focus Management */
+.modalOverlay:focus {
+  outline: none;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modalContent {
+    transition: none;
+  }
+  
+  .modalOpen .modalContent,
+  .modalClosing .modalContent {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .modalOverlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
+

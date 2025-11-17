@@ -1,0 +1,398 @@
+---
+description: "Centralized business information management and integration patterns"
+globs: src/**/*.ts,src/**/*.tsx,src/**/*.js,src/**/*.jsx
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: business,data,integration,typescript,react
+---
+
+# Company Information Integration Rules
+
+## Purpose and Scope
+
+This rule enforces centralized business information management by requiring all business data to be sourced from a single configuration file (`businessInfo.ts`). It ensures data consistency, maintainability, and prevents hardcoded business details throughout the application.
+
+## Standards and Requirements
+
+### Central Data Management - STRICTLY ENFORCE
+- Import and use structured data from `businessInfo.ts`
+- Update business information ONLY in the central configuration file
+- NEVER hardcode business details in components
+
+### Required Import Pattern
+```typescript
+// ALWAYS import from businessInfo.ts
+import { businessInfo, generateSEOData, getCurrentBusinessStatus, getGoogleMapsUrl } from '@data/businessInfo';
+
+// NEVER hardcode business details
+const businessName = "My Business"; // ❌ WRONG
+const businessName = businessInfo.name; // ✅ CORRECT
+```
+
+### Data Consistency Rules - MANDATORY
+- **Phone Display**: ALWAYS use `businessInfo.contact.phone.formatted`
+- **Phone Links**: ALWAYS use `businessInfo.contact.phone.link` for tel: links
+- **Address**: ALWAYS use `businessInfo.address.full` for complete address
+- **Business Name**: Use `businessInfo.name` for full name, `businessInfo.shortName` for abbreviated
+- **Coordinates**: Use `businessInfo.address.coordinates` for map positioning
+- **Website URLs**: Use `businessInfo.website.baseUrl` for absolute URLs
+
+### Business Information Usage
+```typescript
+// Contact information
+businessInfo.contact.phone.formatted  // Display phone number
+businessInfo.contact.phone.link       // Tel: link for calls
+businessInfo.contact.email           // Email address
+
+// Address information
+businessInfo.address.full            // Complete address string
+businessInfo.address.street          // Street address only
+businessInfo.address.city            // City name
+businessInfo.address.state           // State/province
+businessInfo.address.zip             // Postal code
+
+// Business identity
+businessInfo.name                    // Full business name
+businessInfo.shortName               // Abbreviated name
+businessInfo.tagline                 // Business tagline
+businessInfo.description             // Full description
+businessInfo.shortDescription        // Brief description for cards
+
+// Social media links
+businessInfo.social.facebook         // Facebook URL (optional)
+businessInfo.social.instagram        // Instagram URL (optional)
+businessInfo.social.twitter          // Twitter URL (optional)
+businessInfo.social.linkedin         // LinkedIn URL (optional)
+
+// Business offerings
+businessInfo.features               // Array of key features
+businessInfo.services               // Array of services offered
+```
+
+### Business Hours Integration
+```typescript
+// Use the business hours function
+import { getCurrentBusinessStatus } from '@data/businessInfo';
+
+const status = getCurrentBusinessStatus();
+
+// Display logic
+{status.isOpen ? (
+  <span className={styles.open}>{status.message}</span>
+) : (
+  <span className={styles.closed}>{status.message}</span>
+)}
+
+// Individual hours display
+{Object.entries(businessInfo.hours).map(([day, hours]) => (
+  <div key={day}>
+    <span>{day.charAt(0).toUpperCase() + day.slice(1)}:</span>
+    <span>{hours}</span>
+  </div>
+))}
+```
+
+### SEO Data Integration
+```typescript
+// Generate page-specific SEO data
+import { generateSEOData } from '@data/businessInfo';
+
+const seoData = generateSEOData('Home'); // Page title
+const seoData = generateSEOData('About Us'); // About page
+const seoData = generateSEOData(); // Default homepage
+
+// Use in meta tags or head component
+<title>{seoData.title}</title>
+<meta name="description" content={seoData.description} />
+<meta name="keywords" content={seoData.keywords} />
+<meta property="og:title" content={seoData.ogTitle} />
+<meta property="og:description" content={seoData.ogDescription} />
+<meta property="og:url" content={seoData.ogUrl} />
+<meta property="og:image" content={seoData.ogImage} />
+```
+
+### Google Maps Integration
+```typescript
+// Get Google Maps URL for directions
+import { getGoogleMapsUrl, getDirectionsText } from '@data/businessInfo';
+
+const mapsUrl = getGoogleMapsUrl();
+const directionsText = getDirectionsText();
+
+// Use in links
+<a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+  {directionsText}
+</a>
+```
+
+### Path Alias Usage
+```typescript
+// ALWAYS use path aliases for imports
+import { businessInfo } from '@data/businessInfo'; // ✅ CORRECT
+import { Header } from '@components/Header/Header'; // ✅ CORRECT
+
+// NEVER use relative paths for data imports
+import { businessInfo } from '../../../data/businessInfo'; // ❌ WRONG
+```
+
+## Examples
+
+### Good Examples
+
+#### Header Component Integration
+```typescript
+import React, { useState } from 'react';
+import { businessInfo, getCurrentBusinessStatus } from '@data/businessInfo';
+import styles from './Header.module.css';
+
+const Header: React.FC = () => {
+  const businessStatus = getCurrentBusinessStatus();
+
+  return (
+    <header className={styles.header}>
+      <div className={styles.headerContent}>
+        <div className={styles.logo}>
+          <h1 className={styles.logoText}>{businessInfo.shortName}</h1>
+        </div>
+        
+        <div className={styles.businessStatus}>
+          <span className={`${styles.statusText} ${businessStatus.isOpen ? styles.open : styles.closed}`}>
+            {businessStatus.message}
+          </span>
+        </div>
+        
+        <div className={styles.directions}>
+          <a 
+            href={`https://maps.google.com/maps?q=${encodeURIComponent(businessInfo.address.full)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.directionsLink}
+          >
+            Get directions to {businessInfo.address.full}
+          </a>
+        </div>
+      </div>
+    </header>
+  );
+};
+```
+
+#### Footer Component Integration
+```typescript
+import React from 'react';
+import { businessInfo } from '@data/businessInfo';
+import styles from './Footer.module.css';
+
+const Footer: React.FC = () => {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.footerContent}>
+        <div className={styles.businessInfo}>
+          <h3 className={styles.footerTitle}>{businessInfo.name}</h3>
+          <p className={styles.footerDescription}>
+            {businessInfo.shortDescription}
+          </p>
+        </div>
+
+        <div className={styles.contactInfo}>
+          <h4>Contact</h4>
+          <p>
+            <a href={businessInfo.contact.phone.link}>
+              {businessInfo.contact.phone.formatted}
+            </a>
+          </p>
+          <p>
+            <a href={`mailto:${businessInfo.contact.email}`}>
+              {businessInfo.contact.email}
+            </a>
+          </p>
+          <p>{businessInfo.address.full}</p>
+        </div>
+
+        <div className={styles.socialLinks}>
+          <h4>Follow Us</h4>
+          {businessInfo.social.facebook && (
+            <a href={businessInfo.social.facebook} target="_blank" rel="noopener noreferrer">
+              Facebook
+            </a>
+          )}
+          {businessInfo.social.instagram && (
+            <a href={businessInfo.social.instagram} target="_blank" rel="noopener noreferrer">
+              Instagram
+            </a>
+          )}
+        </div>
+
+        <div className={styles.businessHours}>
+          <h4>Hours</h4>
+          {Object.entries(businessInfo.hours).map(([day, hours]) => (
+            <div key={day} className={styles.hoursRow}>
+              <span>{day.charAt(0).toUpperCase() + day.slice(1)}:</span>
+              <span>{hours}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.footerBottom}>
+        <p>© {currentYear} {businessInfo.name}. All rights reserved.</p>
+      </div>
+    </footer>
+  );
+};
+```
+
+#### SEO Component Integration
+```typescript
+import React from 'react';
+import { generateSEOData } from '@data/businessInfo';
+
+interface SEOHeadProps {
+  pageTitle?: string;
+}
+
+const SEOHead: React.FC<SEOHeadProps> = ({ pageTitle }) => {
+  const seoData = generateSEOData(pageTitle);
+  
+  return (
+    <>
+      <title>{seoData.title}</title>
+      <meta name="description" content={seoData.description} />
+      <meta name="keywords" content={seoData.keywords} />
+      <meta property="og:title" content={seoData.ogTitle} />
+      <meta property="og:description" content={seoData.ogDescription} />
+      <meta property="og:url" content={seoData.ogUrl} />
+      <meta property="og:image" content={seoData.ogImage} />
+    </>
+  );
+};
+```
+
+### Bad Examples
+
+#### Hardcoded Business Information
+```typescript
+const Header: React.FC = () => {
+  return (
+    <header>
+      <h1>Broken Loop Brewing</h1> {/* ❌ Hardcoded business name */}
+      <p>123 Main St, Anytown, USA</p> {/* ❌ Hardcoded address */}
+      <a href="tel:555-123-4567">555-123-4567</a> {/* ❌ Hardcoded phone */}
+    </header>
+  );
+};
+```
+*Fails: Business information is hardcoded instead of using centralized data.*
+
+#### Relative Import Paths
+```typescript
+import { businessInfo } from '../../../data/businessInfo'; // ❌ Relative path
+import { Header } from '../../components/Header/Header'; // ❌ Relative path
+```
+*Fails: Uses relative paths instead of path aliases for imports.*
+
+#### Missing Error Handling
+```typescript
+const businessStatus = getCurrentBusinessStatus();
+const displayName = businessInfo.name; // ❌ No fallback
+```
+*Fails: No error handling or fallbacks for potentially missing data.*
+
+## Implementation Guidelines
+
+### Updates and Maintenance Protocol
+- **Business Information Changes**: Update ONLY `src/data/businessInfo.ts`
+- **New Business Data**: Add to appropriate section in `businessInfo.ts`
+- **Contact Updates**: Modify contact object in `businessInfo.ts`
+- **Hours Changes**: Update hours object in `businessInfo.ts`
+- **Address Changes**: Update address object and coordinates in `businessInfo.ts`
+- **SEO Updates**: Business info changes automatically update SEO data
+
+### Error Handling Patterns
+```typescript
+// Always provide fallbacks for dynamic data
+const businessStatus = getCurrentBusinessStatus() || {
+  isOpen: false,
+  message: 'Hours not available - please contact us',
+  status: 'unknown'
+};
+
+// Safe property access for optional social links
+const socialLinks = Object.entries(businessInfo.social)
+  .filter(([platform, url]) => url) // Only include platforms with URLs
+  .map(([platform, url]) => ({ platform, url }));
+
+// Fallback for missing business data
+const displayName = businessInfo.name || businessInfo.shortName || 'Business Name';
+```
+
+### Data Types Enforcement
+```typescript
+// Use the exported TypeScript interfaces
+import type { BusinessInfo } from '@data/businessInfo';
+
+// Ensure type safety when extending business info
+interface ExtendedBusinessInfo extends BusinessInfo {
+  // Add custom business-specific fields here
+  specialOffers?: string[];
+  certifications?: string[];
+}
+```
+
+### Business-Agnostic Design Principles
+- Template must work for ANY business type
+- No hardcoded industry-specific terms
+- Flexible data structure accommodates different business models
+- Configurable features and services arrays
+- Optional social media platforms
+- Adaptable business hours format
+- Generic contact methods support
+
+### Validation Requirements - BEFORE DEPLOYMENT
+- [ ] All required fields in `businessInfo.ts` are populated
+- [ ] Phone number format is consistent (formatted vs raw vs link)
+- [ ] All social media links are valid URLs or removed
+- [ ] Coordinates are accurate for map integration
+- [ ] Business hours are current and correctly formatted
+- [ ] Email address is valid and monitored
+- [ ] Address is complete and accurate
+- [ ] Website URLs are correct and functional
+
+### Integration Checklist - MANDATORY
+- [ ] Import `businessInfo` in all components using business data
+- [ ] Use structured data instead of hardcoded values
+- [ ] Implement proper error handling and fallbacks
+- [ ] Add TypeScript interfaces for any custom data structures
+- [ ] Test business hours display functionality
+- [ ] Validate contact information display
+- [ ] Check social media link rendering
+- [ ] Verify address and directions functionality
+- [ ] Test SEO data generation
+- [ ] Ensure responsive design for all business info displays
+
+## Related Rules
+
+* @typescript-best-practices.mdc
+* @react-component-best-practices.mdc
+* @api-integration-patterns.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with centralized business information management patterns.
+
+<!--
+ Company Information Integration Rules
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
+- Optional social media platforms
+- Adaptable business hours format
+- Generic contact methods support
+
+**Remember: The businessInfo.ts file is the single source of truth for ALL business-related data. Any business information displayed on the website MUST come from this central configuration file.**

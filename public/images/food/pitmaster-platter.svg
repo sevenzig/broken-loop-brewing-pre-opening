@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a2c1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c1810;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="meat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bg)"/>
+  
+  <!-- Wooden plate -->
+  <ellipse cx="200" cy="250" rx="180" ry="40" fill="#8b4513" opacity="0.8"/>
+  <ellipse cx="200" cy="245" rx="180" ry="40" fill="#a0522d"/>
+  
+  <!-- Brisket -->
+  <rect x="50" y="180" width="80" height="40" rx="8" fill="url(#meat)"/>
+  <rect x="50" y="185" width="80" height="5" fill="#654321"/>
+  
+  <!-- Ribs -->
+  <rect x="150" y="170" width="15" height="50" rx="7" fill="url(#meat)"/>
+  <rect x="170" y="170" width="15" height="50" rx="7" fill="url(#meat)"/>
+  <rect x="190" y="170" width="15" height="50" rx="7" fill="url(#meat)"/>
+  
+  <!-- Pulled pork -->
+  <circle cx="280" cy="190" r="25" fill="url(#meat)"/>
+  <circle cx="285" cy="185" r="20" fill="#8b4513"/>
+  <circle cx="275" cy="195" r="18" fill="#a0522d"/>
+  
+  <!-- Sausage -->
+  <ellipse cx="320" cy="200" rx="40" ry="12" fill="#8b4513"/>
+  <ellipse cx="320" cy="198" rx="40" ry="8" fill="#a0522d"/>
+  
+  <!-- Sides -->
+  <circle cx="100" cy="120" r="30" fill="#deb887" opacity="0.8"/>
+  <circle cx="300" cy="120" r="30" fill="#90EE90" opacity="0.8"/>
+  
+  <!-- Smoke effect -->
+  <g opacity="0.6">
+    <circle cx="100" cy="100" r="8" fill="#f5f5f5" opacity="0.3"/>
+    <circle cx="110" cy="90" r="12" fill="#f5f5f5" opacity="0.2"/>
+    <circle cx="120" cy="80" r="15" fill="#f5f5f5" opacity="0.1"/>
+    <circle cx="280" cy="100" r="10" fill="#f5f5f5" opacity="0.3"/>
+    <circle cx="290" cy="85" r="14" fill="#f5f5f5" opacity="0.2"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffc19e" text-anchor="middle">Pitmaster's Platter</text>
+  <text x="200" y="75" font-family="Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" opacity="0.8">The Ultimate BBQ Experience</text>
+</svg> 

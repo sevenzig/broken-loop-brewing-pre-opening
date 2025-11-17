@@ -1,0 +1,505 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# TypeScript Best Practices - STRICTLY ENFORCE
+
+## Core TypeScript Rules - MANDATORY
+
+### 1. Interface and Type Definitions
+- **ALWAYS** define interfaces for component props
+- **ALWAYS** define interfaces for data structures
+- **PREFER** interfaces over types for object shapes
+- **USE** types for unions, primitives, and computed types
+
+```typescript
+// ✅ CORRECT - Component Props Interface
+interface ComponentProps {
+  title: string;
+  subtitle?: string;
+  isActive?: boolean;
+  onAction?: () => void;
+  children?: React.ReactNode;
+  className?: string;
+}
+
+// ✅ CORRECT - Data Interface
+interface BusinessInfo {
+  name: string;
+  contact: ContactInfo;
+  address: AddressInfo;
+}
+
+// ✅ CORRECT - Union Type
+type ButtonVariant = 'primary' | 'secondary' | 'outline';
+type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+```
+
+### 2. React Component Typing - REQUIRED PATTERNS
+
+```typescript
+// ✅ CORRECT - Functional Component with Props
+interface ComponentProps {
+  title: string;
+  variant?: 'default' | 'large';
+}
+
+const Component: React.FC<ComponentProps> = ({ title, variant = 'default' }) => {
+  return <div>{title}</div>;
+};
+
+// ✅ CORRECT - Component with Children
+interface LayoutProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children, className }) => {
+  return <div className={className}>{children}</div>;
+};
+
+// ✅ CORRECT - Component with Event Handlers
+interface ButtonProps {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onSubmit?: (data: FormData) => Promise<void>;
+}
+```
+
+### 3. State Management Typing
+
+```typescript
+// ✅ CORRECT - useState with explicit types
+const [user, setUser] = useState<User | null>(null);
+const [loading, setLoading] = useState<boolean>(false);
+const [data, setData] = useState<ApiResponse<User[]>>([]);
+
+// ✅ CORRECT - Complex state with interface
+interface FormState {
+  values: Record<string, string>;
+  errors: Record<string, string>;
+  isSubmitting: boolean;
+}
+
+const [formState, setFormState] = useState<FormState>({
+  values: {},
+  errors: {},
+  isSubmitting: false
+});
+```
+
+### 4. API and Data Fetching Types
+
+```typescript
+// ✅ CORRECT - API Response Types
+interface ApiResponse<T> {
+  data: T;
+  status: 'success' | 'error';
+  message?: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
+// ✅ CORRECT - Async Function Typing
+async function fetchUser(id: string): Promise<ApiResponse<User>> {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+
+// ✅ CORRECT - Error Handling with Types
+interface ApiError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+}
+```
+
+### 5. Custom Hook Typing
+
+```typescript
+// ✅ CORRECT - Custom Hook with Return Type
+interface UseLocalStorageReturn<T> {
+  value: T;
+  setValue: (value: T) => void;
+  removeValue: () => void;
+}
+
+function useLocalStorage<T>(
+  key: string, 
+  initialValue: T
+): UseLocalStorageReturn<T> {
+  // Implementation...
+  return { value, setValue, removeValue };
+}
+
+// ✅ CORRECT - Hook with Options
+interface UseApiOptions {
+  refetchOnMount?: boolean;
+  retryCount?: number;
+}
+
+interface UseApiReturn<T> {
+  data: T | null;
+  loading: boolean;
+  error: ApiError | null;
+  refetch: () => Promise<void>;
+}
+
+function useApi<T>(
+  url: string, 
+  options: UseApiOptions = {}
+): UseApiReturn<T> {
+  // Implementation...
+}
+```
+
+## Advanced TypeScript Patterns
+
+### 6. Utility Types Usage
+
+```typescript
+// ✅ CORRECT - Using utility types
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+// Create types from existing interfaces
+type PublicUser = Omit<User, 'password'>;
+type UserUpdate = Partial<Pick<User, 'name' | 'email'>>;
+type UserCreation = Omit<User, 'id'>;
+
+// ✅ CORRECT - Record types for key-value pairs
+type ErrorMessages = Record<string, string>;
+type ValidationRules = Record<keyof User, (value: any) => boolean>;
+```
+
+### 7. Generic Constraints
+
+```typescript
+// ✅ CORRECT - Generic with constraints
+interface Identifiable {
+  id: string;
+}
+
+function updateItem<T extends Identifiable>(
+  items: T[], 
+  updatedItem: T
+): T[] {
+  return items.map(item => 
+    item.id === updatedItem.id ? updatedItem : item
+  );
+}
+
+// ✅ CORRECT - Conditional types
+type ApiEndpoint<T> = T extends 'user' 
+  ? '/api/users' 
+  : T extends 'product' 
+  ? '/api/products' 
+  : never;
+```
+
+### 8. Form and Event Handling
+
+```typescript
+// ✅ CORRECT - Form event typing
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  // Process form data...
+};
+
+// ✅ CORRECT - Input change handler
+const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = event.target;
+  setFormData(prev => ({ ...prev, [name]: value }));
+};
+```
+
+## Forbidden Patterns - DO NOT USE
+
+### ❌ NEVER Do These
+
+```typescript
+// ❌ NEVER use 'any' type
+const data: any = fetchData(); // WRONG
+
+// ❌ NEVER use non-null assertion without good reason
+const user = getUser()!; // WRONG - could crash
+
+// ❌ NEVER use 'as any' to bypass types
+const result = (data as any).someProperty; // WRONG
+
+// ❌ NEVER ignore TypeScript errors with @ts-ignore
+// @ts-ignore
+const broken = someFunction(); // WRONG
+
+// ❌ NEVER use Function type
+const callback: Function = () => {}; // WRONG - too loose
+
+// ❌ NEVER use object type
+const config: object = {}; // WRONG - too vague
+```
+
+### ✅ USE These Instead
+
+```typescript
+// ✅ CORRECT - Proper typing
+interface ApiData {
+  users: User[];
+  total: number;
+}
+const data: ApiData = await fetchData();
+
+// ✅ CORRECT - Safe property access
+const user = getUser();
+if (user) {
+  console.log(user.name);
+}
+
+// ✅ CORRECT - Type assertion with proper type
+const result = (data as ApiResponse).data;
+
+// ✅ CORRECT - Fix the actual type issue
+const result: string = someFunction(); // Fix function return type
+
+// ✅ CORRECT - Specific function type
+const callback: (id: string) => void = (id) => {};
+
+// ✅ CORRECT - Specific object interface
+interface Config {
+  apiUrl: string;
+  timeout: number;
+}
+const config: Config = { apiUrl: '...', timeout: 5000 };
+```
+
+## File Organization and Imports
+
+### 9. Type-Only Imports
+
+```typescript
+// ✅ CORRECT - Type-only imports
+import type { User, ApiResponse } from '@types/api';
+import type { ComponentProps } from 'react';
+
+// ✅ CORRECT - Mixed imports
+import React, { type FC } from 'react';
+import { fetchUser, type UserData } from '@utils/api';
+```
+
+### 10. Export Patterns
+
+```typescript
+// ✅ CORRECT - Export interfaces and types
+export interface User {
+  id: string;
+  name: string;
+}
+
+export type UserStatus = 'active' | 'inactive';
+
+// ✅ CORRECT - Default export with named exports
+const UserService = {
+  getUser,
+  updateUser
+};
+
+export default UserService;
+export { getUser, updateUser };
+export type { User, UserStatus };
+```
+
+## Error Handling with Types
+
+### 11. Result Pattern
+
+```typescript
+// ✅ CORRECT - Result type for error handling
+type Result<T, E = Error> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+async function safeApiCall<T>(
+  url: string
+): Promise<Result<T, ApiError>> {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error as ApiError };
+  }
+}
+
+// Usage
+const result = await safeApiCall<User[]>('/api/users');
+if (result.success) {
+  console.log(result.data); // TypeScript knows this is User[]
+} else {
+  console.error(result.error); // TypeScript knows this is ApiError
+}
+```
+
+## Performance and Optimization
+
+### 12. React Performance with Types
+
+```typescript
+// ✅ CORRECT - Memoized component with types
+interface ExpensiveComponentProps {
+  data: ComplexData[];
+  onUpdate: (id: string) => void;
+}
+
+const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
+  ({ data, onUpdate }) => {
+    // Component implementation
+  }
+);
+
+// ✅ CORRECT - Callback memoization with types
+const handleUpdate = useCallback(
+  (id: string) => {
+    // Update logic
+  },
+  [dependency]
+);
+```
+
+## Validation and Runtime Checks
+
+### 13. Type Guards
+
+```typescript
+// ✅ CORRECT - Type guard functions
+function isUser(obj: unknown): obj is User {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'name' in obj &&
+    'email' in obj
+  );
+}
+
+// Usage
+if (isUser(data)) {
+  // TypeScript now knows data is User
+  console.log(data.name);
+}
+
+// ✅ CORRECT - Array type guard
+function isUserArray(arr: unknown[]): arr is User[] {
+  return arr.every(isUser);
+}
+```
+
+## Component Props Best Practices
+
+### 14. Extending HTML Element Props
+
+```typescript
+// ✅ CORRECT - Extending button props
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary';
+  loading?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({ 
+  variant = 'primary', 
+  loading = false, 
+  children,
+  className,
+  ...props 
+}) => {
+  return (
+    <button 
+      className={`btn btn-${variant} ${className}`}
+      disabled={loading}
+      {...props}
+    >
+      {loading ? 'Loading...' : children}
+    </button>
+  );
+};
+```
+
+## Development Environment Rules
+
+### 15. TSConfig Compliance
+- **ENABLE** `strict: true` in tsconfig.json
+- **ENABLE** `noUnusedLocals` and `noUnusedParameters`
+- **ENABLE** `noImplicitReturns`
+- **USE** path mapping for clean imports
+
+### 16. ESLint TypeScript Rules
+- **ENFORCE** `@typescript-eslint/no-explicit-any`
+- **ENFORCE** `@typescript-eslint/no-unused-vars`
+- **ENFORCE** `@typescript-eslint/prefer-as-const`
+- **ENFORCE** `@typescript-eslint/no-non-null-assertion`
+
+## Error Prevention Checklist
+
+Before committing code, verify:
+- [ ] All components have properly typed props
+- [ ] No `any` types are used
+- [ ] All async functions have proper return types
+- [ ] Event handlers are properly typed
+- [ ] State variables have explicit types when needed
+- [ ] API responses are properly typed
+- [ ] Error handling uses typed patterns
+- [ ] Import statements use type-only imports where appropriate
+- [ ] No TypeScript errors in the terminal
+- [ ] ESLint TypeScript rules pass
+
+## Common Patterns Summary
+
+```typescript
+// ✅ COMPONENT PROPS
+interface Props {
+  required: string;
+  optional?: number;
+  callback: (value: string) => void;
+  children?: React.ReactNode;
+}
+
+// ✅ API TYPES
+interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+}
+
+// ✅ STATE TYPES
+const [data, setData] = useState<User[]>([]);
+const [loading, setLoading] = useState<boolean>(false);
+
+// ✅ CUSTOM HOOKS
+function useCustomHook<T>(initial: T): [T, (value: T) => void] {
+  // Implementation
+}
+
+// ✅ ERROR HANDLING
+try {
+  const result = await apiCall();
+  // Handle success
+} catch (error) {
+  const apiError = error as ApiError;
+  // Handle typed error
+}
+```
+
+**Remember: TypeScript is your friend, not your enemy. Embrace strict typing for better code quality, fewer runtime errors, and improved developer experience.**

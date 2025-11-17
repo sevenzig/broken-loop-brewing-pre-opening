@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a2c1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c1810;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="wing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d2691e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b4513;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bg)"/>
+  
+  <!-- Plate -->
+  <ellipse cx="200" cy="240" rx="160" ry="35" fill="#4a4a4a"/>
+  <ellipse cx="200" cy="235" rx="160" ry="35" fill="#696969"/>
+  
+  <!-- Wings -->
+  <ellipse cx="120" cy="180" rx="40" ry="20" fill="url(#wing)" transform="rotate(-15 120 180)"/>
+  <ellipse cx="110" cy="185" rx="35" ry="15" fill="#cd853f" transform="rotate(-15 110 185)"/>
+  
+  <ellipse cx="200" cy="170" rx="40" ry="20" fill="url(#wing)" transform="rotate(10 200 170)"/>
+  <ellipse cx="195" cy="175" rx="35" ry="15" fill="#cd853f" transform="rotate(10 195 175)"/>
+  
+  <ellipse cx="280" cy="180" rx="40" ry="20" fill="url(#wing)" transform="rotate(25 280 180)"/>
+  <ellipse cx="285" cy="185" rx="35" ry="15" fill="#cd853f" transform="rotate(25 285 185)"/>
+  
+  <ellipse cx="160" cy="200" rx="38" ry="18" fill="url(#wing)" transform="rotate(-30 160 200)"/>
+  <ellipse cx="155" cy="205" rx="33" ry="13" fill="#cd853f" transform="rotate(-30 155 205)"/>
+  
+  <ellipse cx="240" cy="200" rx="38" ry="18" fill="url(#wing)" transform="rotate(40 240 200)"/>
+  <ellipse cx="245" cy="205" rx="33" ry="13" fill="#cd853f" transform="rotate(40 245 205)"/>
+  
+  <!-- Celery sticks -->
+  <rect x="80" y="120" width="6" height="40" fill="#90EE90"/>
+  <rect x="90" y="120" width="6" height="40" fill="#90EE90"/>
+  <rect x="100" y="120" width="6" height="40" fill="#90EE90"/>
+  
+  <!-- Ranch dip -->
+  <ellipse cx="320" cy="140" rx="25" ry="15" fill="#f5f5dc"/>
+  <ellipse cx="320" cy="138" rx="20" ry="12" fill="#ffffff"/>
+  
+  <!-- Smoke effect -->
+  <g opacity="0.5">
+    <circle cx="150" cy="120" r="6" fill="#f5f5f5" opacity="0.4"/>
+    <circle cx="155" cy="110" r="8" fill="#f5f5f5" opacity="0.3"/>
+    <circle cx="160" cy="95" r="10" fill="#f5f5f5" opacity="0.2"/>
+    <circle cx="250" cy="125" r="7" fill="#f5f5f5" opacity="0.4"/>
+    <circle cx="255" cy="115" r="9" fill="#f5f5f5" opacity="0.3"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffc19e" text-anchor="middle">Smoked Wings</text>
+  <text x="200" y="65" font-family="Arial, sans-serif" font-size="14" fill="#fff" text-anchor="middle" opacity="0.8">Not Your Average Wings</text>
+</svg> 

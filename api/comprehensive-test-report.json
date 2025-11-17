@@ -1,0 +1,228 @@
+{
+  "timestamp": "2025-09-05T16:46:26.848Z",
+  "testResults": {
+    "server": {
+      "started": false,
+      "error": null,
+      "logs": [
+        "[2025-09-05T16:46:26.833Z] [INFO] === STEP 1: FOUNDATIONAL TESTS ===",
+        "[2025-09-05T16:46:26.834Z] [INFO] Running foundational services tests...",
+        "[2025-09-05T16:46:26.845Z] [INFO] ✅ Foundational tests completed",
+        "[2025-09-05T16:46:26.845Z] [INFO] \n=== STEP 2: SERVER STARTUP ===",
+        "[2025-09-05T16:46:26.845Z] [INFO] Starting API server for testing...",
+        "[2025-09-05T16:46:26.848Z] [ERROR] ❌ Server-related error: spawn EINVAL",
+        "[2025-09-05T16:46:26.848Z] [INFO] \n=== STEP 4: GENERATING REPORT ===",
+        "[2025-09-05T16:46:26.848Z] [INFO] Generating comprehensive test report...",
+        "[2025-09-05T16:46:26.848Z] [INFO] Analyzing combined test results..."
+      ]
+    },
+    "foundational": {
+      "timestamp": "2025-09-05T16:46:26.836Z",
+      "services": {
+        "services": [
+          {
+            "name": "AdminService",
+            "status": "FILE_EXISTS"
+          },
+          {
+            "name": "AdminService",
+            "status": "CLASS_FOUND"
+          },
+          {
+            "name": "BeerService",
+            "status": "FILE_EXISTS"
+          },
+          {
+            "name": "BeerService",
+            "status": "CLASS_FOUND"
+          },
+          {
+            "name": "GitHubService",
+            "status": "FILE_EXISTS"
+          },
+          {
+            "name": "GitHubService",
+            "status": "CLASS_FOUND"
+          }
+        ],
+        "errors": [],
+        "dependencies": []
+      },
+      "types": {
+        "types": [
+          {
+            "file": "lib/types/Admin.ts",
+            "status": "EXISTS",
+            "exportCount": 13
+          },
+          {
+            "file": "lib/types/Beer.ts",
+            "status": "EXISTS",
+            "exportCount": 12
+          },
+          {
+            "file": "lib/types/ContentManager.ts",
+            "status": "EXISTS",
+            "exportCount": 32
+          }
+        ],
+        "errors": []
+      },
+      "middleware": {
+        "middleware": [
+          {
+            "name": "auth_directory",
+            "status": "EXISTS"
+          },
+          {
+            "name": "auth_files",
+            "status": "FOUND",
+            "files": [
+              "config.d.ts",
+              "config.ts",
+              "jwt.ts",
+              "middleware.ts",
+              "password.ts",
+              "rateLimiter.ts"
+            ]
+          },
+          {
+            "name": "utils_directory",
+            "status": "EXISTS"
+          },
+          {
+            "name": "utils_files",
+            "status": "FOUND",
+            "files": [
+              "businessStatus.ts",
+              "dropdowns.ts",
+              "markdown.ts",
+              "validation.ts"
+            ]
+          }
+        ],
+        "errors": []
+      },
+      "environment": {
+        "environment": {},
+        "missing": [
+          "NODE_ENV",
+          "PORT",
+          "GITHUB_TOKEN",
+          "GITHUB_OWNER",
+          "GITHUB_REPO",
+          "GITHUB_BRANCH",
+          "CONTENT_PATH"
+        ],
+        "warnings": [
+          "No .env file found"
+        ]
+      },
+      "operations": {
+        "operations": [
+          {
+            "operation": "mock_json_response",
+            "status": "PASS"
+          }
+        ],
+        "errors": []
+      },
+      "directories": {
+        "directories": [
+          {
+            "path": "public/uploads",
+            "status": "EXISTS"
+          },
+          {
+            "path": "lib/config",
+            "status": "EXISTS"
+          }
+        ],
+        "files": [
+          {
+            "directory": "public/uploads",
+            "fileCount": 0,
+            "files": []
+          },
+          {
+            "directory": "lib/config",
+            "fileCount": 1,
+            "files": [
+              "dropdowns.json"
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "directory": "src/data/beers",
+            "error": "ENOENT: no such file or directory, access 'C:\\Users\\scootypuffjr\\Projects\\broken-loop-brewing\\api\\src\\data\\beers'"
+          }
+        ]
+      },
+      "analysis": {
+        "potentialCauses": [
+          {
+            "issue": "Missing Content-Type headers",
+            "severity": "HIGH",
+            "description": "Responses might not have correct content type"
+          }
+        ],
+        "recommendations": [
+          "Review server.ts for consistent JSON response handling",
+          "Ensure all endpoints use res.json() for responses",
+          "Add proper error handling middleware",
+          "Set Content-Type headers consistently"
+        ]
+      },
+      "summary": {
+        "totalTests": 7,
+        "passed": 6,
+        "failed": 1,
+        "errors": 1
+      }
+    },
+    "api": null,
+    "summary": {
+      "totalIssues": 2,
+      "nonJsonResponses": 0,
+      "criticalErrors": 1,
+      "recommendations": [
+        "🚨 Fix server startup issues first - check dependencies and configuration",
+        "🔧 Address foundational issues that may cause non-JSON responses"
+      ]
+    }
+  },
+  "analysis": {
+    "serverIssues": [
+      {
+        "issue": "Server failed to start",
+        "severity": "CRITICAL",
+        "description": "Unknown server error"
+      }
+    ],
+    "foundationalIssues": [
+      {
+        "issue": "Foundational service errors",
+        "severity": "HIGH",
+        "count": 1
+      }
+    ],
+    "apiIssues": [],
+    "nonJsonCauses": [
+      {
+        "issue": "Missing Content-Type headers",
+        "severity": "HIGH",
+        "description": "Responses might not have correct content type"
+      }
+    ],
+    "recommendations": [
+      "🚨 Fix server startup issues first - check dependencies and configuration",
+      "🔧 Address foundational issues that may cause non-JSON responses"
+    ]
+  },
+  "executionInfo": {
+    "platform": "win32",
+    "nodeVersion": "v20.18.0",
+    "workingDirectory": "C:\\Users\\scootypuffjr\\Projects\\broken-loop-brewing\\api"
+  }
+}

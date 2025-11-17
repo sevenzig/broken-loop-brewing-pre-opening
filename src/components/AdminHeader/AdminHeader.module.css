@@ -1,0 +1,79 @@
+/* AdminHeader Component CSS Module */
+
+.adminHeader {
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  padding: var(--spacing-md) var(--spacing-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.logoLink {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.logoLink:hover {
+  opacity: 0.8;
+}
+
+.logoLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logoText {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-family);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .adminHeader {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .logo {
+    height: 32px;
+  }
+  
+  .logoText {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .logoText {
+    display: none; /* Hide text on very small screens, keep only logo */
+  }
+  
+  .logoContainer {
+    gap: 0;
+  }
+}

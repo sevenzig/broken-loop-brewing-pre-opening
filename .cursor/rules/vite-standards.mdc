@@ -1,0 +1,207 @@
+---
+description: "Vite configuration standards and best practices for optimal development and build performance"
+globs: vite.config.js,vite.config.ts,vitest.config.js,vitest.config.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-08-14"
+lastUpdated: "2025-08-14"
+author: "Claude AI <https://claude.ai>"
+tags: vite, bundler, configuration, performance, build
+---
+
+# Vite Configuration Standards
+
+## Purpose and Scope
+This rule establishes consistent Vite configuration practices to ensure optimal development experience, 
+build performance, and maintainable project setup across all JavaScript/TypeScript projects using Vite.
+
+## Standards and Requirements
+
+### 1. Configuration File Structure
+- Use TypeScript configuration files (`vite.config.ts`) when TypeScript is present in the project
+- Import `defineConfig` helper for type safety and IntelliSense
+- Organize configuration sections in logical order: plugins, resolve, build, server, preview
+
+### 2. Plugin Management
+- Import plugins explicitly at the top of the configuration file
+- Use consistent plugin ordering: framework plugins first, then utility plugins
+- Configure plugins with explicit options rather than relying on defaults for production builds
+
+### 3. Path Resolution
+- Use `resolve.alias` for clean import paths
+- Prefer `@/` alias for src directory
+- Avoid relative imports beyond two levels (`../../`)
+
+### 4. Build Configuration
+- Set explicit `outDir` for build outputs
+- Configure `rollupOptions` for code splitting and chunk optimization
+- Enable source maps for development, disable for production unless needed
+
+### 5. Development Server
+- Configure `server.port` explicitly
+- Set `server.open` to false to prevent automatic browser opening
+- Use `server.cors` when working with external APIs
+
+### 6. Environment Variables
+- Use `envPrefix` to control which environment variables are exposed
+- Never expose sensitive variables to the client
+- Document required environment variables in configuration comments
+
+## Examples
+
+### Good Examples
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+
+export default defineConfig({
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+    }),
+  ],
+  
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@/components': resolve(__dirname, './src/components'),
+      '@/utils': resolve(__dirname, './src/utils'),
+    },
+  },
+  
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['lodash', 'date-fns'],
+        },
+      },
+    },
+  },
+  
+  server: {
+    port: 3000,
+    open: false,
+    cors: true,
+  },
+  
+  envPrefix: ['VITE_', 'PUBLIC_'],
+})
+```
+
+```ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
+
+export default defineConfig({
+  plugins: [vue()],
+  
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      external: ['vue'],
+      output: {
+        globals: {
+          vue: 'Vue'
+        }
+      }
+    }
+  }
+})
+```
+
+### Bad Examples
+
+```js
+export default {
+  plugins: [react()],
+  server: {
+    port: 3000
+  }
+}
+```
+*Fails: missing defineConfig import, no TypeScript, minimal configuration*
+
+```ts
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      components: './src/components',
+      utils: '../utils'
+    }
+  }
+})
+```
+*Fails: relative paths in aliases, no @ prefix convention, incomplete configuration*
+
+```ts
+export default defineConfig({
+  plugins: [react(), eslint(), tailwind()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) return 'vendor'
+        }
+      }
+    }
+  }
+})
+```
+*Fails: overly complex chunking strategy, mixed plugin types without clear organization*
+
+## Implementation Guidelines
+
+### Configuration Organization
+- Group related settings together (all server configs, all build configs)
+- Use consistent indentation and formatting
+- Add comments for non-obvious configuration choices
+- Keep environment-specific overrides in separate files when needed
+
+### Performance Optimization
+- Configure appropriate chunk splitting for your application size
+- Use `build.target` to match your browser support requirements
+- Enable tree-shaking with proper `sideEffects` configuration
+- Consider using `build.lib` mode for library projects
+
+### Development Experience
+- Configure HMR boundaries appropriately for your framework
+- Set up proxy rules for API endpoints during development
+- Use `server.fs.allow` to control file system access when needed
+- Configure CSS preprocessing options consistently
+
+### Security Considerations
+- Never expose backend API keys through environment variables
+- Use `envPrefix` to whitelist client-side environment variables
+- Configure CORS appropriately for your deployment environment
+- Validate external dependencies in `rollupOptions.external`
+
+## Related Rules
+* @typescript-best-practices.mdc
+* @package-json-format.mdc
+* @git-commit-standards.mdc
+
+## Changelog
+* **1.0.0 (2025-08-14)**: Initial release with comprehensive Vite configuration standards.
+
+<!--
+ Vite Configuration Standards
+ Copyright (c) 2025 Claude AI <https://claude.ai>
+ SPDX-License-Identifier: MIT
+-->

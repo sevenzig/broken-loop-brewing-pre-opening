@@ -1,0 +1,1943 @@
+/* AdminPage Component CSS Module */
+
+.adminContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.adminLayout {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+/* Sidebar Styles - Professional Design */
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a4d5c 0%, #0f3a47 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebarHeader {
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebarBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.brandIcon {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  color: #d4af37;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+  min-width: 32px;
+}
+
+.sidebarTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: var(--spacing-lg) 0;
+  overflow-y: auto;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.navButtonActive {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border-left-color: #d4af37;
+  font-weight: 600;
+}
+
+.navButtonActive::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: #d4af37;
+  border-radius: 2px 0 0 2px;
+}
+
+.navIcon {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  width: 24px;
+  text-align: center;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.sidebarFooter {
+  padding: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.avatarText {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #1a4d5c;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: white;
+}
+
+.userRole {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.logoutButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.logoutIcon {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.logoutText {
+  flex: 1;
+  text-align: left;
+}
+
+/* Main Content Styles */
+.mainContent {
+  flex: 1;
+  margin-left: 280px;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  background: var(--color-background);
+  min-height: 100vh;
+}
+
+.sectionContent {
+  max-width: 100%;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xxl);
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-xl) 0;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-border, #e5e7eb);
+  padding-bottom: var(--spacing-md);
+}
+
+.subsectionTitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+  font-weight: 600;
+}
+
+/* Placeholder Section */
+.placeholderSection {
+  background: rgba(0, 0, 0, 0.02);
+  border: 2px dashed var(--color-border, #e5e7eb);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text);
+}
+
+.placeholderSection p {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-lg);
+}
+
+.placeholderSection ul {
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto;
+  padding-left: var(--spacing-lg);
+}
+
+.placeholderSection li {
+  margin: var(--spacing-sm) 0;
+  color: var(--color-text);
+  opacity: 0.8;
+}
+
+.adminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--color-border, #e5e7eb);
+}
+
+.adminTitle {
+  font-size: var(--font-size-xxl);
+  color: var(--color-primary);
+  margin: 0;
+  font-weight: 700;
+}
+
+.adminUserInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.userDetails {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-error, #ef4444);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.logoutButton:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.logoutButton:focus-visible {
+  outline: 2px solid var(--color-error);
+  outline-offset: 2px;
+}
+
+/* Tab Navigation */
+.tabNavigation {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.tabButton {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.tabButton:hover {
+  color: var(--color-primary);
+  background: rgba(26, 77, 92, 0.05);
+}
+
+.activeTab {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(26, 77, 92, 0.1);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Beer Management */
+.beerManagement {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.controlsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--spacing-md);
+}
+
+.searchSection {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.searchInput {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  background: white;
+  max-width: 300px;
+  height: 36px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(26, 77, 92, 0.1);
+}
+
+/* Focus state handled in main styles */
+
+.filterSection {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filterSelect {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  background: white;
+  min-width: 150px;
+  height: 32px;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(26, 77, 92, 0.1);
+}
+
+/* Focus state handled in main styles */
+
+.beerList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.beerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.beerInfo {
+  flex: 1;
+}
+
+.beerName {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.beerStyle {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-xs) 0;
+  opacity: 0.8;
+}
+
+.beerStatus {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin: 0;
+  opacity: 0.7;
+}
+
+.beerActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Removed duplicate addBeerButton styles - now defined in beer management section */
+
+/* Status styles */
+.statusOnTap {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.statusSeasonal {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.statusComingSoon {
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.statusLimitedEdition {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.statusSoldOut {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.statusArchived {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.statusRetired {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Loading and Error States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(26, 77, 92, 0.1);
+  border-left-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.retryButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.retryButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Stats Overview */
+/* Stats styles removed - no longer needed */
+
+/* Actions Section */
+.actionsSection {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.addButton {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all var(--transition-speed) ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.addButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.refreshButton {
+  background: var(--color-secondary);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.refreshButton:hover {
+  background: var(--color-secondary-hover);
+  transform: translateY(-1px);
+}
+
+/* Filters Section */
+.filtersSection {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 250px;
+  padding: var(--spacing-md);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-speed) ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Duplicate styles removed - handled in main beer management section */
+
+/* Error Message */
+.errorMessage {
+  background: #fee;
+  color: #c53030;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  border: 1px solid #feb2b2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.errorClose {
+  background: none;
+  border: none;
+  color: #c53030;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Beer table styles now handled in beer management section */
+
+/* Removed conflicting table styles - now defined in beer management section */
+
+/* Removed conflicting beer name styles - now defined in beer management section */
+
+/* Removed conflicting status badge styles - now defined in beer management section */
+
+/* Removed conflicting action button styles - now defined in beer management section */
+
+.noData {
+  text-align: center;
+  color: var(--color-text);
+  opacity: 0.6;
+  font-style: italic;
+  padding: var(--spacing-xl);
+}
+
+/* Business Management */
+.businessManagement {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+  font-weight: 600;
+}
+
+.statusSection {
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--spacing-md);
+  max-width: 400px;
+  position: relative;
+  transition: all var(--transition-speed) ease;
+}
+
+.statusSection:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.statusSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  transition: height var(--transition-speed) ease;
+}
+
+.statusSection:hover::before {
+  height: 4px;
+}
+
+.subsectionTitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.subsectionTitle::before {
+  content: '●';
+  font-size: var(--font-size-sm);
+  opacity: 0.7;
+  color: var(--color-primary);
+}
+
+.changeIndicator {
+  color: var(--color-warning);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  animation: pulse 1s infinite;
+  margin-left: var(--spacing-xs);
+}
+
+.loadingIndicator {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  animation: blink 1.5s infinite;
+  margin-left: var(--spacing-xs);
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-speed) ease;
+}
+
+.statusIndicator:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px currentColor;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+}
+
+.statusDot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: white;
+  opacity: 0.8;
+}
+
+.statusOpen {
+  background: var(--color-success);
+  color: var(--color-success);
+  animation: pulse 2s infinite;
+}
+
+.statusClosed {
+  background: var(--color-error);
+  color: var(--color-error);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 8px currentColor;
+  }
+}
+
+.statusText {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusDetails {
+  padding: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: var(--spacing-sm);
+}
+
+.statusDetails p {
+  margin: var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  opacity: 0.8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusDetails strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.radioGroup {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed) ease;
+  background: white;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.radioLabel:hover {
+  border-color: var(--color-primary);
+  background: rgba(26, 77, 92, 0.02);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.radioLabel:has(input:checked) {
+  border-color: var(--color-primary);
+  background: rgba(26, 77, 92, 0.05);
+  box-shadow: 0 2px 4px rgba(26, 77, 92, 0.1);
+}
+
+.radioLabel:focus-within {
+  border-color: var(--color-primary);
+  background: rgba(26, 77, 92, 0.05);
+  box-shadow: 0 0 0 2px rgba(26, 77, 92, 0.2);
+}
+
+.radioInput {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.radioText {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.statusActions {
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.saveButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  min-width: 120px;
+  height: 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.saveButton:not(:disabled) {
+  background: var(--color-primary);
+  box-shadow: 0 2px 4px rgba(26, 77, 92, 0.2);
+}
+
+.saveButton:disabled {
+  background: var(--color-text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.saveButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-speed) ease;
+}
+
+.saveButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(26, 77, 92, 0.3);
+}
+
+.saveButton:focus-visible {
+  outline: 2px solid var(--color-background);
+  outline-offset: 2px;
+}
+
+.resetButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  min-width: 120px;
+  height: 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.resetButton:not(:disabled) {
+  background: var(--color-secondary);
+  box-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+}
+
+.resetButton:disabled {
+  background: var(--color-text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.resetButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-speed) ease;
+}
+
+.resetButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.resetButton:hover:not(:disabled) {
+  background: var(--color-secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+}
+
+.resetButton:focus-visible {
+  outline: 2px solid var(--color-background);
+  outline-offset: 2px;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.infoList li {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--color-text);
+}
+
+.infoList li:last-child {
+  border-bottom: none;
+}
+
+.noteSection {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .adminLayout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+  }
+  
+  .sidebarHeader {
+    padding: var(--spacing-lg);
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 1;
+  }
+  
+  .sidebarTitle {
+    font-size: var(--font-size-lg);
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+  
+  .userInfo {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+  
+  .sidebarNav {
+    flex: 2;
+    padding: var(--spacing-md) 0;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  
+  .navButton {
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    text-align: center;
+    min-width: 120px;
+  }
+  
+  .navButton:hover {
+    border-left-color: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .navButtonActive {
+    border-left-color: transparent;
+    border-bottom-color: white;
+  }
+  
+  .mainContent {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebarHeader {
+    padding: var(--spacing-lg);
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 1;
+  }
+  
+  .sidebarBrand {
+    justify-content: center;
+  }
+  
+  .sidebarTitle {
+    font-size: var(--font-size-lg);
+  }
+  
+  .sidebarNav {
+    flex: 2;
+    padding: var(--spacing-md) 0;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: var(--spacing-xs);
+  }
+  
+  .navButton {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-width: 80px;
+    text-align: center;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .navButton:hover {
+    border-left: none;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .navButtonActive {
+    border-left: none;
+    border-bottom-color: #d4af37;
+  }
+  
+  .navButtonActive::before {
+    display: none;
+  }
+  
+  .navIcon {
+    font-size: var(--font-size-lg);
+  }
+  
+  .navLabel {
+    font-size: var(--font-size-xs);
+    line-height: 1.2;
+  }
+  
+  .sidebarFooter {
+    display: none;
+  }
+  
+  .mainContent {
+    margin-left: 0;
+    padding: var(--spacing-md);
+  }
+  
+  .statsOverview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .filtersSection {
+    flex-direction: column;
+  }
+  
+  .searchInput {
+    min-width: auto;
+  }
+  
+  .actionsSection {
+    flex-direction: column;
+  }
+  
+  .beerTable {
+    font-size: var(--font-size-sm);
+  }
+  
+  /* Table padding handled in main beer management styles */
+  
+  /* Action button layout handled in main beer management styles */
+}
+
+/* Accessibility */
+.radioInput:focus + .radioText {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .adminCard {
+    border: 2px solid var(--color-primary);
+  }
+  
+  .statusSection,
+  .controlSection,
+  .infoSection {
+    border: 1px solid var(--color-text);
+  }
+  
+  .radioLabel:hover {
+    border-color: var(--color-text);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .radioLabel {
+    transition: none;
+  }
+}
+
+/* Beer Management - Condensed Table Design */
+.beerManagementHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.quickStats {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.statBadge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.addBeerSection {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--spacing-md);
+  padding: 0 var(--spacing-sm);
+}
+
+.addBeerButton {
+  display: inline-block;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: all var(--transition-speed) ease;
+  border: none;
+  cursor: pointer;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+}
+
+.addBeerButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.addBeerButton:focus-visible {
+  outline: 2px solid var(--color-background);
+  outline-offset: 2px;
+}
+
+.statusFilters {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  background: white;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  height: 32px;
+  min-width: 80px;
+}
+
+.filterButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filterButtonActive {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.filterButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Condensed Table Design */
+.beerTableContainer {
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--spacing-md);
+  position: relative;
+}
+
+.beerTableContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.beerTableContainer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.beerTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  background: white;
+}
+
+.beerTable caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-weight: 600;
+  color: var(--color-text);
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.beerTable th {
+  background: rgba(0, 0, 0, 0.04);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.beerTable th:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.beerTable th:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Table Header Alignment */
+.beerNameHeader {
+  text-align: left;
+  min-width: 200px;
+  padding-left: var(--spacing-md);
+  position: relative;
+}
+
+.beerNameHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  opacity: 0.3;
+}
+
+.beerStyleHeader {
+  text-align: left;
+  min-width: 120px;
+  padding-left: var(--spacing-sm);
+}
+
+.beerAbvHeader {
+  text-align: center;
+  min-width: 60px;
+}
+
+.beerIbuHeader {
+  text-align: center;
+  min-width: 60px;
+}
+
+.beerStatusHeader {
+  text-align: left;
+  min-width: 120px;
+  padding-left: var(--spacing-sm);
+}
+
+.beerTappedHeader {
+  text-align: center;
+  min-width: 80px;
+}
+
+.beerActionsHeader {
+  text-align: center;
+  min-width: 80px;
+}
+
+.beerTable td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  vertical-align: top;
+  height: 60px;
+}
+
+.beerRow {
+  transition: all var(--transition-speed) ease;
+  cursor: default;
+  position: relative;
+}
+
+.beerRow:hover {
+  background: rgba(26, 77, 92, 0.02);
+  transform: translateX(2px);
+}
+
+.beerRow:last-child td {
+  border-bottom: none;
+}
+
+.beerRow:nth-child(even) {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.beerRow:nth-child(even):hover {
+  background: rgba(26, 77, 92, 0.03);
+}
+
+.beerRow:focus-within {
+  background: rgba(26, 77, 92, 0.05);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.beerRow:hover .beerName {
+  color: var(--color-primary-hover);
+}
+
+.beerRow:hover .editButton,
+.beerRow:hover .deleteButton {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.beerRow:hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-primary);
+  opacity: 0.5;
+}
+
+/* Table Cell Styles */
+.beerNameCell {
+  min-width: 200px;
+  text-align: left;
+  padding-left: var(--spacing-sm);
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.beerNameCell:focus-within {
+  background: rgba(26, 77, 92, 0.05);
+  border-left-color: var(--color-primary);
+}
+
+.beerName {
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--transition-speed) ease;
+  display: block;
+}
+
+.beerName:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.beerName:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.beerDescription {
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
+  opacity: 0.8;
+  line-height: 1.3;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  display: block;
+}
+
+.beerStyleCell {
+  min-width: 120px;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  padding-left: var(--spacing-sm);
+}
+
+.beerAbvCell,
+.beerIbuCell {
+  text-align: center;
+  min-width: 60px;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+.beerStatusCell {
+  min-width: 120px;
+  text-align: left;
+  padding-left: var(--spacing-sm);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statusBadge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left var(--transition-speed) ease;
+}
+
+.statusBadge:hover::before {
+  left: 100%;
+}
+
+.statusontap {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.statusontap:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
+.statuscomingsoon {
+  background: rgba(251, 191, 36, 0.15);
+  color: #d97706;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.statuscomingsoon:hover {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);
+}
+
+.statusseasonal {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.statusseasonal:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.statusretired {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+.statusretired:hover {
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(107, 114, 128, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.beerTappedCell {
+  text-align: center;
+  min-width: 80px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.beerActionsCell {
+  min-width: 80px;
+  text-align: center;
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.beerRow:hover .actionButtons {
+  opacity: 1;
+}
+
+.editButton,
+.deleteButton {
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  transition: all var(--transition-speed) ease;
+  background: white;
+  color: var(--color-text);
+  min-width: 50px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.editButton::before,
+.deleteButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-speed) ease;
+}
+
+.editButton:hover::before,
+.deleteButton:hover::before {
+  left: 100%;
+}
+
+.editButton:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.deleteButton:hover {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.editButton:focus-visible,
+.deleteButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.beerManagementFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.beerManagementFooter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.tableInfo {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  opacity: 0.8;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.tableInfo::before {
+  content: '●';
+  font-size: var(--font-size-sm);
+  opacity: 0.6;
+  color: var(--color-primary);
+}
+
+/* Mobile table adjustments */
+@media (max-width: 768px) {
+  .beerTableContainer {
+    overflow-x: auto;
+    border-radius: var(--border-radius);
+  }
+  
+  .beerTable {
+    min-width: 600px;
+  }
+  
+  .beerManagementHeader {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+  }
+  
+  .statusFilters {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .filterSection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .searchInput {
+    max-width: none;
+    height: 40px;
+  }
+  
+  .quickStats {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .addBeerSection {
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .addBeerButton {
+    width: 100%;
+    max-width: 200px;
+    height: 44px;
+  }
+  
+  .controlsSection {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+  
+  .filterButton {
+    height: 36px;
+    min-width: 70px;
+    font-size: var(--font-size-xs);
+  }
+  
+  .filterSelect {
+    height: 36px;
+  }
+  
+  .beerManagementFooter {
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+  }
+}
+
+/* Mobile responsiveness for business status */
+@media (max-width: 768px) {
+  .statusSection {
+    max-width: none;
+    margin: 0 var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .radioGroup {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .radioLabel {
+    min-width: auto;
+    justify-content: flex-start;
+  }
+  
+  .statusActions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+  
+  .saveButton,
+  .resetButton {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .statusDetails p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+.radioInput:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.statusSection:focus-within {
+  box-shadow: 0 0 0 2px rgba(26, 77, 92, 0.2);
+}

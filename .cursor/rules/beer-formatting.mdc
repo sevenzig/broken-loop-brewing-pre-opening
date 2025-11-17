@@ -1,0 +1,313 @@
+# Beer Content Formatting Standards
+
+## Purpose and Scope
+
+This rule establishes the standardized format for beer content files in the Broken Loop Brewing website. It defines the required YAML frontmatter structure, content organization, and formatting guidelines to ensure consistency across all beer entries. This standard is based on the golden-wheat.md template and applies to all beer content files in the `src/data/beers/` directory.
+
+## File Structure and Naming
+
+### File Naming Convention
+- **Format**: `beer-name.md` (lowercase, hyphens for spaces)
+- **Location**: `src/data/beers/`
+- **Extension**: `.md` (Markdown with YAML frontmatter)
+- **Examples**: `golden-wheat.md`, `hoppy-trails-ipa.md`, `midnight-stout.md`
+
+### File Organization
+```
+src/data/beers/
+├── beer-name.md          # Individual beer files
+├── style-guide/          # BJCP style guide references
+└── templates/            # Content templates
+```
+
+## YAML Frontmatter Structure
+
+### Required Fields - MANDATORY
+
+#### Basic Information
+```yaml
+name: 'Beer Name'                    # Required: Display name with proper capitalization
+image: '/images/beers/filename.jpg'  # Required: Path to beer image (svg, jpg, png)
+slug: 'beer-name'                    # Required: URL slug (lowercase, hyphens only)
+```
+
+#### Beer Specifications
+```yaml
+abv: '5.2%'                         # Required: Alcohol by volume (include % symbol)
+ibu: '45'                           # Required: International Bitterness Units (0-120+)
+srm: '8'                            # Required: Standard Reference Method color (1-40+)
+style: 'American IPA'               # Required: Beer style classification
+```
+
+#### Status & Availability
+```yaml
+status: 'on-tap'                    # Required: "on-tap" | "seasonal" | "coming-soon" | "limited-edition" | "sold-out"
+featured: true                      # Required: true | false (shows featured badge)
+```
+
+#### Content
+```yaml
+brief_description: 'Short description for cards and previews (max 200 characters)'
+```
+
+#### Availability Details
+```yaml
+availability: 'Year-round'          # Optional: "Year-round" | "Spring" | "Summer" | "Fall" | "Winter" | "Limited" | "Seasonal"
+tapped_on: '2024-06-10'            # Optional: Date format YYYY-MM-DD
+```
+
+#### Brewing Details
+```yaml
+hops: 'Cascade, Centennial, Amarillo'                    # Optional: Hop varieties used
+malts: '2-Row Pale Malt, Munich Malt, Crystal 40L'       # Optional: Malt types (can duplicate grain_bill)
+yeast: 'Wyeast 1056 American Ale'                        # Optional: Yeast strain used
+```
+
+#### Tasting Notes
+```yaml
+flavor_profile: 'Balanced malt sweetness with citrus and pine hop character'  # Optional: Flavor description
+aroma: 'Prominent citrus and floral hop aromas with light malt background'    # Optional: Aroma description
+appearance: 'Deep golden amber with persistent off-white head'                # Optional: Visual description
+```
+
+## Content Body Structure
+
+### Markdown Content Guidelines
+
+#### Required Sections
+```markdown
+# Beer Name - Tagline
+
+Brief introduction paragraph (2-3 sentences) describing the beer's character and appeal.
+
+## Brewing Notes
+
+Detailed brewing information including:
+- Malt bill and brewing process
+- Hop selection and timing
+- Yeast characteristics
+- Any special techniques or ingredients
+
+## Food Pairings
+
+- Specific food pairing suggestions
+- Organized by category (appetizers, mains, desserts)
+- Include both complementary and contrasting pairings
+```
+
+#### Optional Sections
+```markdown
+## Awards & Recognition
+
+- Competition awards
+- Industry recognition
+- Customer favorites
+
+## Seasonal Notes
+
+- When this beer is typically available
+- Seasonal variations or special releases
+- Limited edition details
+```
+
+## Field Specifications and Constraints
+
+### Text Field Guidelines
+
+#### Name Field
+- **Format**: Title case with proper capitalization
+- **Length**: 2-50 characters
+- **Examples**: `'Golden Wheat'`, `'Hoppy Trails IPA'`, `'Midnight Stout'`
+
+#### Slug Field
+- **Format**: Lowercase with hyphens only
+- **Length**: 3-50 characters
+- **Pattern**: `[a-z0-9-]+`
+- **Examples**: `'golden-wheat'`, `'hoppy-trails-ipa'`, `'midnight-stout'`
+
+#### Brief Description
+- **Length**: 50-200 characters
+- **Purpose**: Card previews and search results
+- **Tone**: Engaging and descriptive
+- **No HTML**: Plain text only
+
+### Numeric Field Ranges
+
+#### ABV (Alcohol By Volume)
+- **Format**: String with % symbol
+- **Range**: 0.1% - 25.0%
+- **Examples**: `'4.8%'`, `'7.2%'`, `'12.5%'`
+
+#### IBU (International Bitterness Units)
+- **Format**: String (no units)
+- **Range**: 0 - 200+
+- **Typical Ranges**:
+  - 0-20: Low bitterness
+  - 20-40: Medium bitterness
+  - 40-60: High bitterness
+  - 60+: Very high bitterness
+
+#### SRM (Standard Reference Method)
+- **Format**: String (no units)
+- **Range**: 1 - 40+
+- **Color Scale**:
+  - 1-3: Pale yellow
+  - 4-6: Golden
+  - 7-14: Amber
+  - 15-22: Brown
+  - 23-30: Dark brown
+  - 30+: Black
+
+### Status Field Values
+
+#### Status Options
+- `'on-tap'`: Currently available on draft
+- `'seasonal'`: Available during specific seasons
+- `'coming-soon'`: Planned for future release
+- `'limited-edition'`: Special release with limited availability
+- `'sold-out'`: Temporarily unavailable
+
+#### Status Badge Colors
+- `on-tap`: Green (#28a745)
+- `seasonal`: Orange (#ffc107)
+- `coming-soon`: Purple (#6f42c1)
+- `limited-edition`: Red (#dc3545)
+- `sold-out`: Gray (#6c757d)
+
+### Image Requirements
+
+#### File Formats
+- **Supported**: SVG, JPG, PNG
+- **Preferred**: SVG for logos, JPG for photos
+- **Size**: 400x600px recommended
+- **Optimization**: Web-optimized (compressed)
+
+#### Path Structure
+```
+/images/beers/beer-name.jpg          # Individual beer images
+/images/beers-test/beer-name.jpg     # Test/placeholder images
+```
+
+## Content Writing Guidelines
+
+### Tone and Style
+- **Voice**: Professional yet approachable
+- **Audience**: Beer enthusiasts and casual drinkers
+- **Technical Level**: Accessible to non-experts
+- **Length**: 200-800 words total
+
+### Brewing Notes Section
+- Focus on ingredients and process
+- Explain technical terms
+- Highlight unique aspects
+- Keep it engaging for non-brewers
+
+### Food Pairings Section
+- Provide specific, actionable suggestions
+- Include both complementary and contrasting pairings
+- Consider different meal occasions
+- Mention flavor interactions
+
+### HTML Support
+- **Allowed**: Basic HTML in content body only
+- **Tags**: `<strong>`, `<em>`, `<br>`, `<ul>`, `<ol>`, `<li>`
+- **Forbidden**: `<script>`, `<style>`, `<iframe>`, complex layouts
+- **Security**: All HTML is sanitized before rendering
+
+## Validation Rules
+
+### Required Field Validation
+- All required fields must be present
+- No empty strings for required fields
+- Valid data types for each field
+- Proper format compliance
+
+### Content Validation
+- Markdown syntax is valid
+- No broken links in content
+- Image files exist at specified paths
+- Character limits respected
+
+### Business Logic Validation
+- Slug uniqueness across all beers
+- Status values match defined options
+- Date formats are valid ISO 8601
+- Numeric ranges are within bounds
+
+## Examples
+
+### Complete Beer Entry Example
+```yaml
+---
+name: 'Golden Wheat'
+image: '/images/beers-test/american-wheat.jpg'
+slug: 'golden-wheat'
+abv: '4.8%'
+ibu: '18'
+srm: '4'
+style: 'American Wheat Beer'
+status: 'on-tap'
+availability: 'Year-round'
+tapped_on: '2024-06-10'
+featured: true
+brief_description: 'Light and refreshing wheat beer with hints of citrus and coriander, perfect for any season.'
+hops: 'Tettnang, Saaz'
+malts: 'Wheat Malt, 2-Row Pale Malt, Vienna Malt'
+yeast: 'Wyeast 1010 American Wheat'
+flavor_profile: 'Light wheat character with subtle spice and citrus notes'
+aroma: 'Fresh wheat with hints of citrus and noble hops'
+appearance: 'Pale golden with a fluffy white head'
+---
+
+# Golden Wheat - Sunshine in a Glass
+
+A classic American wheat beer that's as refreshing as a summer breeze...
+
+## Brewing Notes
+
+Crafted with a 50/50 blend of wheat and barley malts...
+
+## Food Pairings
+
+- Light salads and seafood
+- Soft cheeses and pretzels
+- Grilled chicken and vegetables
+```
+
+---
+
+## Error Prevention
+
+### Common Mistakes to Avoid
+1. **Missing required fields**: Ensure all mandatory fields are present
+2. **Invalid slug format**: Use only lowercase letters, numbers, and hyphens
+3. **Incorrect data types**: ABV as string with %, IBU/SRM as strings without units
+4. **Broken image paths**: Verify images exist at specified locations
+5. **Duplicate slugs**: Ensure unique slugs across all beer entries
+6. **Invalid status values**: Use only defined status options
+7. **HTML in frontmatter**: Keep YAML clean, HTML only in content body
+
+### Validation Checklist
+- [ ] All required fields present
+- [ ] Valid slug format (lowercase, hyphens only)
+- [ ] Image file exists at specified path
+- [ ] ABV includes % symbol
+- [ ] IBU/SRM are strings without units
+- [ ] Status value is valid
+- [ ] Slug is unique across all beers
+- [ ] Brief description under 200 characters
+- [ ] Markdown content is valid
+- [ ] No HTML in frontmatter
+
+## Related Rules
+
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive beer formatting standards based on golden-wheat.md template.
+
+<!--
+ Beer Content Formatting Standards
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->

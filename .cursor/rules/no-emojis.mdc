@@ -1,0 +1,175 @@
+---
+description: "Prohibits emoji usage in code and design elements for professional consistency"
+globs: src/**/*.{ts,tsx,js,jsx,css,md},public/**/*
+alwaysApply: true
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: code-style, accessibility, professionalism, design
+---
+
+# No Emojis Rule
+
+## Purpose and Scope
+
+This rule enforces a complete prohibition on emoji usage in code, design elements, and content. It ensures professional consistency, accessibility compliance, and cross-platform compatibility across all project files. The rule applies to all code files, content files, and design elements to maintain the professional brewery brand aesthetic.
+
+## Standards and Requirements
+
+### Absolute Prohibition
+- **NEVER** use emoji characters (🕒, 👥, 🐕, etc.) in any code files
+- **NEVER** use emojis as icons, decorative elements, or visual enhancements
+- **NEVER** include emojis in component text, titles, or descriptions
+- **NEVER** use emojis in CSS content properties or pseudo-elements
+- **NEVER** use emojis in markdown files, documentation, or comments
+
+### Professional Standards
+- Maintain professional business website appearance
+- Ensure cross-platform rendering consistency
+- Support accessibility requirements and screen readers
+- Align with brewery brand aesthetic and tone
+
+### Alternative Solutions
+- Use proper SVG icons or icon fonts for visual elements
+- Implement text-based design elements and typography
+- Rely on CSS gradients, shadows, and spacing for visual hierarchy
+- Use color, typography, and layout for visual appeal
+
+## Examples
+
+### Good Examples
+
+```tsx
+// Professional component with proper icons
+import { Clock, Users, Dog } from 'phosphor-react';
+
+export function InfoSection() {
+  return (
+    <div className={styles.infoSection}>
+      <div className={styles.infoItem}>
+        <Clock className={styles.icon} />
+        <h3>Kitchen Hours</h3>
+      </div>
+      <div className={styles.infoItem}>
+        <Users className={styles.icon} />
+        <p>Family-friendly environment</p>
+      </div>
+      <div className={styles.infoItem}>
+        <Dog className={styles.icon} />
+        <p>We welcome well-behaved dogs</p>
+      </div>
+    </div>
+  );
+}
+```
+
+```css
+/* Professional CSS without emojis */
+.infoIcon::before {
+  content: "⏰"; /* ❌ Don't use emoji */
+}
+
+.infoIcon::before {
+  content: ""; /* ✅ Use background image or icon font */
+  background-image: url('/icons/clock.svg');
+  background-size: contain;
+}
+```
+
+```tsx
+// Professional content without emojis
+<h2>Welcome to Broken Loop Brewing</h2>
+<p>Experience craft beer excellence in a welcoming atmosphere</p>
+```
+
+### Bad Examples
+
+```tsx
+// ❌ Don't use emojis in components
+<div className={styles.infoIcon}>🕒</div>
+<h3>Kitchen Hours 🍽️</h3>
+<p>We welcome dogs 🐕</p>
+```
+
+*Fails: Uses emoji characters which are unprofessional and inaccessible.*
+
+```css
+/* ❌ Don't use emojis in CSS */
+.icon::before {
+  content: "🍺";
+}
+```
+
+*Fails: Uses emoji in CSS content property which can cause rendering issues.*
+
+```tsx
+// ❌ Don't use emojis in comments or documentation
+// 🚀 This component handles user authentication
+// ⚠️ TODO: Add error handling
+```
+
+*Fails: Uses emojis in code comments which is unprofessional.*
+
+## Implementation Guidelines
+
+### Code Review Process
+- Always review code for emoji usage before committing
+- Check all file types: TypeScript, JavaScript, CSS, Markdown
+- Remove any emojis found immediately
+- Replace with appropriate alternatives
+
+### Icon Implementation
+```tsx
+// Use proper icon libraries
+import { 
+  Clock, 
+  Users, 
+  Dog, 
+  Beer, 
+  MapPin, 
+  Phone 
+} from 'phosphor-react';
+
+// Or use SVG components
+const ClockIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </svg>
+);
+```
+
+### Content Guidelines
+- Use descriptive text instead of emojis
+- Implement proper typography hierarchy
+- Use color and spacing for visual emphasis
+- Focus on professional tone and messaging
+
+### Accessibility Considerations
+- Ensure all icons have proper alt text or aria-labels
+- Use semantic HTML elements
+- Maintain proper color contrast ratios
+- Support screen reader navigation
+
+### Cross-Platform Testing
+- Test rendering across different browsers
+- Verify display on various operating systems
+- Check mobile device compatibility
+- Ensure consistent appearance in different locales
+
+## Related Rules
+
+* @css-best-practices.mdc
+* @accessibility-standards.mdc
+* @professional-design-standards.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive emoji prohibition guidelines and professional alternatives.
+
+<!--
+ No Emojis Rule
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+--> 

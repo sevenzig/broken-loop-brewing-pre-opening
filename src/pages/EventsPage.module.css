@@ -1,0 +1,493 @@
+/* Events Page Styles */
+.pageContainer {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.pageContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Page Header */
+.pageHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 3rem 0;
+  background: linear-gradient(135deg, #1a4d5c 0%, #2a5d6c 100%);
+  color: white;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pageHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/images/events/events-bg.jpg') center/cover;
+  opacity: 0.2;
+  z-index: 1;
+}
+
+.headerContent {
+  position: relative;
+  z-index: 2;
+}
+
+.pageTitle {
+  font-size: 3rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.pageSubtitle {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+/* Filters Section */
+.filtersSection {
+  margin-bottom: 3rem;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.filterButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  min-height: 100px;
+  justify-content: center;
+}
+
+.filterButton:hover {
+  border-color: #1a4d5c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(26, 77, 92, 0.1);
+}
+
+.filterButtonActive {
+  background: #1a4d5c;
+  border-color: #1a4d5c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(26, 77, 92, 0.2);
+}
+
+.filterIcon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.filterLabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.filterCount {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.filterButtonActive .filterCount {
+  opacity: 0.9;
+}
+
+/* Events Section */
+.eventsSection {
+  margin-bottom: 4rem;
+}
+
+.sectionInfo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 2.5rem;
+  color: #1a4d5c;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.resultsCount {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Events Grid */
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Loading and Error States */
+.loadingState,
+.errorState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.loadingState h1,
+.errorState h1 {
+  color: #1a4d5c;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.loadingState p,
+.errorState p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  color: #1a4d5c;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.emptyState p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.resetButton {
+  background: #1a4d5c;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resetButton:hover {
+  background: #2a5d6c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(26, 77, 92, 0.3);
+}
+
+/* Call to Action Section */
+.ctaSection {
+  background: linear-gradient(135deg, #1a4d5c 0%, #2a5d6c 100%);
+  color: white;
+  padding: 4rem 2rem;
+  border-radius: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/images/events/private-events-bg.jpg') center/cover;
+  opacity: 0.15;
+  z-index: 1;
+}
+
+.ctaContent {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ctaContent h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.ctaContent p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaButton {
+  display: inline-block;
+  background: #d4af37;
+  color: white;
+  text-decoration: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.ctaButton:hover {
+  background: #c19b2c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.ctaButtonSecondary {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-decoration: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.ctaButtonSecondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .pageContent {
+    padding: 2rem;
+  }
+  
+  .pageTitle {
+    font-size: 2.5rem;
+  }
+  
+  .eventsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .filterGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile Landscape / Small Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+  .pageContent {
+    padding: 1.5rem;
+  }
+  
+  .pageHeader {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .pageSubtitle {
+    font-size: 1rem;
+  }
+  
+  .eventsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .filterGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .filterButton {
+    padding: 1rem 0.75rem;
+    min-height: 80px;
+  }
+  
+  .sectionTitle {
+    font-size: 2rem;
+  }
+  
+  .ctaContent h2 {
+    font-size: 2rem;
+  }
+  
+  .ctaContent p {
+    font-size: 1.1rem;
+  }
+  
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .ctaButton,
+  .ctaButtonSecondary {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  .pageContent {
+    padding: 1rem;
+  }
+  
+  .pageHeader {
+    padding: 2rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+  
+  .pageSubtitle {
+    font-size: 0.95rem;
+  }
+  
+  .filtersSection {
+    margin-bottom: 2rem;
+  }
+  
+  .filterGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    max-width: none;
+  }
+  
+  .filterButton {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 1rem;
+    min-height: auto;
+    text-align: left;
+  }
+  
+  .filterIcon {
+    margin-bottom: 0;
+    margin-right: 0.75rem;
+  }
+  
+  .filterLabel {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .eventsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+  
+  .resultsCount {
+    font-size: 1rem;
+  }
+  
+  .ctaSection {
+    padding: 3rem 1.5rem;
+  }
+  
+  .ctaContent h2 {
+    font-size: 1.8rem;
+  }
+  
+  .ctaContent p {
+    font-size: 1rem;
+  }
+  
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .ctaButton,
+  .ctaButtonSecondary {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .pageContainer {
+    background: white !important;
+  }
+  
+  .pageHeader,
+  .ctaSection {
+    background: #1a4d5c !important;
+    color: white !important;
+  }
+  
+  .filterButton,
+  .eventsGrid {
+    box-shadow: none !important;
+  }
+  
+  .ctaButtons {
+    display: none;
+  }
+} 

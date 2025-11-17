@@ -1,0 +1,38 @@
+{
+  "name": "broken-loop-brewing-api",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Express API server for Broken Loop Brewing",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "node simple-server.js",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/formidable": "^3.4.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.0.0",
+    "@types/uuid": "^9.0.7",
+    "@vercel/node": "^3.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "formidable": "^3.5.1",
+    "gray-matter": "^4.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
+    "slugify": "^1.6.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

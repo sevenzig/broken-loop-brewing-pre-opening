@@ -1,0 +1,293 @@
+---
+description: "Enforces CSS Modules scoping and component-based CSS architecture patterns"
+globs: src/**/*.css,src/**/*.module.css,src/**/*.scss,src/**/*.tsx,src/**/*.jsx
+alwaysApply: true
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: css, modules, scoping, architecture, components
+---
+
+# CSS Scoping & Architecture Rules
+
+## Purpose and Scope
+
+This rule enforces mandatory CSS Modules scoping and component-based CSS architecture. It ensures that all component styles are properly scoped, prevents global CSS conflicts, and maintains a clean, predictable styling system. The rule establishes clear file naming conventions, CSS architecture layers, and implementation patterns for consistent styling across the application.
+
+## Standards and Requirements
+
+### CSS Module Scoping - MANDATORY
+- Every React component MUST have a corresponding .module.css file
+- Component styles MUST be imported as: `import styles from './Component.module.css'`
+- All className attributes MUST use the styles object: `className={styles.className}`
+- NEVER mix CSS Modules with global CSS classes in the same component
+
+### File Naming Conventions
+- Component files: `ComponentName.jsx`
+- CSS Module files: `ComponentName.module.css`
+- Global CSS files: `globals.css`, `variables.css` (in src/styles/)
+
+### CSS Module Class Naming
+- Use camelCase: `.headerRow`, `.beerCard`, `.sectionTitle`
+- Be specific to the component: `.cardTitle` not `.title`
+- Use semantic names: `.primaryButton` not `.blueButton`
+
+### CSS Architecture Layers
+1. **Global Layer** (`src/styles/globals.css`):
+   - CSS resets only
+   - Typography base styles
+   - CSS custom properties (:root)
+   
+2. **Component Layer** (`.module.css` files):
+   - ALL component-specific styles
+   - Layout within the component
+   - Component variants and states
+
+### Prohibited Global CSS
+- NO component layouts in global CSS
+- NO color values (use CSS custom properties)
+- NO spacing values (use CSS custom properties)
+- NO utility classes (use CSS Modules)
+
+## Examples
+
+### Good Examples
+
+```css
+/* Component.module.css */
+.component {
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.content {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+```
+
+```javascript
+// CORRECT - CSS Modules
+import styles from './Component.module.css';
+
+export function Component({ variant = 'default' }) {
+  const componentClass = variant === 'primary' 
+    ? styles.componentPrimary 
+    : styles.component;
+    
+  return (
+    <div className={componentClass}>
+      <h2 className={styles.title}>Title</h2>
+      <div className={styles.content}>Content</div>
+    </div>
+  );
+}
+```
+
+```css
+/* globals.css - ONLY place for these */
+:root {
+  /* Colors */
+  --color-primary: #1a4d5c;
+  --color-secondary: #d4af37;
+  --color-background: #ffffff;
+  --color-text: #333333;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+}
+```
+
+### Bad Examples
+
+```javascript
+// INCORRECT - Global classes
+export function Component() {
+  return (
+    <div className="component"> {/* ❌ Global class */}
+      <h2 className="title">Title</h2> {/* ❌ Global class */}
+    </div>
+  );
+}
+```
+*Fails: Uses global CSS classes instead of CSS Modules scoping.*
+
+```css
+/* INCORRECT - Component styles in global CSS */
+.component {
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+}
+```
+*Fails: Component-specific styles should be in CSS Modules, not global CSS.*
+
+```css
+/* INCORRECT - Hardcoded values */
+.button {
+  background: #1a4d5c; /* ❌ Hardcoded color */
+  padding: 16px; /* ❌ Hardcoded spacing */
+}
+```
+*Fails: Uses hardcoded values instead of CSS custom properties.*
+
+## Implementation Guidelines
+
+### CSS Custom Properties Strategy
+```css
+/* globals.css - ONLY place for these */
+:root {
+  /* Colors */
+  --color-primary: #1a4d5c;
+  --color-secondary: #d4af37;
+  --color-background: #ffffff;
+  --color-text: #333333;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+  
+  /* Typography */
+  --font-family: 'Arial', sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 2rem;
+  
+  /* Layout */
+  --container-max-width: 1200px;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+  
+  /* Z-index scale */
+  --z-dropdown: 100;
+  --z-modal: 1000;
+  --z-header: 1100;
+}
+```
+
+### Component CSS Structure Template
+```css
+/* Component.module.css */
+
+/* Main component wrapper */
+.component {
+  /* Use variables for consistency */
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+}
+
+/* Child elements */
+.title {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.content {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+/* States */
+.component:hover {
+  transform: translateY(-2px);
+  transition: transform var(--transition-speed) ease;
+}
+
+/* Variants */
+.componentPrimary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.componentSecondary {
+  background: var(--color-secondary);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .component {
+    padding: var(--spacing-md);
+  }
+  
+  .title {
+    font-size: var(--font-size-lg);
+  }
+}
+```
+
+### CSS Module Composition (Advanced)
+```css
+/* Base.module.css */
+.button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+/* Button.module.css */
+.primaryButton {
+  composes: button from './Base.module.css';
+  background: var(--color-primary);
+  color: white;
+}
+
+.secondaryButton {
+  composes: button from './Base.module.css';
+  background: var(--color-secondary);
+  color: white;
+}
+```
+
+### Debugging CSS Modules
+- Use browser dev tools to see generated class names
+- Check that styles object contains expected properties
+- Verify import paths are correct
+- Ensure .module.css files are in the same directory as components
+
+### Code Review Checklist
+- [ ] Component has corresponding .module.css file
+- [ ] All styles imported using CSS Modules syntax
+- [ ] No global CSS classes used in component JSX
+- [ ] CSS custom properties used instead of hardcoded values
+- [ ] No !important declarations
+- [ ] Responsive design implemented with mobile-first approach
+- [ ] Semantic class names used
+- [ ] Proper CSS property ordering followed
+
+## Related Rules
+
+* @css-best-practices.mdc
+* @css-no-important.mdc
+* @css-module-standards.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive CSS Modules scoping and architecture guidelines.
+
+<!--
+ CSS Scoping & Architecture Rules
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->

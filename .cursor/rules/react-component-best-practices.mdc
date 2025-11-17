@@ -1,0 +1,783 @@
+---
+description: "Comprehensive React component architecture, TypeScript integration, and best practices"
+globs: src/**/*.tsx,src/**/*.ts,src/components/**/*
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: react,typescript,components,architecture,accessibility
+---
+
+# React Component Best Practices
+
+## Purpose and Scope
+
+This rule enforces comprehensive React component architecture standards, TypeScript integration patterns, and best practices for building maintainable, performant, and accessible React applications. It establishes mandatory patterns for component structure, state management, performance optimization, and testing integration.
+
+## Standards and Requirements
+
+### Component Architecture Standards
+
+#### File Structure Requirements
+```
+src/
+├── components/
+│   ├── ComponentName/
+│   │   ├── ComponentName.tsx          # Main component
+│   │   ├── ComponentName.module.css   # Scoped styles
+│   │   ├── ComponentName.test.tsx     # Unit tests
+│   │   └── index.ts                   # Export barrel
+│   └── shared/                        # Reusable components
+│       ├── Button/
+│       ├── Input/
+│       └── Modal/
+```
+
+#### Component Naming Conventions
+```typescript
+// ✅ CORRECT - PascalCase for components
+const UserProfile: React.FC = () => { ... };
+const NavigationMenu: React.FC = () => { ... };
+
+// ❌ WRONG - camelCase or other formats
+const userProfile = () => { ... };
+const navigation_menu = () => { ... };
+```
+
+#### Export Patterns
+```typescript
+// ComponentName/index.ts - ALWAYS use barrel exports
+export { ComponentName } from './ComponentName';
+export type { ComponentNameProps } from './ComponentName';
+
+// Usage in other files
+import { ComponentName } from '@components/ComponentName';
+```
+
+### TypeScript Integration - MANDATORY
+
+#### Component Props Interface
+```typescript
+// ✅ CORRECT - Explicit interface definition
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'small' | 'medium' | 'large';
+  disabled?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  className?: string;
+  'aria-label'?: string;
+}
+
+const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'medium',
+  disabled = false,
+  onClick,
+  className,
+  'aria-label': ariaLabel,
+}) => {
+  // Component implementation
+};
+
+// ❌ WRONG - No type definitions
+const Button = ({ children, variant, onClick }) => { ... };
+```
+
+#### Event Handler Typing
+```typescript
+// ✅ CORRECT - Properly typed event handlers
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+  // Handle click
+};
+
+const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const value = event.target.value;
+  // Handle change
+};
+
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  // Handle form submission
+};
+
+// ❌ WRONG - Untyped events
+const handleClick = (event) => { ... };
+```
+
+#### Ref Typing
+```typescript
+// ✅ CORRECT - Properly typed refs
+const inputRef = useRef<HTMLInputElement>(null);
+const divRef = useRef<HTMLDivElement>(null);
+
+// Forward refs with proper typing
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, ...props }, ref) => {
+    return <input ref={ref} className={className} {...props} />;
+  }
+);
+```
+
+### Component Structure Standards
+
+#### Functional Component Template
+```typescript
+import React, { useState, useEffect, useCallback } from 'react';
+import styles from './ComponentName.module.css';
+
+interface ComponentNameProps {
+  // Props interface here
+}
+
+const ComponentName: React.FC<ComponentNameProps> = ({
+  // Destructured props with defaults
+}) => {
+  // 1. State declarations
+  const [state, setState] = useState<StateType>(initialValue);
+  
+  // 2. Refs
+  const elementRef = useRef<HTMLElement>(null);
+  
+  // 3. Custom hooks
+  const customHookResult = useCustomHook();
+  
+  // 4. Effect hooks
+  useEffect(() => {
+    // Effect logic
+    return () => {
+      // Cleanup
+    };
+  }, [dependencies]);
+  
+  // 5. Event handlers
+  const handleEvent = useCallback((event: EventType) => {
+    // Handler logic
+  }, [dependencies]);
+  
+  // 6. Computed values
+  const computedValue = useMemo(() => {
+    return expensiveComputation(state);
+  }, [state]);
+  
+  // 7. Early returns for loading/error states
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  
+  // 8. Main render
+  return (
+    <div className={styles.container}>
+      {/* Component JSX */}
+    </div>
+  );
+};
+
+export default ComponentName;
+export type { ComponentNameProps };
+```
+
+### State Management Best Practices
+
+#### useState Patterns
+```typescript
+// ✅ CORRECT - Typed state with proper initial values
+const [user, setUser] = useState<User | null>(null);
+const [loading, setLoading] = useState<boolean>(false);
+const [errors, setErrors] = useState<string[]>([]);
+
+// Complex state with reducer pattern
+interface FormState {
+  values: Record<string, string>;
+  errors: Record<string, string>;
+  touched: Record<string, boolean>;
+}
+
+const [formState, setFormState] = useReducer(formReducer, initialFormState);
+
+// ❌ WRONG - Untyped or poorly structured state
+const [data, setData] = useState();
+const [stuff, setStuff] = useState({});
+```
+
+#### State Updates
+```typescript
+// ✅ CORRECT - Functional updates for dependent state
+setCount(prevCount => prevCount + 1);
+setItems(prevItems => [...prevItems, newItem]);
+setUser(prevUser => ({ ...prevUser, name: newName }));
+
+// ❌ WRONG - Direct state mutation
+items.push(newItem); // Mutating state directly
+setUser(user.name = newName); // Incorrect syntax
+```
+
+### Performance Optimization
+
+#### Memoization Patterns
+```typescript
+// ✅ CORRECT - Memoize expensive computations
+const expensiveValue = useMemo(() => {
+  return items.filter(item => item.active).sort((a, b) => a.name.localeCompare(b.name));
+}, [items]);
+
+// ✅ CORRECT - Memoize callback functions
+const handleItemClick = useCallback((itemId: string) => {
+  onItemSelect(itemId);
+}, [onItemSelect]);
+
+// ✅ CORRECT - Memoize components with React.memo
+const ListItem = React.memo<ListItemProps>(({ item, onSelect }) => {
+  return (
+    <div onClick={() => onSelect(item.id)}>
+      {item.name}
+    </div>
+  );
+});
+
+// ❌ WRONG - Unnecessary memoization
+const simpleValue = useMemo(() => props.name, [props.name]); // Too simple
+const handleClick = useCallback(() => console.log('clicked'), []); // No dependencies needed
+```
+
+#### Component Splitting
+```typescript
+// ✅ CORRECT - Split large components
+const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
+  return (
+    <div className={styles.profile}>
+      <UserAvatar user={user} />
+      <UserDetails user={user} />
+      <UserActions user={user} />
+    </div>
+  );
+};
+
+// Extract complex logic into custom hooks
+const useUserProfile = (userId: string) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Hook logic here
+  
+  return { user, loading, refetch };
+};
+```
+
+### Event Handling Standards
+
+#### Event Handler Patterns
+```typescript
+// ✅ CORRECT - Descriptive handler names
+const handleFormSubmit = (event: React.FormEvent) => { ... };
+const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => { ... };
+const handleUserSelect = (userId: string) => { ... };
+
+// ✅ CORRECT - Prevent default when needed
+const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  event.preventDefault();
+  // Custom navigation logic
+};
+
+// ✅ CORRECT - Event delegation for lists
+const handleListClick = (event: React.MouseEvent<HTMLUListElement>) => {
+  const target = event.target as HTMLElement;
+  const listItem = target.closest('[data-item-id]');
+  if (listItem) {
+    const itemId = listItem.getAttribute('data-item-id');
+    onItemSelect(itemId);
+  }
+};
+
+// ❌ WRONG - Generic handler names
+const handleClick = () => { ... }; // Too generic
+const onClick = () => { ... }; // Conflicts with prop names
+```
+
+### Accessibility Requirements
+
+#### ARIA and Semantic HTML
+```typescript
+// ✅ CORRECT - Proper ARIA attributes and semantic HTML
+const Button: React.FC<ButtonProps> = ({
+  children,
+  disabled,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  ...props
+}) => {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      className={styles.button}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// ✅ CORRECT - Focus management
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [isOpen]);
+  
+  return isOpen ? (
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      className={styles.modal}
+    >
+      {children}
+    </div>
+  ) : null;
+};
+```
+
+#### Keyboard Navigation
+```typescript
+// ✅ CORRECT - Keyboard event handling
+const handleKeyDown = (event: React.KeyboardEvent) => {
+  switch (event.key) {
+    case 'Enter':
+    case ' ':
+      event.preventDefault();
+      handleActivate();
+      break;
+    case 'Escape':
+      handleClose();
+      break;
+    case 'ArrowDown':
+      event.preventDefault();
+      focusNext();
+      break;
+    case 'ArrowUp':
+      event.preventDefault();
+      focusPrevious();
+      break;
+  }
+};
+```
+
+### Error Handling Patterns
+
+#### Error Boundaries
+```typescript
+// ✅ CORRECT - Error boundary implementation
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends React.Component<
+  React.PropsWithChildren<{}>,
+  ErrorBoundaryState
+> {
+  constructor(props: React.PropsWithChildren<{}>) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
+    
+    return this.props.children;
+  }
+}
+```
+
+#### Error State Handling
+```typescript
+// ✅ CORRECT - Proper error state management
+const DataComponent: React.FC = () => {
+  const [data, setData] = useState<Data[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await api.getData();
+        setData(result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} onRetry={() => window.location.reload()} />;
+  
+  return <DataList data={data} />;
+};
+```
+
+### CSS Integration Standards
+
+#### CSS Modules Usage
+```typescript
+// ✅ CORRECT - CSS Modules with TypeScript
+import styles from './Component.module.css';
+
+const Component: React.FC = () => {
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.title}>Title</h1>
+      <p className={styles.description}>Description</p>
+    </div>
+  );
+};
+
+// ✅ CORRECT - Conditional classes
+const buttonClass = `${styles.button} ${variant === 'primary' ? styles.primary : styles.secondary}`;
+
+// ✅ CORRECT - Using clsx for complex conditions
+import clsx from 'clsx';
+
+const className = clsx(
+  styles.button,
+  {
+    [styles.primary]: variant === 'primary',
+    [styles.disabled]: disabled,
+    [styles.loading]: loading,
+  },
+  additionalClassName
+);
+```
+
+### Testing Integration
+
+#### Component Testing Setup
+```typescript
+// ComponentName.test.tsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ComponentName } from './ComponentName';
+
+describe('ComponentName', () => {
+  const defaultProps = {
+    // Default props for testing
+  };
+  
+  it('renders correctly with default props', () => {
+    render(<ComponentName {...defaultProps} />);
+    expect(screen.getByRole('button')).toBeInTheDocument();
+  });
+  
+  it('handles user interactions', async () => {
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
+    
+    render(<ComponentName {...defaultProps} onClick={handleClick} />);
+    
+    await user.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+  
+  it('handles async operations', async () => {
+    render(<ComponentName {...defaultProps} />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Loaded content')).toBeInTheDocument();
+    });
+  });
+});
+```
+
+## Examples
+
+### Good Examples
+
+```typescript
+// Well-structured functional component
+import React, { useState, useCallback, useMemo } from 'react';
+import styles from './UserProfile.module.css';
+
+interface UserProfileProps {
+  user: User;
+  onUpdate: (user: User) => void;
+  className?: string;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({
+  user,
+  onUpdate,
+  className = '',
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(user);
+
+  const handleSave = useCallback(async () => {
+    try {
+      await onUpdate(formData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  }, [formData, onUpdate]);
+
+  const isFormValid = useMemo(() => {
+    return formData.name.trim().length > 0 && formData.email.includes('@');
+  }, [formData]);
+
+  return (
+    <div className={`${styles.container} ${className}`}>
+      <h2 className={styles.title}>{user.name}</h2>
+      {isEditing ? (
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            className={styles.input}
+            aria-label="User name"
+          />
+          <button type="submit" disabled={!isFormValid} className={styles.button}>
+            Save
+          </button>
+        </form>
+      ) : (
+        <button onClick={() => setIsEditing(true)} className={styles.button}>
+          Edit
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default UserProfile;
+```
+
+```typescript
+// Proper error boundary implementation
+class ComponentErrorBoundary extends React.Component<
+  React.PropsWithChildren<{}>,
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: React.PropsWithChildren<{}>) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Component Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary">
+          <h2>Something went wrong</h2>
+          <p>We're sorry, but something unexpected happened.</p>
+          <button onClick={() => window.location.reload()}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+### Bad Examples
+
+```typescript
+// Untyped component with poor structure
+const UserProfile = ({ user, onUpdate }) => {
+  const [editing, setEditing] = useState();
+  const [data, setData] = useState();
+  
+  const handleClick = (e) => {
+    setEditing(true);
+  };
+  
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <button onClick={handleClick}>Edit</button>
+    </div>
+  );
+};
+```
+*Fails: No TypeScript types, poor state management, generic handler names, no accessibility attributes.*
+
+```typescript
+// Component with performance issues
+const ExpensiveComponent = ({ items }) => {
+  const expensiveList = items.filter(item => item.active)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(item => <div key={item.id}>{item.name}</div>);
+  
+  return (
+    <div>
+      {expensiveList}
+    </div>
+  );
+};
+```
+*Fails: Expensive computation in render, no memoization, potential re-render issues.*
+
+```typescript
+// Component with accessibility issues
+const Button = ({ children, onClick }) => {
+  return (
+    <div onClick={onClick} style={{ cursor: 'pointer' }}>
+      {children}
+    </div>
+  );
+};
+```
+*Fails: Uses div instead of button element, no keyboard support, no ARIA attributes, inline styles.*
+
+## Implementation Guidelines
+
+### Component Development Workflow
+
+1. **Plan Component Structure**
+   - Define single responsibility
+   - Design props interface
+   - Plan state management strategy
+
+2. **Implement Core Functionality**
+   - Create TypeScript interfaces
+   - Implement component logic
+   - Add proper event handlers
+
+3. **Add Styling and Accessibility**
+   - Use CSS Modules for styling
+   - Add ARIA attributes
+   - Implement keyboard navigation
+
+4. **Optimize Performance**
+   - Add memoization where needed
+   - Implement proper dependency arrays
+   - Consider component splitting
+
+5. **Add Error Handling**
+   - Implement error boundaries
+   - Add proper error states
+   - Handle edge cases
+
+6. **Write Tests**
+   - Unit tests for component logic
+   - Integration tests for user interactions
+   - Accessibility tests
+
+### Code Review Checklist
+
+#### Before Component Creation
+- [ ] Component has a single, clear responsibility
+- [ ] Props interface is properly typed
+- [ ] Component name follows PascalCase convention
+- [ ] File structure follows established patterns
+
+#### During Development
+- [ ] All props are destructured with default values
+- [ ] Event handlers are properly typed
+- [ ] State updates use functional form when dependent on previous state
+- [ ] Effects have proper dependency arrays
+- [ ] Expensive computations are memoized
+- [ ] Component handles loading and error states
+
+#### Before Code Review
+- [ ] Component is properly exported with barrel export
+- [ ] CSS classes use CSS Modules
+- [ ] Accessibility attributes are included
+- [ ] Component has unit tests
+- [ ] No console.log statements remain
+- [ ] TypeScript strict mode passes
+- [ ] ESLint rules pass
+
+#### Performance Checklist
+- [ ] Unnecessary re-renders are prevented
+- [ ] Large lists use virtualization if needed
+- [ ] Images have proper loading attributes
+- [ ] Components are split appropriately
+- [ ] Bundle size impact is considered
+
+### Forbidden Patterns
+
+#### ❌ AVOID These Patterns
+```typescript
+// ❌ WRONG - Inline object/array creation in render
+<Component style={{ margin: 10 }} items={[1, 2, 3]} />
+
+// ❌ WRONG - Anonymous functions in JSX
+<button onClick={() => handleClick(item.id)}>Click</button>
+
+// ❌ WRONG - Mutating props
+props.items.push(newItem);
+
+// ❌ WRONG - Using array index as key
+{items.map((item, index) => <Item key={index} item={item} />)}
+
+// ❌ WRONG - Conditional hooks
+if (condition) {
+  useEffect(() => { ... }, []);
+}
+
+// ❌ WRONG - Missing dependencies in useEffect
+useEffect(() => {
+  fetchData(userId);
+}, []); // Missing userId dependency
+
+// ❌ WRONG - Direct DOM manipulation
+document.getElementById('myElement').style.display = 'none';
+```
+
+## Related Rules
+
+* @typescript-best-practices.mdc
+* @css-best-practices.mdc
+* @custom-hooks-best-practices.mdc
+* @accessibility-standards.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive React component best practices, TypeScript integration, performance optimization, and accessibility requirements.
+
+<!--
+ React Component Best Practices
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
+
+- [ ] Components are split appropriately
+- [ ] Bundle size impact is considered
+
+**Remember: Every React component should be predictable, testable, accessible, and performant. Follow these patterns consistently across the entire codebase.**

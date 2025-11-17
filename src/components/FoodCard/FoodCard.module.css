@@ -1,0 +1,213 @@
+/* Base card styles - Restaurant menu style */
+.card {
+  background: var(--color-background);
+  padding: var(--spacing-lg);
+  transition: background-color var(--transition-speed) var(--transition-timing);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  border-radius: var(--border-radius);
+}
+
+.card:hover {
+  background: var(--color-background-hover);
+}
+
+.cardFeatured {
+  background: var(--color-background);
+  padding: var(--spacing-lg);
+  transition: background-color var(--transition-speed) var(--transition-timing);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  border-radius: var(--border-radius);
+}
+
+.cardFeatured:hover {
+  background: var(--color-background-hover);
+}
+
+/* Image container - smaller, more subtle */
+.imageContainer {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--color-background-secondary);
+}
+
+.foodImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Badges - more subtle */
+.specialBadge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: var(--color-primary);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-sm);
+}
+
+.unavailableBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--color-error);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Content area - menu-style layout */
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-md);
+}
+
+.foodName {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+  line-height: var(--line-height-tight);
+  flex-grow: 1;
+}
+
+.foodMeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.category {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+/* Footer - subtle link */
+.cardFooter {
+  margin-top: var(--spacing-xs);
+}
+
+.detailsLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: color var(--transition-speed) var(--transition-timing);
+  opacity: 0.7;
+}
+
+.detailsLink:hover {
+  color: var(--color-primary-hover);
+  opacity: 1;
+}
+
+.linkArrow {
+  transition: transform var(--transition-speed) var(--transition-timing);
+  font-size: 0.75rem;
+}
+
+.detailsLink:hover .linkArrow {
+  transform: translateX(2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card,
+  .cardFeatured {
+    padding: var(--spacing-md) 0;
+    gap: var(--spacing-sm);
+  }
+  
+  .cardFeatured {
+    padding: var(--spacing-md);
+  }
+  
+  .imageContainer {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .foodMeta {
+    align-self: flex-end;
+    margin-top: calc(-1 * var(--spacing-lg));
+  }
+  
+  .foodName {
+    font-size: var(--font-size-base);
+  }
+  
+  .price {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .imageContainer {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .foodName {
+    font-size: var(--font-size-base);
+  }
+  
+  .description {
+    font-size: var(--font-size-xs);
+  }
+} 

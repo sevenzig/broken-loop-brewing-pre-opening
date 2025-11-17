@@ -1,0 +1,1441 @@
+---
+description: "Async state management, data loading patterns, and performance optimization strategies"
+globs: src/hooks/**/*.ts,src/hooks/**/*.tsx,src/components/**/*.tsx,src/utils/**/*.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: react,async,state,data,loading,caching,performance
+---
+
+# Data Loading & Async State Management
+
+## Purpose and Scope
+
+This rule enforces comprehensive standards for async state management, data loading patterns, and performance optimization strategies. It ensures consistent handling of asynchronous operations, proper error management, efficient caching strategies, and optimal user experience across the application. The rule establishes clear patterns for data fetching, state management, error recovery, and performance optimization.
+
+## Standards and Requirements
+
+### Async State Architecture
+
+#### Standard Async State Pattern
+```typescript
+// ✅ CORRECT - Comprehensive async state structure
+interface AsyncState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  lastFetched: number | null;
+  retryCount: number;
+  hasMore?: boolean; // For pagination
+}
+
+interface AsyncActions<T> {
+  execute: () => Promise<T>;
+  retry: () => Promise<T>;
+  reset: () => void;
+  setData: (data: T) => void;
+  setError: (error: string) => void;
+  clearError: () => void;
+}
+
+// Base async state hook
+export function useAsyncState<T>(
+  asyncFunction: () => Promise<T>,
+  options: {
+    immediate?: boolean;
+    retryAttempts?: number;
+    retryDelay?: number;
+    cacheKey?: string;
+    cacheTTL?: number;
+  } = {}
+): AsyncState<T> & AsyncActions<T> {
+  const {
+    immediate = true,
+    retryAttempts = 3,
+    retryDelay = 1000,
+    cacheKey,
+    cacheTTL = 5 * 60 * 1000, // 5 minutes
+  } = options;
+
+  const [state, setState] = useState<AsyncState<T>>({
+    data: null,
+    loading: immediate,
+    error: null,
+    lastFetched: null,
+    retryCount: 0,
+  });
+
+  const execute = useCallback(async (): Promise<T> => {
+    // Check cache first
+    if (cacheKey) {
+      const cached = getFromCache<T>(cacheKey);
+      if (cached && Date.now() - cached.timestamp < cacheTTL) {
+        setState(prev => ({
+          ...prev,
+          data: cached.data,
+          loading: false,
+          error: null,
+          lastFetched: cached.timestamp,
+        }));
+        return cached.data;
+      }
+    }
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const result = await asyncFunction();
+      const timestamp = Date.now();
+
+      // Cache the result
+      if (cacheKey) {
+        setInCache(cacheKey, { data: result, timestamp });
+      }
+
+      setState(prev => ({
+        ...prev,
+        data: result,
+        loading: false,
+        error: null,
+        lastFetched: timestamp,
+        retryCount: 0,
+      }));
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+
+      throw error;
+    }
+  }, [asyncFunction, cacheKey, cacheTTL]);
+
+  const retry = useCallback(async (): Promise<T> => {
+    if (state.retryCount >= retryAttempts) {
+      throw new Error('Maximum retry attempts reached');
+    }
+
+    setState(prev => ({ ...prev, retryCount: prev.retryCount + 1 }));
+
+    // Exponential backoff
+    const delay = retryDelay * Math.pow(2, state.retryCount);
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    return execute();
+  }, [execute, state.retryCount, retryAttempts, retryDelay]);
+
+  const reset = useCallback(() => {
+    setState({
+      data: null,
+      loading: false,
+      error: null,
+      lastFetched: null,
+      retryCount: 0,
+    });
+  }, []);
+
+  const setData = useCallback((data: T) => {
+    setState(prev => ({ ...prev, data, error: null }));
+  }, []);
+
+  const setError = useCallback((error: string) => {
+    setState(prev => ({ ...prev, error, loading: false }));
+  }, []);
+
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
+
+  useEffect(() => {
+    if (immediate) {
+      execute().catch(() => {
+        // Error is already handled in execute
+      });
+    }
+  }, [immediate]);
+
+  return {
+    ...state,
+    execute,
+    retry,
+    reset,
+    setData,
+    setError,
+    clearError,
+  };
+}
+```
+
+#### Collection Loading Pattern
+```typescript
+// ✅ CORRECT - Collection loading with filtering and stats
+interface CollectionState<T> extends AsyncState<T[]> {
+  filteredData: T[];
+  stats: CollectionStats;
+  filters: Record<string, any>;
+  sortConfig: SortConfig;
+}
+
+interface CollectionStats {
+  total: number;
+  filtered: number;
+  categories: Record<string, number>;
+  lastUpdated: string;
+}
+
+interface SortConfig {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export function useCollectionLoader<T>(
+  loader: () => Promise<T[]>,
+  options: {
+    filters?: Record<string, (items: T[]) => T[]>;
+    statsCalculator?: (items: T[]) => CollectionStats;
+    defaultSort?: SortConfig;
+    cacheKey?: string;
+  } = {}
+) {
+  const {
+    filters = {},
+    statsCalculator,
+    defaultSort = { field: 'name', direction: 'asc' },
+    cacheKey,
+  } = options;
+
+  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
+  const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSort);
+
+  const asyncState = useAsyncState(loader, { cacheKey });
+
+  // Memoized filtered data
+  const filteredData = useMemo(() => {
+    if (!asyncState.data) return [];
+
+    let result = asyncState.data;
+
+    // Apply active filters
+    Object.entries(activeFilters).forEach(([filterKey, filterValue]) => {
+      if (filterValue && filters[filterKey]) {
+        result = filters[filterKey](result);
+      }
+    });
+
+    // Apply sorting
+    result = [...result].sort((a, b) => {
+      const aValue = (a as any)[sortConfig.field];
+      const bValue = (b as any)[sortConfig.field];
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc'
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [asyncState.data, activeFilters, sortConfig, filters]);
+
+  // Memoized stats
+  const stats = useMemo(() => {
+    if (!asyncState.data) {
+      return {
+        total: 0,
+        filtered: 0,
+        categories: {},
+        lastUpdated: new Date().toISOString(),
+      };
+    }
+
+    if (statsCalculator) {
+      return statsCalculator(asyncState.data);
+    }
+
+    // Default stats calculation
+    return {
+      total: asyncState.data.length,
+      filtered: filteredData.length,
+      categories: asyncState.data.reduce((acc, item) => {
+        const category = (item as any).category || 'uncategorized';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+      lastUpdated: new Date().toISOString(),
+    };
+  }, [asyncState.data, filteredData, statsCalculator]);
+
+  const setFilter = useCallback((key: string, value: any) => {
+    setActiveFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setActiveFilters({});
+  }, []);
+
+  const setSortBy = useCallback((field: string, direction: 'asc' | 'desc') => {
+    setSortConfig({ field, direction });
+  }, []);
+
+  return {
+    // Async state
+    ...asyncState,
+    
+    // Collection-specific data
+    filteredData,
+    stats,
+    filters: activeFilters,
+    sortConfig,
+    
+    // Collection actions
+    setFilter,
+    clearFilters,
+    setSortBy,
+  };
+}
+```
+
+### Error Handling Strategies
+
+#### Error Classification and Recovery
+```typescript
+// ✅ CORRECT - Comprehensive error handling
+export enum ErrorType {
+  NETWORK = 'NETWORK',
+  VALIDATION = 'VALIDATION',
+  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHORIZATION = 'AUTHORIZATION',
+  NOT_FOUND = 'NOT_FOUND',
+  SERVER = 'SERVER',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export interface AppError {
+  type: ErrorType;
+  message: string;
+  code?: string;
+  details?: any;
+  retryable: boolean;
+  timestamp: number;
+}
+
+export class ErrorHandler {
+  static classify(error: any): AppError {
+    const timestamp = Date.now();
+
+    // Network errors
+    if (!navigator.onLine) {
+      return {
+        type: ErrorType.NETWORK,
+        message: 'No internet connection. Please check your network.',
+        retryable: true,
+        timestamp,
+      };
+    }
+
+    // HTTP errors
+    if (error.response) {
+      const status = error.response.status;
+      
+      switch (status) {
+        case 400:
+          return {
+            type: ErrorType.VALIDATION,
+            message: error.response.data?.message || 'Invalid request data',
+            details: error.response.data?.errors,
+            retryable: false,
+            timestamp,
+          };
+        case 401:
+          return {
+            type: ErrorType.AUTHENTICATION,
+            message: 'Authentication required. Please log in.',
+            retryable: false,
+            timestamp,
+          };
+        case 403:
+          return {
+            type: ErrorType.AUTHORIZATION,
+            message: 'You do not have permission to access this resource.',
+            retryable: false,
+            timestamp,
+          };
+        case 404:
+          return {
+            type: ErrorType.NOT_FOUND,
+            message: 'The requested resource was not found.',
+            retryable: false,
+            timestamp,
+          };
+        case 429:
+          return {
+            type: ErrorType.NETWORK,
+            message: 'Too many requests. Please try again later.',
+            retryable: true,
+            timestamp,
+          };
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          return {
+            type: ErrorType.SERVER,
+            message: 'Server error. Please try again later.',
+            retryable: true,
+            timestamp,
+          };
+        default:
+          return {
+            type: ErrorType.UNKNOWN,
+            message: error.response.data?.message || 'An unexpected error occurred',
+            retryable: false,
+            timestamp,
+          };
+      }
+    }
+
+    // Request timeout
+    if (error.code === 'ECONNABORTED') {
+      return {
+        type: ErrorType.NETWORK,
+        message: 'Request timeout. Please try again.',
+        retryable: true,
+        timestamp,
+      };
+    }
+
+    // Generic error
+    return {
+      type: ErrorType.UNKNOWN,
+      message: error.message || 'An unexpected error occurred',
+      retryable: false,
+      timestamp,
+    };
+  }
+
+  static shouldRetry(error: AppError, retryCount: number, maxRetries: number): boolean {
+    if (retryCount >= maxRetries) return false;
+    if (!error.retryable) return false;
+    
+    // Don't retry validation errors
+    if (error.type === ErrorType.VALIDATION) return false;
+    
+    return true;
+  }
+
+  static getRetryDelay(retryCount: number, baseDelay: number = 1000): number {
+    // Exponential backoff with jitter
+    const exponentialDelay = baseDelay * Math.pow(2, retryCount);
+    const jitter = Math.random() * 0.1 * exponentialDelay;
+    return exponentialDelay + jitter;
+  }
+}
+
+// Enhanced async state with error handling
+export function useAsyncStateWithErrorHandling<T>(
+  asyncFunction: () => Promise<T>,
+  options: {
+    maxRetries?: number;
+    baseRetryDelay?: number;
+    onError?: (error: AppError) => void;
+    fallbackData?: T;
+  } = {}
+) {
+  const {
+    maxRetries = 3,
+    baseRetryDelay = 1000,
+    onError,
+    fallbackData,
+  } = options;
+
+  const [state, setState] = useState<{
+    data: T | null;
+    loading: boolean;
+    error: AppError | null;
+    retryCount: number;
+  }>({
+    data: fallbackData || null,
+    loading: false,
+    error: null,
+    retryCount: 0,
+  });
+
+  const execute = useCallback(async (): Promise<T> => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const result = await asyncFunction();
+      setState(prev => ({
+        ...prev,
+        data: result,
+        loading: false,
+        error: null,
+        retryCount: 0,
+      }));
+      return result;
+    } catch (rawError) {
+      const error = ErrorHandler.classify(rawError);
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error,
+      }));
+
+      onError?.(error);
+      throw error;
+    }
+  }, [asyncFunction, onError]);
+
+  const retry = useCallback(async (): Promise<T> => {
+    const currentError = state.error;
+    if (!currentError || !ErrorHandler.shouldRetry(currentError, state.retryCount, maxRetries)) {
+      throw new Error('Cannot retry this operation');
+    }
+
+    setState(prev => ({ ...prev, retryCount: prev.retryCount + 1 }));
+
+    const delay = ErrorHandler.getRetryDelay(state.retryCount, baseRetryDelay);
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    return execute();
+  }, [execute, state.error, state.retryCount, maxRetries, baseRetryDelay]);
+
+  const canRetry = useMemo(() => {
+    return state.error && ErrorHandler.shouldRetry(state.error, state.retryCount, maxRetries);
+  }, [state.error, state.retryCount, maxRetries]);
+
+  return {
+    ...state,
+    execute,
+    retry,
+    canRetry,
+  };
+}
+```
+
+### Caching Strategies
+
+#### Multi-Level Caching System
+```typescript
+// ✅ CORRECT - Comprehensive caching system
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+  tags: string[];
+}
+
+class CacheManager {
+  private memoryCache = new Map<string, CacheEntry<any>>();
+  private readonly maxMemoryEntries = 100;
+
+  // Memory cache operations
+  set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000, tags: string[] = []): void {
+    // Implement LRU eviction if cache is full
+    if (this.memoryCache.size >= this.maxMemoryEntries) {
+      const oldestKey = this.memoryCache.keys().next().value;
+      this.memoryCache.delete(oldestKey);
+    }
+
+    this.memoryCache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl,
+      tags,
+    });
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.memoryCache.get(key);
+    if (!entry) return null;
+
+    // Check if expired
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      this.memoryCache.delete(key);
+      return null;
+    }
+
+    return entry.data;
+  }
+
+  invalidate(key: string): void {
+    this.memoryCache.delete(key);
+  }
+
+  invalidateByTag(tag: string): void {
+    for (const [key, entry] of this.memoryCache.entries()) {
+      if (entry.tags.includes(tag)) {
+        this.memoryCache.delete(key);
+      }
+    }
+  }
+
+  clear(): void {
+    this.memoryCache.clear();
+  }
+
+  // Session storage operations
+  setSession<T>(key: string, data: T): void {
+    try {
+      sessionStorage.setItem(key, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      }));
+    } catch (error) {
+      console.warn('Failed to save to session storage:', error);
+    }
+  }
+
+  getSession<T>(key: string, maxAge: number = 30 * 60 * 1000): T | null {
+    try {
+      const item = sessionStorage.getItem(key);
+      if (!item) return null;
+
+      const { data, timestamp } = JSON.parse(item);
+      
+      if (Date.now() - timestamp > maxAge) {
+        sessionStorage.removeItem(key);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Failed to read from session storage:', error);
+      return null;
+    }
+  }
+
+  // Local storage operations (for persistent cache)
+  setLocal<T>(key: string, data: T, ttl: number = 24 * 60 * 60 * 1000): void {
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+        ttl,
+      }));
+    } catch (error) {
+      console.warn('Failed to save to local storage:', error);
+    }
+  }
+
+  getLocal<T>(key: string): T | null {
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return null;
+
+      const { data, timestamp, ttl } = JSON.parse(item);
+      
+      if (Date.now() - timestamp > ttl) {
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Failed to read from local storage:', error);
+      return null;
+    }
+  }
+}
+
+export const cacheManager = new CacheManager();
+
+// Hook for cached data loading
+export function useCachedData<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: {
+    memoryTTL?: number;
+    sessionTTL?: number;
+    localTTL?: number;
+    tags?: string[];
+    staleWhileRevalidate?: boolean;
+  } = {}
+) {
+  const {
+    memoryTTL = 5 * 60 * 1000,
+    sessionTTL = 30 * 60 * 1000,
+    localTTL = 24 * 60 * 60 * 1000,
+    tags = [],
+    staleWhileRevalidate = true,
+  } = options;
+
+  const [state, setState] = useState<{
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+    isStale: boolean;
+  }>({
+    data: null,
+    loading: true,
+    error: null,
+    isStale: false,
+  });
+
+  const loadData = useCallback(async (useCache = true): Promise<T> => {
+    // Try cache layers in order: memory -> session -> local
+    if (useCache) {
+      let cachedData = cacheManager.get<T>(key);
+      let isStale = false;
+
+      if (!cachedData) {
+        cachedData = cacheManager.getSession<T>(key, sessionTTL);
+        if (cachedData) {
+          // Promote to memory cache
+          cacheManager.set(key, cachedData, memoryTTL, tags);
+        }
+      }
+
+      if (!cachedData) {
+        cachedData = cacheManager.getLocal<T>(key);
+        if (cachedData) {
+          // Promote to memory and session cache
+          cacheManager.set(key, cachedData, memoryTTL, tags);
+          cacheManager.setSession(key, cachedData);
+          isStale = true; // Local cache data is considered stale
+        }
+      }
+
+      if (cachedData) {
+        setState(prev => ({
+          ...prev,
+          data: cachedData,
+          loading: staleWhileRevalidate && isStale,
+          error: null,
+          isStale,
+        }));
+
+        // If using stale-while-revalidate and data is stale, fetch fresh data
+        if (staleWhileRevalidate && isStale) {
+          try {
+            const freshData = await fetcher();
+            
+            // Update all cache layers
+            cacheManager.set(key, freshData, memoryTTL, tags);
+            cacheManager.setSession(key, freshData);
+            cacheManager.setLocal(key, freshData, localTTL);
+
+            setState(prev => ({
+              ...prev,
+              data: freshData,
+              loading: false,
+              isStale: false,
+            }));
+
+            return freshData;
+          } catch (error) {
+            // If fresh fetch fails, keep stale data but stop loading
+            setState(prev => ({ ...prev, loading: false }));
+            throw error;
+          }
+        }
+
+        return cachedData;
+      }
+    }
+
+    // No cached data, fetch fresh
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const freshData = await fetcher();
+      
+      // Store in all cache layers
+      cacheManager.set(key, freshData, memoryTTL, tags);
+      cacheManager.setSession(key, freshData);
+      cacheManager.setLocal(key, freshData, localTTL);
+
+      setState({
+        data: freshData,
+        loading: false,
+        error: null,
+        isStale: false,
+      });
+
+      return freshData;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, [key, fetcher, memoryTTL, sessionTTL, localTTL, tags, staleWhileRevalidate]);
+
+  const invalidate = useCallback(() => {
+    cacheManager.invalidate(key);
+    sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
+  }, [key]);
+
+  const refresh = useCallback(() => {
+    return loadData(false);
+  }, [loadData]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  return {
+    ...state,
+    refresh,
+    invalidate,
+  };
+}
+```
+
+### Performance Optimization
+
+#### Request Deduplication and Batching
+```typescript
+// ✅ CORRECT - Request deduplication
+class RequestManager {
+  private pendingRequests = new Map<string, Promise<any>>();
+  private batchQueue = new Map<string, Array<{ resolve: Function; reject: Function; params: any }>>();
+  private batchTimeouts = new Map<string, NodeJS.Timeout>();
+
+  // Deduplicate identical requests
+  async dedupe<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key);
+    }
+
+    const promise = requestFn().finally(() => {
+      this.pendingRequests.delete(key);
+    });
+
+    this.pendingRequests.set(key, promise);
+    return promise;
+  }
+
+  // Batch multiple requests
+  async batch<T>(
+    batchKey: string,
+    params: any,
+    batchFn: (paramsList: any[]) => Promise<T[]>,
+    delay: number = 50
+  ): Promise<T> {
+    return new Promise((resolve, reject) => {
+      if (!this.batchQueue.has(batchKey)) {
+        this.batchQueue.set(batchKey, []);
+      }
+
+      const queue = this.batchQueue.get(batchKey)!;
+      queue.push({ resolve, reject, params });
+
+      // Clear existing timeout
+      if (this.batchTimeouts.has(batchKey)) {
+        clearTimeout(this.batchTimeouts.get(batchKey)!);
+      }
+
+      // Set new timeout
+      const timeout = setTimeout(async () => {
+        const currentQueue = this.batchQueue.get(batchKey) || [];
+        this.batchQueue.delete(batchKey);
+        this.batchTimeouts.delete(batchKey);
+
+        if (currentQueue.length === 0) return;
+
+        try {
+          const paramsList = currentQueue.map(item => item.params);
+          const results = await batchFn(paramsList);
+
+          currentQueue.forEach((item, index) => {
+            item.resolve(results[index]);
+          });
+        } catch (error) {
+          currentQueue.forEach(item => {
+            item.reject(error);
+          });
+        }
+      }, delay);
+
+      this.batchTimeouts.set(batchKey, timeout);
+    });
+  }
+}
+
+export const requestManager = new RequestManager();
+
+// Hook for deduplicated requests
+export function useDeduplicatedRequest<T>(
+  key: string,
+  requestFn: () => Promise<T>,
+  dependencies: any[] = []
+) {
+  const [state, setState] = useState<{
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const execute = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const result = await requestManager.dedupe(key, requestFn);
+      setState({
+        data: result,
+        loading: false,
+        error: null,
+      });
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Request failed';
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, [key, requestFn]);
+
+  useEffect(() => {
+    execute();
+  }, [execute, ...dependencies]);
+
+  return {
+    ...state,
+    execute,
+  };
+}
+```
+
+### Pagination and Infinite Loading
+
+#### Infinite Scroll Implementation
+```typescript
+// ✅ CORRECT - Infinite scroll with virtual scrolling
+interface PaginatedResponse<T> {
+  data: T[];
+  hasMore: boolean;
+  nextCursor?: string;
+  total?: number;
+}
+
+export function useInfiniteScroll<T>(
+  fetchPage: (cursor?: string) => Promise<PaginatedResponse<T>>,
+  options: {
+    pageSize?: number;
+    threshold?: number;
+    enabled?: boolean;
+  } = {}
+) {
+  const {
+    pageSize = 20,
+    threshold = 0.8,
+    enabled = true,
+  } = options;
+
+  const [state, setState] = useState<{
+    data: T[];
+    loading: boolean;
+    loadingMore: boolean;
+    error: string | null;
+    hasMore: boolean;
+    nextCursor?: string;
+  }>({
+    data: [],
+    loading: true,
+    loadingMore: false,
+    error: null,
+    hasMore: true,
+  });
+
+  const loadInitial = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await fetchPage();
+      setState({
+        data: response.data,
+        loading: false,
+        loadingMore: false,
+        error: null,
+        hasMore: response.hasMore,
+        nextCursor: response.nextCursor,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+    }
+  }, [fetchPage]);
+
+  const loadMore = useCallback(async () => {
+    if (!state.hasMore || state.loadingMore || state.loading) return;
+
+    setState(prev => ({ ...prev, loadingMore: true, error: null }));
+
+    try {
+      const response = await fetchPage(state.nextCursor);
+      setState(prev => ({
+        ...prev,
+        data: [...prev.data, ...response.data],
+        loadingMore: false,
+        hasMore: response.hasMore,
+        nextCursor: response.nextCursor,
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load more data';
+      setState(prev => ({
+        ...prev,
+        loadingMore: false,
+        error: errorMessage,
+      }));
+    }
+  }, [fetchPage, state.nextCursor, state.hasMore, state.loadingMore, state.loading]);
+
+  // Intersection Observer for automatic loading
+  const observerRef = useRef<IntersectionObserver>();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!enabled || !sentinelRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && state.hasMore && !state.loadingMore) {
+          loadMore();
+        }
+      },
+      { threshold }
+    );
+
+    observerRef.current.observe(sentinelRef.current);
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [enabled, threshold, state.hasMore, state.loadingMore, loadMore]);
+
+  useEffect(() => {
+    loadInitial();
+  }, [loadInitial]);
+
+  const reset = useCallback(() => {
+    setState({
+      data: [],
+      loading: true,
+      loadingMore: false,
+      error: null,
+      hasMore: true,
+      nextCursor: undefined,
+    });
+    loadInitial();
+  }, [loadInitial]);
+
+  return {
+    ...state,
+    loadMore,
+    reset,
+    sentinelRef,
+  };
+}
+```
+
+### Real-time Data Updates
+
+#### WebSocket Integration
+```typescript
+// ✅ CORRECT - WebSocket with reconnection and state sync
+export function useRealtimeData<T>(
+  initialLoader: () => Promise<T>,
+  websocketUrl: string,
+  options: {
+    reconnectAttempts?: number;
+    reconnectDelay?: number;
+    heartbeatInterval?: number;
+  } = {}
+) {
+  const {
+    reconnectAttempts = 5,
+    reconnectDelay = 1000,
+    heartbeatInterval = 30000,
+  } = options;
+
+  const [state, setState] = useState<{
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+    connected: boolean;
+    reconnecting: boolean;
+  }>({
+    data: null,
+    loading: true,
+    error: null,
+    connected: false,
+    reconnecting: false,
+  });
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectCountRef = useRef(0);
+  const heartbeatRef = useRef<NodeJS.Timeout>();
+
+  const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+
+    setState(prev => ({ ...prev, reconnecting: true }));
+
+    try {
+      wsRef.current = new WebSocket(websocketUrl);
+
+      wsRef.current.onopen = () => {
+        setState(prev => ({ 
+          ...prev, 
+          connected: true, 
+          reconnecting: false,
+          error: null,
+        }));
+        reconnectCountRef.current = 0;
+
+        // Start heartbeat
+        heartbeatRef.current = setInterval(() => {
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({ type: 'ping' }));
+          }
+        }, heartbeatInterval);
+      };
+
+      wsRef.current.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'data_update') {
+            setState(prev => ({ ...prev, data: message.data }));
+          }
+        } catch (error) {
+          console.error('Failed to parse WebSocket message:', error);
+        }
+      };
+
+      wsRef.current.onclose = () => {
+        setState(prev => ({ ...prev, connected: false }));
+        
+        if (heartbeatRef.current) {
+          clearInterval(heartbeatRef.current);
+        }
+
+        // Attempt reconnection
+        if (reconnectCountRef.current < reconnectAttempts) {
+          reconnectCountRef.current++;
+          const delay = reconnectDelay * Math.pow(2, reconnectCountRef.current - 1);
+          
+          setTimeout(() => {
+            connect();
+          }, delay);
+        } else {
+          setState(prev => ({ 
+            ...prev, 
+            reconnecting: false,
+            error: 'Failed to establish WebSocket connection',
+          }));
+        }
+      };
+
+      wsRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setState(prev => ({ 
+          ...prev, 
+          error: 'WebSocket connection error',
+        }));
+      };
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        reconnecting: false,
+        error: 'Failed to create WebSocket connection',
+      }));
+    }
+  }, [websocketUrl, reconnectAttempts, reconnectDelay, heartbeatInterval]);
+
+  const disconnect = useCallback(() => {
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+    }
+    
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    
+    setState(prev => ({ ...prev, connected: false, reconnecting: false }));
+  }, []);
+
+  // Load initial data
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const data = await initialLoader();
+        setState(prev => ({ ...prev, data, loading: false }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load initial data';
+        setState(prev => ({ ...prev, loading: false, error: errorMessage }));
+      }
+    };
+
+    loadInitialData();
+  }, [initialLoader]);
+
+  // Establish WebSocket connection
+  useEffect(() => {
+    connect();
+    return disconnect;
+  }, [connect, disconnect]);
+
+  return {
+    ...state,
+    connect,
+    disconnect,
+  };
+}
+```
+
+## Examples
+
+### Good Examples
+
+```typescript
+// ✅ CORRECT - Well-structured async state hook
+export function useBeers() {
+  const [state, setState] = useState<{
+    beers: Beer[];
+    loading: boolean;
+    error: string | null;
+  }>({
+    beers: [],
+    loading: true,
+    error: null,
+  });
+
+  const loadBeers = useCallback(async () => {
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const data = await beerLoader.loadAll();
+      setState({ beers: data, loading: false, error: null });
+    } catch (err) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load beers',
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBeers();
+  }, [loadBeers]);
+
+  return {
+    ...state,
+    reload: loadBeers,
+  };
+}
+```
+
+```typescript
+// ✅ CORRECT - Cached data loading with stale-while-revalidate
+export function useCachedBeers() {
+  return useCachedData(
+    'beers',
+    () => beerLoader.loadAll(),
+    {
+      memoryTTL: 5 * 60 * 1000, // 5 minutes
+      sessionTTL: 30 * 60 * 1000, // 30 minutes
+      localTTL: 24 * 60 * 60 * 1000, // 24 hours
+      tags: ['beers', 'menu'],
+      staleWhileRevalidate: true,
+    }
+  );
+}
+```
+
+```typescript
+// ✅ CORRECT - Error handling with retry logic
+export function useBeersWithRetry() {
+  return useAsyncStateWithErrorHandling(
+    () => beerLoader.loadAll(),
+    {
+      maxRetries: 3,
+      baseRetryDelay: 1000,
+      onError: (error) => {
+        console.error('Beer loading error:', error);
+      },
+      fallbackData: [],
+    }
+  );
+}
+```
+
+### Bad Examples
+
+```typescript
+// ❌ WRONG - No loading states
+const fetchData = async () => {
+  const data = await api.getData();
+  setData(data);
+};
+*Fails: No loading state management, poor user experience.*
+
+```typescript
+// ❌ WRONG - Poor error handling
+const fetchData = async () => {
+  try {
+    const data = await api.getData();
+    setData(data);
+  } catch (error) {
+    console.log(error); // Silent failure
+  }
+};
+*Fails: Silent error handling, no user feedback, no recovery options.*
+
+```typescript
+// ❌ WRONG - Race conditions
+useEffect(() => {
+  fetchData().then(setData);
+}, [dependency]); // No cleanup
+*Fails: Potential race conditions, memory leaks, no request cancellation.*
+
+```typescript
+// ❌ WRONG - Unnecessary re-fetching
+useEffect(() => {
+  fetchData();
+}, [data]); // Infinite loop
+*Fails: Infinite re-rendering loop, poor performance, unnecessary network requests.*
+
+```typescript
+// ❌ WRONG - No caching
+const fetchExpensiveData = async () => {
+  return await heavyApiCall(); // Called every time
+};
+*Fails: Poor performance, unnecessary network requests, no optimization.*
+
+```typescript
+// ❌ WRONG - Blocking UI
+const handleSubmit = async () => {
+  await longRunningOperation(); // No loading state
+  navigate('/success');
+};
+*Fails: Blocking UI, poor user experience, no feedback during operation.*
+```
+
+## Implementation Guidelines
+
+### Data Loading Checklist
+
+#### Before Implementation
+- [ ] Data loading strategy is planned (immediate, lazy, on-demand)
+- [ ] Error handling strategy is defined
+- [ ] Caching requirements are identified
+- [ ] Loading states are designed
+
+#### During Development
+- [ ] All async operations have loading states
+- [ ] Error handling is comprehensive with user-friendly messages
+- [ ] Race conditions are prevented with cleanup
+- [ ] Caching is implemented where appropriate
+- [ ] Request deduplication is used for identical requests
+
+#### Before Code Review
+- [ ] Loading states provide meaningful feedback
+- [ ] Error states allow for recovery actions
+- [ ] Performance is optimized with caching and batching
+- [ ] Memory leaks are prevented with proper cleanup
+- [ ] TypeScript types are properly defined
+
+#### Performance Checklist
+- [ ] Unnecessary requests are eliminated
+- [ ] Data is cached appropriately
+- [ ] Large datasets use pagination or virtualization
+- [ ] Network requests are optimized and batched
+- [ ] Stale-while-revalidate pattern is used where beneficial
+
+### Forbidden Patterns
+
+#### ❌ AVOID These Anti-Patterns
+```typescript
+// ❌ WRONG - No loading states
+const fetchData = async () => {
+  const data = await api.getData();
+  setData(data);
+};
+
+// ❌ WRONG - Poor error handling
+const fetchData = async () => {
+  try {
+    const data = await api.getData();
+    setData(data);
+  } catch (error) {
+    console.log(error); // Silent failure
+  }
+};
+
+// ❌ WRONG - Race conditions
+useEffect(() => {
+  fetchData().then(setData);
+}, [dependency]); // No cleanup
+
+// ❌ WRONG - Unnecessary re-fetching
+useEffect(() => {
+  fetchData();
+}, [data]); // Infinite loop
+
+// ❌ WRONG - No caching
+const fetchExpensiveData = async () => {
+  return await heavyApiCall(); // Called every time
+};
+
+// ❌ WRONG - Blocking UI
+const handleSubmit = async () => {
+  await longRunningOperation(); // No loading state
+  navigate('/success');
+};
+```
+
+## Related Rules
+
+* @custom-hooks-best-practices.mdc
+* @react-component-best-practices.mdc
+* @typescript-best-practices.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive async state management, error handling, caching strategies, and performance optimization patterns.
+
+<!--
+ Data Loading & Async State Management
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
+
+**Remember: Data loading is a critical part of user experience. Always provide clear feedback, handle errors gracefully, and optimize for performance while maintaining data consistency.**

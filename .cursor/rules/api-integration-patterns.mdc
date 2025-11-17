@@ -1,0 +1,1144 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# API Integration Patterns - MANDATORY
+
+## HTTP Client Architecture
+
+### Axios Configuration and Setup
+```typescript
+// ✅ CORRECT - Comprehensive API client setup
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+
+interface ApiClientConfig {
+  baseURL: string;
+  timeout?: number;
+  retryAttempts?: number;
+  retryDelay?: number;
+  enableLogging?: boolean;
+}
+
+class ApiClient {
+  private client: AxiosInstance;
+  private retryAttempts: number;
+  private retryDelay: number;
+  private enableLogging: boolean;
+
+  constructor(config: ApiClientConfig) {
+    this.retryAttempts = config.retryAttempts || 3;
+    this.retryDelay = config.retryDelay || 1000;
+    this.enableLogging = config.enableLogging || false;
+
+    this.client = axios.create({
+      baseURL: config.baseURL,
+      timeout: config.timeout || 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    this.setupInterceptors();
+  }
+
+  private setupInterceptors(): void {
+    // Request interceptor
+    this.client.interceptors.request.use(
+      (config) => {
+        // Add authentication token
+        const token = this.getAuthToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // Add request ID for tracking
+        config.headers['X-Request-ID'] = this.generateRequestId();
+
+        // Log request
+        if (this.enableLogging) {
+          console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
+            headers: config.headers,
+            data: config.data,
+          });
+        }
+
+        return config;
+      },
+      (error) => {
+        if (this.enableLogging) {
+          console.error('❌ Request Error:', error);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Response interceptor
+    this.client.interceptors.response.use(
+      (response) => {
+        // Log successful response
+        if (this.enableLogging) {
+          console.log(`✅ API Response: ${response.status} ${response.config.url}`, {
+            data: response.data,
+            headers: response.headers,
+          });
+        }
+
+        return response;
+      },
+      async (error: AxiosError) => {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+        // Log error response
+        if (this.enableLogging) {
+          console.error(`❌ API Error: ${error.response?.status} ${error.config?.url}`, {
+            error: error.response?.data,
+            headers: error.response?.headers,
+          });
+        }
+
+        // Handle authentication errors
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          
+          try {
+            await this.refreshAuthToken();
+            return this.client(originalRequest);
+          } catch (refreshError) {
+            this.handleAuthenticationFailure();
+            return Promise.reject(refreshError);
+          }
+        }
+
+        // Handle retry logic for retryable errors
+        if (this.shouldRetry(error) && !originalRequest._retry) {
+          originalRequest._retry = true;
+          
+          await this.delay(this.retryDelay);
+          return this.client(originalRequest);
+        }
+
+        return Promise.reject(this.transformError(error));
+      }
+    );
+  }
+
+  private shouldRetry(error: AxiosError): boolean {
+    // Retry on network errors or 5xx server errors
+    return !error.response || (error.response.status >= 500 && error.response.status < 600);
+  }
+
+  private transformError(error: AxiosError): ApiError {
+    if (!error.response) {
+      return {
+        type: 'NETWORK_ERROR',
+        message: 'Network error occurred. Please check your connection.',
+        code: 'NETWORK_ERROR',
+        retryable: true,
+      };
+    }
+
+    const { status, data } = error.response;
+    
+    switch (status) {
+      case 400:
+        return {
+          type: 'VALIDATION_ERROR',
+          message: data?.message || 'Invalid request data',
+          code: data?.code || 'VALIDATION_ERROR',
+          details: data?.errors,
+          retryable: false,
+        };
+      case 401:
+        return {
+          type: 'AUTHENTICATION_ERROR',
+          message: 'Authentication required',
+          code: 'UNAUTHORIZED',
+          retryable: false,
+        };
+      case 403:
+        return {
+          type: 'AUTHORIZATION_ERROR',
+          message: 'Access denied',
+          code: 'FORBIDDEN',
+          retryable: false,
+        };
+      case 404:
+        return {
+          type: 'NOT_FOUND_ERROR',
+          message: 'Resource not found',
+          code: 'NOT_FOUND',
+          retryable: false,
+        };
+      case 429:
+        return {
+          type: 'RATE_LIMIT_ERROR',
+          message: 'Too many requests. Please try again later.',
+          code: 'RATE_LIMITED',
+          retryable: true,
+        };
+      default:
+        return {
+          type: 'SERVER_ERROR',
+          message: data?.message || 'Server error occurred',
+          code: data?.code || 'SERVER_ERROR',
+          retryable: status >= 500,
+        };
+    }
+  }
+
+  private getAuthToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
+  private async refreshAuthToken(): Promise<void> {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post('/auth/refresh', {
+      refresh_token: refreshToken,
+    });
+
+    const { access_token, refresh_token: newRefreshToken } = response.data;
+    localStorage.setItem('auth_token', access_token);
+    localStorage.setItem('refresh_token', newRefreshToken);
+  }
+
+  private handleAuthenticationFailure(): void {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    window.location.href = '/login';
+  }
+
+  private generateRequestId(): string {
+    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Public API methods
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.get<T>(url, config);
+    return response.data;
+  }
+
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.post<T>(url, data, config);
+    return response.data;
+  }
+
+  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.put<T>(url, data, config);
+    return response.data;
+  }
+
+  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.patch<T>(url, data, config);
+    return response.data;
+  }
+
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.delete<T>(url, config);
+    return response.data;
+  }
+}
+
+// API Error interface
+export interface ApiError {
+  type: 'NETWORK_ERROR' | 'VALIDATION_ERROR' | 'AUTHENTICATION_ERROR' | 'AUTHORIZATION_ERROR' | 'NOT_FOUND_ERROR' | 'RATE_LIMIT_ERROR' | 'SERVER_ERROR';
+  message: string;
+  code: string;
+  details?: any;
+  retryable: boolean;
+}
+
+// Create API client instance
+export const apiClient = new ApiClient({
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api',
+  timeout: 10000,
+  retryAttempts: 3,
+  retryDelay: 1000,
+  enableLogging: process.env.NODE_ENV === 'development',
+});
+```
+
+## Service Layer Architecture
+
+### Resource-Based Service Pattern
+```typescript
+// ✅ CORRECT - Resource-based API service
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
+interface FilterParams {
+  [key: string]: any;
+}
+
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+abstract class BaseService<T, CreateT = Partial<T>, UpdateT = Partial<T>> {
+  protected abstract resourcePath: string;
+
+  async getAll(
+    params: PaginationParams & FilterParams = {}
+  ): Promise<PaginatedResponse<T>> {
+    const queryParams = new URLSearchParams();
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const url = `${this.resourcePath}?${queryParams.toString()}`;
+    return apiClient.get<PaginatedResponse<T>>(url);
+  }
+
+  async getById(id: string): Promise<T> {
+    return apiClient.get<T>(`${this.resourcePath}/${id}`);
+  }
+
+  async create(data: CreateT): Promise<T> {
+    return apiClient.post<T>(this.resourcePath, data);
+  }
+
+  async update(id: string, data: UpdateT): Promise<T> {
+    return apiClient.put<T>(`${this.resourcePath}/${id}`, data);
+  }
+
+  async partialUpdate(id: string, data: Partial<UpdateT>): Promise<T> {
+    return apiClient.patch<T>(`${this.resourcePath}/${id}`, data);
+  }
+
+  async delete(id: string): Promise<void> {
+    return apiClient.delete<void>(`${this.resourcePath}/${id}`);
+  }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    return apiClient.post<void>(`${this.resourcePath}/bulk-delete`, { ids });
+  }
+
+  async search(query: string, filters: FilterParams = {}): Promise<T[]> {
+    const params = { q: query, ...filters };
+    const queryParams = new URLSearchParams();
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    return apiClient.get<T[]>(`${this.resourcePath}/search?${queryParams.toString()}`);
+  }
+}
+
+// Example service implementation
+interface Beer {
+  id: string;
+  name: string;
+  style: string;
+  abv: number;
+  ibu: number;
+  description: string;
+  available: boolean;
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateBeerRequest {
+  name: string;
+  style: string;
+  abv: number;
+  ibu: number;
+  description: string;
+  available?: boolean;
+  featured?: boolean;
+}
+
+interface UpdateBeerRequest extends Partial<CreateBeerRequest> {}
+
+class BeerService extends BaseService<Beer, CreateBeerRequest, UpdateBeerRequest> {
+  protected resourcePath = '/beers';
+
+  async getFeatured(): Promise<Beer[]> {
+    return apiClient.get<Beer[]>(`${this.resourcePath}/featured`);
+  }
+
+  async getByStyle(style: string): Promise<Beer[]> {
+    return apiClient.get<Beer[]>(`${this.resourcePath}/by-style/${encodeURIComponent(style)}`);
+  }
+
+  async toggleFeatured(id: string): Promise<Beer> {
+    return apiClient.post<Beer>(`${this.resourcePath}/${id}/toggle-featured`);
+  }
+
+  async toggleAvailability(id: string): Promise<Beer> {
+    return apiClient.post<Beer>(`${this.resourcePath}/${id}/toggle-availability`);
+  }
+
+  async getStats(): Promise<{
+    total: number;
+    available: number;
+    featured: number;
+    byStyle: Record<string, number>;
+  }> {
+    return apiClient.get(`${this.resourcePath}/stats`);
+  }
+}
+
+export const beerService = new BeerService();
+```
+
+## Request/Response Type Safety
+
+### TypeScript API Contracts
+```typescript
+// ✅ CORRECT - Comprehensive API type definitions
+// Base types
+interface BaseEntity {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: ValidationError[];
+}
+
+interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+// Request/Response pairs
+interface ContactFormRequest {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+interface ContactFormResponse {
+  id: string;
+  status: 'pending' | 'processed' | 'replied';
+  submittedAt: string;
+}
+
+// Generic API response wrapper
+type ApiResult<T> = Promise<ApiResponse<T>>;
+
+// Service with type-safe methods
+class ContactService {
+  async submitForm(data: ContactFormRequest): ApiResult<ContactFormResponse> {
+    return apiClient.post<ApiResponse<ContactFormResponse>>('/contact', data);
+  }
+
+  async getSubmissions(
+    params: PaginationParams = {}
+  ): ApiResult<PaginatedResponse<ContactFormResponse & ContactFormRequest>> {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    return apiClient.get<ApiResponse<PaginatedResponse<ContactFormResponse & ContactFormRequest>>>(
+      `/contact/submissions?${queryParams.toString()}`
+    );
+  }
+
+  async getSubmissionById(id: string): ApiResult<ContactFormResponse & ContactFormRequest> {
+    return apiClient.get<ApiResponse<ContactFormResponse & ContactFormRequest>>(
+      `/contact/submissions/${id}`
+    );
+  }
+
+  async updateSubmissionStatus(
+    id: string, 
+    status: ContactFormResponse['status']
+  ): ApiResult<ContactFormResponse> {
+    return apiClient.patch<ApiResponse<ContactFormResponse>>(
+      `/contact/submissions/${id}`,
+      { status }
+    );
+  }
+}
+
+export const contactService = new ContactService();
+```
+
+## Authentication Patterns
+
+### JWT Authentication Implementation
+```typescript
+// ✅ CORRECT - Comprehensive authentication service
+interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+interface LoginResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'user';
+  permissions: string[];
+  lastLoginAt: string;
+}
+
+interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+class AuthService {
+  private tokenKey = 'auth_token';
+  private refreshTokenKey = 'refresh_token';
+  private userKey = 'user_data';
+
+  async login(credentials: LoginRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+    
+    if (response.success) {
+      this.storeAuthData(response.data);
+    }
+    
+    return response.data;
+  }
+
+  async logout(): Promise<void> {
+    const refreshToken = this.getRefreshToken();
+    
+    if (refreshToken) {
+      try {
+        await apiClient.post('/auth/logout', { refreshToken });
+      } catch (error) {
+        console.warn('Logout request failed:', error);
+      }
+    }
+    
+    this.clearAuthData();
+  }
+
+  async refreshToken(): Promise<RefreshTokenResponse> {
+    const refreshToken = this.getRefreshToken();
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>('/auth/refresh', {
+      refreshToken,
+    });
+
+    if (response.success) {
+      this.storeTokens(response.data.accessToken, response.data.refreshToken);
+    }
+
+    return response.data;
+  }
+
+  async getCurrentUser(): Promise<User> {
+    const response = await apiClient.get<ApiResponse<User>>('/auth/me');
+    
+    if (response.success) {
+      this.storeUser(response.data);
+    }
+    
+    return response.data;
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await apiClient.post<ApiResponse<void>>('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    });
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    await apiClient.post<ApiResponse<void>>('/auth/forgot-password', { email });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    await apiClient.post<ApiResponse<void>>('/auth/reset-password', {
+      token,
+      newPassword,
+    });
+  }
+
+  // Token management
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  getUser(): User | null {
+    const userData = localStorage.getItem(this.userKey);
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getAccessToken();
+  }
+
+  hasPermission(permission: string): boolean {
+    const user = this.getUser();
+    return user?.permissions.includes(permission) || false;
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.getUser();
+    return user?.role === role;
+  }
+
+  private storeAuthData(authData: LoginResponse): void {
+    localStorage.setItem(this.tokenKey, authData.accessToken);
+    localStorage.setItem(this.refreshTokenKey, authData.refreshToken);
+    localStorage.setItem(this.userKey, JSON.stringify(authData.user));
+  }
+
+  private storeTokens(accessToken: string, refreshToken: string): void {
+    localStorage.setItem(this.tokenKey, accessToken);
+    localStorage.setItem(this.refreshTokenKey, refreshToken);
+  }
+
+  private storeUser(user: User): void {
+    localStorage.setItem(this.userKey, JSON.stringify(user));
+  }
+
+  private clearAuthData(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.userKey);
+  }
+}
+
+export const authService = new AuthService();
+```
+
+## File Upload Handling
+
+### Multipart Form Data and Progress Tracking
+```typescript
+// ✅ CORRECT - File upload with progress tracking
+interface FileUploadOptions {
+  onProgress?: (progress: number) => void;
+  onSuccess?: (response: any) => void;
+  onError?: (error: Error) => void;
+  maxSize?: number; // in bytes
+  allowedTypes?: string[];
+  multiple?: boolean;
+}
+
+interface UploadResponse {
+  id: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  mimeType: string;
+  url: string;
+  uploadedAt: string;
+}
+
+class FileUploadService {
+  async uploadFile(
+    file: File,
+    options: FileUploadOptions = {}
+  ): Promise<UploadResponse> {
+    const {
+      onProgress,
+      onSuccess,
+      onError,
+      maxSize = 10 * 1024 * 1024, // 10MB default
+      allowedTypes = [],
+    } = options;
+
+    // Validate file
+    this.validateFile(file, maxSize, allowedTypes);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await apiClient.post<ApiResponse<UploadResponse>>(
+        '/uploads',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total && onProgress) {
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              onProgress(progress);
+            }
+          },
+        }
+      );
+
+      if (response.success) {
+        onSuccess?.(response.data);
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Upload failed');
+      }
+    } catch (error) {
+      const uploadError = error instanceof Error ? error : new Error('Upload failed');
+      onError?.(uploadError);
+      throw uploadError;
+    }
+  }
+
+  async uploadMultipleFiles(
+    files: FileList | File[],
+    options: FileUploadOptions = {}
+  ): Promise<UploadResponse[]> {
+    const fileArray = Array.from(files);
+    const uploadPromises = fileArray.map(file => this.uploadFile(file, options));
+    
+    return Promise.all(uploadPromises);
+  }
+
+  async deleteFile(fileId: string): Promise<void> {
+    await apiClient.delete<ApiResponse<void>>(`/uploads/${fileId}`);
+  }
+
+  async getFileInfo(fileId: string): Promise<UploadResponse> {
+    const response = await apiClient.get<ApiResponse<UploadResponse>>(`/uploads/${fileId}`);
+    return response.data;
+  }
+
+  private validateFile(file: File, maxSize: number, allowedTypes: string[]): void {
+    if (file.size > maxSize) {
+      throw new Error(`File size exceeds maximum allowed size of ${this.formatFileSize(maxSize)}`);
+    }
+
+    if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
+      throw new Error(`File type ${file.type} is not allowed. Allowed types: ${allowedTypes.join(', ')}`);
+    }
+  }
+
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+}
+
+export const fileUploadService = new FileUploadService();
+
+// Hook for file upload with state management
+export function useFileUpload(options: FileUploadOptions = {}) {
+  const [uploadState, setUploadState] = useState<{
+    uploading: boolean;
+    progress: number;
+    error: string | null;
+    uploadedFiles: UploadResponse[];
+  }>({
+    uploading: false,
+    progress: 0,
+    error: null,
+    uploadedFiles: [],
+  });
+
+  const uploadFile = useCallback(async (file: File) => {
+    setUploadState(prev => ({
+      ...prev,
+      uploading: true,
+      progress: 0,
+      error: null,
+    }));
+
+    try {
+      const result = await fileUploadService.uploadFile(file, {
+        ...options,
+        onProgress: (progress) => {
+          setUploadState(prev => ({ ...prev, progress }));
+          options.onProgress?.(progress);
+        },
+      });
+
+      setUploadState(prev => ({
+        ...prev,
+        uploading: false,
+        uploadedFiles: [...prev.uploadedFiles, result],
+      }));
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      setUploadState(prev => ({
+        ...prev,
+        uploading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, [options]);
+
+  const reset = useCallback(() => {
+    setUploadState({
+      uploading: false,
+      progress: 0,
+      error: null,
+      uploadedFiles: [],
+    });
+  }, []);
+
+  return {
+    ...uploadState,
+    uploadFile,
+    reset,
+  };
+}
+```
+
+## API Testing Patterns
+
+### Mock Service and Testing Utilities
+```typescript
+// ✅ CORRECT - API testing utilities
+import { jest } from '@jest/globals';
+import { AxiosResponse } from 'axios';
+
+// Mock API responses
+export const createMockApiResponse = <T>(
+  data: T,
+  status: number = 200,
+  statusText: string = 'OK'
+): AxiosResponse<T> => ({
+  data,
+  status,
+  statusText,
+  headers: {},
+  config: {} as any,
+});
+
+export const createMockApiError = (
+  status: number,
+  message: string,
+  data?: any
+) => {
+  const error = new Error(message) as any;
+  error.response = {
+    status,
+    data: data || { message },
+    headers: {},
+  };
+  return error;
+};
+
+// Mock service factory
+export class MockApiService<T> {
+  private mockData: T[] = [];
+  private delay: number = 0;
+
+  constructor(initialData: T[] = [], delay: number = 0) {
+    this.mockData = [...initialData];
+    this.delay = delay;
+  }
+
+  setData(data: T[]): void {
+    this.mockData = [...data];
+  }
+
+  setDelay(delay: number): void {
+    this.delay = delay;
+  }
+
+  private async simulateDelay(): Promise<void> {
+    if (this.delay > 0) {
+      await new Promise(resolve => setTimeout(resolve, this.delay));
+    }
+  }
+
+  async getAll(): Promise<T[]> {
+    await this.simulateDelay();
+    return [...this.mockData];
+  }
+
+  async getById(id: string): Promise<T | null> {
+    await this.simulateDelay();
+    return this.mockData.find((item: any) => item.id === id) || null;
+  }
+
+  async create(data: Partial<T>): Promise<T> {
+    await this.simulateDelay();
+    const newItem = {
+      ...data,
+      id: `mock_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as T;
+    
+    this.mockData.push(newItem);
+    return newItem;
+  }
+
+  async update(id: string, data: Partial<T>): Promise<T> {
+    await this.simulateDelay();
+    const index = this.mockData.findIndex((item: any) => item.id === id);
+    
+    if (index === -1) {
+      throw createMockApiError(404, 'Item not found');
+    }
+
+    const updatedItem = {
+      ...this.mockData[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    this.mockData[index] = updatedItem;
+    return updatedItem;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.simulateDelay();
+    const index = this.mockData.findIndex((item: any) => item.id === id);
+    
+    if (index === -1) {
+      throw createMockApiError(404, 'Item not found');
+    }
+
+    this.mockData.splice(index, 1);
+  }
+
+  simulateError(status: number, message: string): void {
+    throw createMockApiError(status, message);
+  }
+}
+
+// Test utilities
+export const setupApiMocks = () => {
+  const mockGet = jest.fn();
+  const mockPost = jest.fn();
+  const mockPut = jest.fn();
+  const mockPatch = jest.fn();
+  const mockDelete = jest.fn();
+
+  // Mock axios
+  jest.mock('axios', () => ({
+    create: jest.fn(() => ({
+      get: mockGet,
+      post: mockPost,
+      put: mockPut,
+      patch: mockPatch,
+      delete: mockDelete,
+      interceptors: {
+        request: { use: jest.fn() },
+        response: { use: jest.fn() },
+      },
+    })),
+  }));
+
+  return {
+    mockGet,
+    mockPost,
+    mockPut,
+    mockPatch,
+    mockDelete,
+  };
+};
+
+// Example test
+describe('BeerService', () => {
+  let mockBeerService: MockApiService<Beer>;
+
+  beforeEach(() => {
+    const mockBeers: Beer[] = [
+      {
+        id: '1',
+        name: 'Test IPA',
+        style: 'IPA',
+        abv: 6.5,
+        ibu: 65,
+        description: 'A hoppy test beer',
+        available: true,
+        featured: false,
+        createdAt: '2023-01-01T00:00:00Z',
+        updatedAt: '2023-01-01T00:00:00Z',
+      },
+    ];
+
+    mockBeerService = new MockApiService(mockBeers);
+  });
+
+  it('should fetch all beers', async () => {
+    const beers = await mockBeerService.getAll();
+    expect(beers).toHaveLength(1);
+    expect(beers[0].name).toBe('Test IPA');
+  });
+
+  it('should create a new beer', async () => {
+    const newBeer = await mockBeerService.create({
+      name: 'New Beer',
+      style: 'Lager',
+      abv: 4.5,
+      ibu: 20,
+      description: 'A crisp lager',
+      available: true,
+      featured: false,
+    });
+
+    expect(newBeer.name).toBe('New Beer');
+    expect(newBeer.id).toBeDefined();
+    expect(newBeer.createdAt).toBeDefined();
+  });
+
+  it('should handle errors gracefully', async () => {
+    await expect(mockBeerService.getById('nonexistent')).resolves.toBeNull();
+    
+    await expect(
+      mockBeerService.update('nonexistent', { name: 'Updated' })
+    ).rejects.toThrow('Item not found');
+  });
+
+  it('should simulate network delays', async () => {
+    mockBeerService.setDelay(100);
+    
+    const startTime = Date.now();
+    await mockBeerService.getAll();
+    const endTime = Date.now();
+    
+    expect(endTime - startTime).toBeGreaterThanOrEqual(100);
+  });
+});
+```
+
+## Forbidden Patterns
+
+### ❌ AVOID These Anti-Patterns
+```typescript
+// ❌ WRONG - Direct fetch usage without error handling
+const fetchData = async () => {
+  const response = await fetch('/api/data');
+  const data = await response.json();
+  return data;
+};
+
+// ❌ WRONG - No request/response typing
+const apiCall = async (url: string, data: any): Promise<any> => {
+  return axios.post(url, data);
+};
+
+// ❌ WRONG - Hardcoded URLs
+const getUser = async (id: string) => {
+  return axios.get(`http://localhost:3000/api/users/${id}`);
+};
+
+// ❌ WRONG - No authentication handling
+const protectedCall = async () => {
+  return axios.get('/api/protected');
+};
+
+// ❌ WRONG - No retry logic for failed requests
+const unreliableCall = async () => {
+  try {
+    return await axios.get('/api/unreliable');
+  } catch (error) {
+    throw error; // No retry attempt
+  }
+};
+
+// ❌ WRONG - Mixing business logic with API calls
+const getUserAndUpdateUI = async (id: string) => {
+  const user = await axios.get(`/api/users/${id}`);
+  document.getElementById('username').textContent = user.data.name;
+  return user.data;
+};
+
+// ❌ WRONG - No request cancellation
+useEffect(() => {
+  fetchData().then(setData);
+}, [dependency]); // No cleanup
+
+// ❌ WRONG - Poor error messages
+const handleError = (error: any) => {
+  alert('Error!'); // Generic error message
+};
+```
+
+## API Integration Checklist
+
+### Before Implementation
+- [ ] API endpoints and contracts are documented
+- [ ] Authentication strategy is defined
+- [ ] Error handling strategy is planned
+- [ ] Request/response types are defined
+
+### During Development
+- [ ] HTTP client is properly configured with interceptors
+- [ ] All API calls are properly typed with TypeScript
+- [ ] Authentication tokens are handled automatically
+- [ ] Retry logic is implemented for appropriate errors
+- [ ] Loading states are managed consistently
+
+### Before Code Review
+- [ ] Error handling provides user-friendly messages
+- [ ] API responses are validated and typed
+- [ ] Request cancellation is implemented where needed
+- [ ] API calls are tested with mock data
+- [ ] Performance is optimized with caching and deduplication
+
+### Security Checklist
+- [ ] Sensitive data is not logged
+- [ ] Authentication tokens are stored securely
+- [ ] API endpoints use HTTPS in production
+- [ ] Request/response data is validated
+- [ ] Rate limiting is handled gracefully
+
+### Testing Checklist
+- [ ] API services have unit tests
+- [ ] Mock services are used for testing
+- [ ] Error scenarios are tested
+- [ ] Network delays are simulated in tests
+- [ ] Integration tests cover critical API flows
+
+**Remember: API integration is the backbone of modern web applications. Ensure robust error handling, type safety, and comprehensive testing to create reliable and maintainable API layers.**

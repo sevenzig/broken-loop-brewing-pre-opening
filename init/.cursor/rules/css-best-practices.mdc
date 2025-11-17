@@ -1,0 +1,122 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# CSS Best Practices - STRICTLY ENFORCE
+
+## CSS Modules Architecture - MANDATORY
+- Import styles as `import styles from './Component.module.css'`
+- Use camelCase naming for CSS Module classes: `.headerRow1`, `.componentCard`, `.sectionTitle`
+- Each component must have its own .module.css file in the same directory
+
+## File Structure Requirements
+```
+src/components/ComponentName/
+  ├── ComponentName.jsx
+  └── ComponentName.module.css
+```
+
+## CSS Module Class Usage
+```javascript
+// CORRECT
+import styles from './Component.module.css';
+<div className={styles.container}>
+<h1 className={styles.title}>
+
+// INCORRECT - global classes
+<div className="container">
+<h1 className="title">
+```
+
+## Global CSS Restrictions
+- globals.css: ONLY CSS resets, typography, and CSS custom properties
+- variables.css: ONLY :root custom properties
+- NO component-specific styles in global files
+- NO utility classes (use CSS Modules instead)
+
+## CSS Custom Properties Pattern
+```css
+/* globals.css */
+:root {
+  --color-primary: #1a4d5c;
+  --spacing-md: 1rem;
+  --border-radius: 8px;
+}
+
+/* Component.module.css */
+.card {
+  background: var(--color-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+}
+```
+
+## CSS Best Practices Rules
+- NEVER use `!important` declarations - refactor specificity instead
+- Use CSS custom properties (--variables) for reusable values
+- Prefer flexbox and grid over floats and positioning
+- Use relative units (rem, em, %) over fixed pixels when appropriate
+- Follow BEM-like naming within modules: `.card`, `.cardTitle`, `.cardContent`
+
+## Responsive Design Rules
+- Use mobile-first media queries
+- Standard breakpoints: 480px (mobile), 768px (tablet), 1024px (desktop), 1200px (large)
+- Container max-width: 1200px with auto margins for centering
+- Full-width sections with centered content containers
+
+## CSS Property Order
+1. Display & positioning
+2. Box model (width, height, padding, margin)
+3. Typography
+4. Visual (background, border, shadow)
+5. Animations & transitions
+
+## Forbidden Patterns
+- ❌ `!important` declarations
+- ❌ Global CSS classes for components
+- ❌ Inline styles (except dynamic values)
+- ❌ Deep selector nesting (max 2 levels)
+- ❌ Fixed z-index values (use CSS custom properties)
+- ❌ Magic numbers (use named variables)
+
+## Required Patterns
+- ✅ CSS Modules for all component styles
+- ✅ CSS custom properties for reusable values
+- ✅ Semantic class names
+- ✅ Mobile-first responsive design
+- ✅ Consistent spacing scale
+- ✅ Proper accessibility (focus states, contrast)
+
+## Component CSS Template
+```css
+/* Component.module.css */
+.component {
+  /* Use CSS custom properties */
+  background: var(--color-background);
+  padding: var(--spacing-lg);
+  
+  /* Responsive */
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.component:hover {
+  /* Smooth transitions */
+  transition: transform 0.3s ease;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .component {
+    padding: var(--spacing-md);
+  }
+}
+```
+
+## Error Prevention
+- Lint CSS Module imports to ensure they exist
+- Check for unused CSS classes in modules
+- Validate that all colors use CSS custom properties
+- Ensure no global classes are used in JSX className attributes
+- Verify responsive design at specified breakpoints

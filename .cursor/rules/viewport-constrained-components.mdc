@@ -1,0 +1,328 @@
+---
+description: "Best practices for viewport-constrained components like tooltips, modals, and overlays"
+globs: src/**/*.tsx,src/**/*.css,src/**/*.module.css
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: css,react,components,viewport,positioning,accessibility
+---
+
+# Viewport-Constrained Components Best Practices
+
+## Purpose and Scope
+
+This rule enforces best practices for creating components like tooltips, modals, dropdowns, and overlays that must remain within viewport boundaries. It ensures consistent user experiences across all screen sizes by promoting simple, predictable positioning over complex calculations and providing comprehensive testing strategies.
+
+## Standards and Requirements
+
+### Core Principles
+
+#### 1. Simplicity Over Complexity
+- **ALWAYS** prefer simple, predictable positioning over complex calculations
+- **AVOID** nested media queries and multiple positioning strategies
+- **START** with the simplest approach that works
+- **BUILD** complexity only when verified necessary
+
+#### 2. Progressive Enhancement
+- **BUILD** for mobile-first with simple positioning
+- **ADD** complexity only for larger screens where space is guaranteed
+- **TEST** positioning on the smallest expected screen size first
+
+### Component Categories
+
+#### Fixed Overlays (Modals, Alerts)
+- **USE** `position: fixed` with safe margins
+- **ALWAYS** include `max-width` and `max-height` constraints
+- **CENTER** with flexbox on the container, not CSS transforms
+
+#### Positioned Overlays (Tooltips, Dropdowns)
+- **START** with simple `left: 0` or small offset like `left: 20px`
+- **ONLY** attempt centering on screens where space is guaranteed (1200px+)
+- **USE** consistent widths rather than dynamic sizing
+
+#### Responsive Floating Elements
+- **USE** `position: fixed` for mobile to avoid parent container issues
+- **SWITCH** to `position: absolute` for larger screens
+- **ALWAYS** include viewport-relative constraints
+
+### Essential CSS Patterns
+
+#### Viewport Constraints
+- **ALWAYS** include safety constraints: `max-width: calc(100vw - 2rem)`
+- **USE** `clamp()` for dynamic positioning with bounds
+- **INCLUDE** emergency constraints for edge cases
+
+#### Safe Positioning Utilities
+- **ENSURE** minimum distance from edges using `env(safe-area-inset-*)`
+- **PROVIDE** fallback margins for non-supporting browsers
+
+### React Component Requirements
+
+#### Tooltip Components
+- **IMPLEMENT** proper ARIA attributes for accessibility
+- **INCLUDE** focus management for interactive tooltips
+- **PROVIDE** screen reader support with `aria-describedby`
+
+#### Modal Components
+- **USE** portals for fixed positioned elements
+- **IMPLEMENT** proper cleanup in useEffect hooks
+- **INCLUDE** focus trap for keyboard navigation
+
+### Testing Requirements
+
+#### Viewport Testing Checklist
+- **TEST** on 320px width (smallest common mobile)
+- **TEST** on 768px width (tablet breakpoint)
+- **TEST** on 1024px width (desktop breakpoint)
+- **TEST** when parent element is near viewport edges
+- **TEST** with browser zoom at 150% and 200%
+- **TEST** with reduced viewport height (mobile landscape)
+
+### Accessibility Standards
+
+#### Focus Management
+- **IMPLEMENT** proper focus trapping for modals
+- **PROVIDE** keyboard navigation support
+- **INCLUDE** escape key handling
+
+#### Screen Reader Support
+- **USE** appropriate ARIA roles and attributes
+- **PROVIDE** live regions for dynamic content
+- **INCLUDE** proper labeling and descriptions
+
+## Examples
+
+### Good Examples
+
+```css
+/* Simple, predictable tooltip positioning */
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 20px; /* Small offset to avoid edge */
+  width: 280px;
+  max-width: calc(100vw - 40px); /* Emergency constraint */
+}
+
+/* Modal with proper viewport constraints */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; /* Prevent edge contact */
+}
+
+.modal {
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  width: 100%;
+}
+```
+
+```tsx
+/* Tooltip component with proper accessibility */
+interface TooltipProps {
+  isVisible: boolean;
+  children: React.ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  maxWidth?: number;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({ 
+  isVisible, 
+  children, 
+  position = 'bottom',
+  maxWidth = 280 
+}) => {
+  if (!isVisible) return null;
+
+  return (
+    <div 
+      className={`tooltip tooltip--${position}`}
+      style={{ maxWidth: `min(${maxWidth}px, calc(100vw - 2rem))` }}
+      role="tooltip"
+      aria-live="polite"
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+```tsx
+/* Modal component with proper focus management */
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div 
+        ref={modalRef}
+        className="modal" 
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+```
+
+### Bad Examples
+
+```css
+/* Overly complex positioning */
+.tooltip {
+  left: max(-50px, calc(-140px + 50%));
+  transform: translateX(clamp(-100px, 50%, 100px));
+}
+```
+*Fails: Uses complex calc() expressions that are hard to debug and often break.*
+
+```css
+/* Missing viewport constraints */
+.modal {
+  width: 500px;
+  height: 400px;
+  /* No max-width/height constraints */
+}
+```
+*Fails: No viewport constraints can cause overflow on small screens.*
+
+```tsx
+/* Missing accessibility attributes */
+const Tooltip = ({ isVisible, children }) => {
+  if (!isVisible) return null;
+  
+  return (
+    <div className="tooltip">
+      {children}
+    </div>
+  );
+};
+```
+*Fails: Missing ARIA attributes and proper accessibility support.*
+
+```tsx
+/* No focus management in modal */
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal">
+        {children}
+      </div>
+    </div>
+  );
+};
+```
+*Fails: No focus management, keyboard navigation, or proper cleanup.*
+
+## Implementation Guidelines
+
+### CSS Positioning Strategy
+
+#### Start Simple
+1. Begin with basic `position: absolute` and simple offsets
+2. Use fixed widths with `max-width` constraints
+3. Test on smallest target screen size first
+4. Add complexity only when simple approach fails
+
+#### Progressive Enhancement
+1. Build mobile-first positioning
+2. Add responsive enhancements for larger screens
+3. Use media queries sparingly and predictably
+4. Always include fallback constraints
+
+### React Component Architecture
+
+#### Component Structure
+1. Separate positioning logic from content logic
+2. Use portals for fixed positioned elements
+3. Implement proper cleanup in useEffect hooks
+4. Include comprehensive accessibility support
+
+#### State Management
+1. Keep positioning state simple and predictable
+2. Avoid complex state calculations
+3. Use CSS for positioning when possible
+4. Reserve JavaScript for dynamic positioning only
+
+### Testing Strategy
+
+#### Viewport Testing
+1. Test on actual devices when possible
+2. Use browser dev tools with exact breakpoint values
+3. Test edge cases and boundary conditions
+4. Verify accessibility across all screen sizes
+
+#### Debug Positioning
+1. Use temporary debug styles for troubleshooting
+2. Test with different zoom levels
+3. Verify on various device orientations
+4. Check for parent container constraints
+
+### Performance Optimization
+
+#### CSS Performance
+1. Use `transform` for animations instead of position changes
+2. Implement `will-change` sparingly
+3. Avoid layout thrashing with proper containment
+4. Use GPU-accelerated properties when possible
+
+#### React Performance
+1. Implement proper cleanup for event listeners
+2. Use `useCallback` for stable function references
+3. Consider `React.memo` for expensive components
+4. Lazy load content for large overlays
+
+### Accessibility Implementation
+
+#### Focus Management
+1. Implement focus traps for modals
+2. Provide keyboard navigation support
+3. Handle escape key events
+4. Maintain proper tab order
+
+#### Screen Reader Support
+1. Use appropriate ARIA roles and attributes
+2. Provide live regions for dynamic content
+3. Include proper labeling and descriptions
+4. Test with screen reader software
+
+## Related Rules
+
+* @css-best-practices.mdc
+* @react-component-best-practices.mdc
+* @accessibility-standards.mdc
+* @responsive-design-standards.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive viewport-constrained component guidelines, positioning strategies, and accessibility requirements.
+
+<!--
+ Viewport-Constrained Components Best Practices
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->

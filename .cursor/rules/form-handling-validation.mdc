@@ -1,0 +1,1070 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Form Handling & Validation - MANDATORY
+
+## Form Architecture Standards
+
+### Form Component Structure
+```typescript
+// ✅ CORRECT - Comprehensive form component structure
+import React, { useState, useCallback } from 'react';
+import { useForm } from '@hooks/useForm';
+import { validateEmail, validateRequired, validatePhone } from '@utils/validation';
+import styles from './ContactForm.module.css';
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+interface ContactFormProps {
+  onSubmit: (data: ContactFormData) => Promise<void>;
+  initialData?: Partial<ContactFormData>;
+  disabled?: boolean;
+}
+
+const ContactForm: React.FC<ContactFormProps> = ({
+  onSubmit,
+  initialData = {},
+  disabled = false,
+}) => {
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    isValid,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setFieldError,
+    clearFieldError,
+    reset,
+  } = useForm<ContactFormData>({
+    initialValues: {
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+      ...initialData,
+    },
+    validationSchema: {
+      name: [validateRequired('Name is required')],
+      email: [
+        validateRequired('Email is required'),
+        validateEmail('Please enter a valid email address'),
+      ],
+      phone: [], // Optional field
+      subject: [validateRequired('Subject is required')],
+      message: [validateRequired('Message is required')],
+    },
+    onSubmit: async (data) => {
+      try {
+        await onSubmit(data);
+        reset();
+      } catch (error) {
+        // Handle submission errors
+        if (error instanceof ValidationError) {
+          error.fieldErrors.forEach(({ field, message }) => {
+            setFieldError(field, message);
+          });
+        }
+      }
+    },
+  });
+
+  return (
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <div className={styles.formGroup}>
+        <label htmlFor="name" className={styles.label}>
+          Name <span className={styles.required}>*</span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={disabled || isSubmitting}
+          className={`${styles.input} ${errors.name && touched.name ? styles.inputError : ''}`}
+          aria-describedby={errors.name && touched.name ? 'name-error' : undefined}
+          aria-invalid={!!(errors.name && touched.name)}
+          required
+        />
+        {errors.name && touched.name && (
+          <div id="name-error" className={styles.errorMessage} role="alert">
+            {errors.name}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="email" className={styles.label}>
+          Email <span className={styles.required}>*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={values.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={disabled || isSubmitting}
+          className={`${styles.input} ${errors.email && touched.email ? styles.inputError : ''}`}
+          aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
+          aria-invalid={!!(errors.email && touched.email)}
+          required
+        />
+        {errors.email && touched.email && (
+          <div id="email-error" className={styles.errorMessage} role="alert">
+            {errors.email}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="message" className={styles.label}>
+          Message <span className={styles.required}>*</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          value={values.message}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={disabled || isSubmitting}
+          rows={5}
+          className={`${styles.textarea} ${errors.message && touched.message ? styles.inputError : ''}`}
+          aria-describedby={errors.message && touched.message ? 'message-error' : undefined}
+          aria-invalid={!!(errors.message && touched.message)}
+          required
+        />
+        {errors.message && touched.message && (
+          <div id="message-error" className={styles.errorMessage} role="alert">
+            {errors.message}
+          </div>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={disabled || isSubmitting || !isValid}
+        className={styles.submitButton}
+        aria-describedby="submit-status"
+      >
+        {isSubmitting ? 'Sending...' : 'Send Message'}
+      </button>
+
+      <div id="submit-status" className={styles.submitStatus} aria-live="polite">
+        {isSubmitting && 'Submitting your message...'}
+      </div>
+    </form>
+  );
+};
+
+export default ContactForm;
+```
+
+## Form State Management
+
+### useForm Hook Implementation
+```typescript
+// ✅ CORRECT - Comprehensive form hook
+import { useState, useCallback, useMemo } from 'react';
+
+export interface ValidationRule<T = any> {
+  (value: T, allValues?: Record<string, any>): string | null;
+}
+
+export interface ValidationSchema<T> {
+  [K in keyof T]?: ValidationRule<T[K]>[];
+}
+
+export interface UseFormOptions<T> {
+  initialValues: T;
+  validationSchema?: ValidationSchema<T>;
+  validateOnChange?: boolean;
+  validateOnBlur?: boolean;
+  onSubmit?: (values: T) => Promise<void> | void;
+}
+
+export interface UseFormReturn<T> {
+  // Values
+  values: T;
+  initialValues: T;
+  
+  // Validation state
+  errors: Partial<Record<keyof T, string>>;
+  touched: Partial<Record<keyof T, boolean>>;
+  isValid: boolean;
+  isSubmitting: boolean;
+  isDirty: boolean;
+  
+  // Actions
+  handleChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleBlur: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleSubmit: (event: React.FormEvent) => void;
+  setFieldValue: (field: keyof T, value: any) => void;
+  setFieldError: (field: keyof T, error: string) => void;
+  clearFieldError: (field: keyof T) => void;
+  setValues: (values: Partial<T>) => void;
+  reset: (newValues?: T) => void;
+  validateField: (field: keyof T) => Promise<string | null>;
+  validateForm: () => Promise<boolean>;
+}
+
+export function useForm<T extends Record<string, any>>(
+  options: UseFormOptions<T>
+): UseFormReturn<T> {
+  const {
+    initialValues,
+    validationSchema = {},
+    validateOnChange = true,
+    validateOnBlur = true,
+    onSubmit,
+  } = options;
+
+  const [values, setValues] = useState<T>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Computed properties
+  const isDirty = useMemo(() => {
+    return Object.keys(values).some(key => 
+      values[key] !== initialValues[key]
+    );
+  }, [values, initialValues]);
+
+  const isValid = useMemo(() => {
+    return Object.keys(errors).length === 0;
+  }, [errors]);
+
+  // Validation functions
+  const validateField = useCallback(async (field: keyof T): Promise<string | null> => {
+    const rules = validationSchema[field];
+    if (!rules || rules.length === 0) return null;
+
+    const value = values[field];
+    
+    for (const rule of rules) {
+      const error = await rule(value, values);
+      if (error) return error;
+    }
+    
+    return null;
+  }, [values, validationSchema]);
+
+  const validateForm = useCallback(async (): Promise<boolean> => {
+    const newErrors: Partial<Record<keyof T, string>> = {};
+    
+    for (const field of Object.keys(validationSchema) as (keyof T)[]) {
+      const error = await validateField(field);
+      if (error) {
+        newErrors[field] = error;
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [validateField, validationSchema]);
+
+  // Event handlers
+  const handleChange = useCallback(async (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = event.target;
+    const fieldName = name as keyof T;
+    
+    // Handle different input types
+    let fieldValue: any = value;
+    if (type === 'checkbox') {
+      fieldValue = (event.target as HTMLInputElement).checked;
+    } else if (type === 'number') {
+      fieldValue = value === '' ? '' : Number(value);
+    }
+    
+    setValues(prev => ({ ...prev, [fieldName]: fieldValue }));
+    
+    // Clear existing error when user starts typing
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+    
+    // Validate on change if enabled
+    if (validateOnChange && touched[fieldName]) {
+      const error = await validateField(fieldName);
+      if (error) {
+        setErrors(prev => ({ ...prev, [fieldName]: error }));
+      }
+    }
+  }, [errors, touched, validateOnChange, validateField]);
+
+  const handleBlur = useCallback(async (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name } = event.target;
+    const fieldName = name as keyof T;
+    
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
+    
+    // Validate on blur if enabled
+    if (validateOnBlur) {
+      const error = await validateField(fieldName);
+      setErrors(prev => ({ ...prev, [fieldName]: error }));
+    }
+  }, [validateOnBlur, validateField]);
+
+  const handleSubmit = useCallback(async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Mark all fields as touched
+      const allTouched = Object.keys(values).reduce((acc, key) => {
+        acc[key as keyof T] = true;
+        return acc;
+      }, {} as Partial<Record<keyof T, boolean>>);
+      setTouched(allTouched);
+      
+      // Validate entire form
+      const isFormValid = await validateForm();
+      
+      if (isFormValid && onSubmit) {
+        await onSubmit(values);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [values, isSubmitting, validateForm, onSubmit]);
+
+  // Utility functions
+  const setFieldValue = useCallback((field: keyof T, value: any) => {
+    setValues(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const setFieldError = useCallback((field: keyof T, error: string) => {
+    setErrors(prev => ({ ...prev, [field]: error }));
+  }, []);
+
+  const clearFieldError = useCallback((field: keyof T) => {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
+  }, []);
+
+  const setFormValues = useCallback((newValues: Partial<T>) => {
+    setValues(prev => ({ ...prev, ...newValues }));
+  }, []);
+
+  const reset = useCallback((newValues?: T) => {
+    const resetValues = newValues || initialValues;
+    setValues(resetValues);
+    setErrors({});
+    setTouched({});
+    setIsSubmitting(false);
+  }, [initialValues]);
+
+  return {
+    // Values
+    values,
+    initialValues,
+    
+    // Validation state
+    errors,
+    touched,
+    isValid,
+    isSubmitting,
+    isDirty,
+    
+    // Actions
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setFieldValue,
+    setFieldError,
+    clearFieldError,
+    setValues: setFormValues,
+    reset,
+    validateField,
+    validateForm,
+  };
+}
+```
+
+## Validation Strategies
+
+### Validation Rules Library
+```typescript
+// ✅ CORRECT - Reusable validation rules
+export const validateRequired = (message = 'This field is required') => 
+  (value: any): string | null => {
+    if (value === null || value === undefined || value === '') {
+      return message;
+    }
+    if (typeof value === 'string' && value.trim() === '') {
+      return message;
+    }
+    return null;
+  };
+
+export const validateEmail = (message = 'Please enter a valid email address') => 
+  (value: string): string | null => {
+    if (!value) return null; // Let required validator handle empty values
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value) ? null : message;
+  };
+
+export const validatePhone = (message = 'Please enter a valid phone number') => 
+  (value: string): string | null => {
+    if (!value) return null; // Optional field
+    
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const cleanValue = value.replace(/[\s\-\(\)]/g, '');
+    return phoneRegex.test(cleanValue) ? null : message;
+  };
+
+export const validateMinLength = (minLength: number, message?: string) => 
+  (value: string): string | null => {
+    if (!value) return null;
+    
+    const defaultMessage = `Must be at least ${minLength} characters long`;
+    return value.length >= minLength ? null : (message || defaultMessage);
+  };
+
+export const validateMaxLength = (maxLength: number, message?: string) => 
+  (value: string): string | null => {
+    if (!value) return null;
+    
+    const defaultMessage = `Must be no more than ${maxLength} characters long`;
+    return value.length <= maxLength ? null : (message || defaultMessage);
+  };
+
+export const validatePattern = (pattern: RegExp, message: string) => 
+  (value: string): string | null => {
+    if (!value) return null;
+    
+    return pattern.test(value) ? null : message;
+  };
+
+export const validateConfirmPassword = (passwordField: string, message = 'Passwords do not match') => 
+  (value: string, allValues?: Record<string, any>): string | null => {
+    if (!value || !allValues) return null;
+    
+    return value === allValues[passwordField] ? null : message;
+  };
+
+export const validateUrl = (message = 'Please enter a valid URL') => 
+  (value: string): string | null => {
+    if (!value) return null;
+    
+    try {
+      new URL(value);
+      return null;
+    } catch {
+      return message;
+    }
+  };
+
+export const validateNumber = (message = 'Please enter a valid number') => 
+  (value: any): string | null => {
+    if (value === '' || value === null || value === undefined) return null;
+    
+    return !isNaN(Number(value)) ? null : message;
+  };
+
+export const validateRange = (min: number, max: number, message?: string) => 
+  (value: number): string | null => {
+    if (value === null || value === undefined) return null;
+    
+    const defaultMessage = `Value must be between ${min} and ${max}`;
+    const numValue = Number(value);
+    
+    return numValue >= min && numValue <= max ? null : (message || defaultMessage);
+  };
+
+// Async validation example
+export const validateUniqueEmail = (checkEmailExists: (email: string) => Promise<boolean>) => 
+  async (value: string): Promise<string | null> => {
+    if (!value) return null;
+    
+    try {
+      const exists = await checkEmailExists(value);
+      return exists ? 'This email is already registered' : null;
+    } catch (error) {
+      return 'Unable to verify email uniqueness';
+    }
+  };
+```
+
+### Complex Validation Schemas
+```typescript
+// ✅ CORRECT - Complex form validation
+interface UserRegistrationForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone?: string;
+  website?: string;
+  age: number;
+  terms: boolean;
+}
+
+const userRegistrationSchema: ValidationSchema<UserRegistrationForm> = {
+  firstName: [
+    validateRequired('First name is required'),
+    validateMinLength(2, 'First name must be at least 2 characters'),
+    validateMaxLength(50, 'First name must be less than 50 characters'),
+  ],
+  lastName: [
+    validateRequired('Last name is required'),
+    validateMinLength(2, 'Last name must be at least 2 characters'),
+    validateMaxLength(50, 'Last name must be less than 50 characters'),
+  ],
+  email: [
+    validateRequired('Email is required'),
+    validateEmail('Please enter a valid email address'),
+    validateUniqueEmail(checkEmailExists),
+  ],
+  password: [
+    validateRequired('Password is required'),
+    validateMinLength(8, 'Password must be at least 8 characters'),
+    validatePattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    ),
+  ],
+  confirmPassword: [
+    validateRequired('Please confirm your password'),
+    validateConfirmPassword('password', 'Passwords do not match'),
+  ],
+  phone: [
+    validatePhone('Please enter a valid phone number'),
+  ],
+  website: [
+    validateUrl('Please enter a valid website URL'),
+  ],
+  age: [
+    validateRequired('Age is required'),
+    validateNumber('Age must be a number'),
+    validateRange(13, 120, 'Age must be between 13 and 120'),
+  ],
+  terms: [
+    (value: boolean) => value ? null : 'You must accept the terms and conditions',
+  ],
+};
+```
+
+## Error Handling Patterns
+
+### Error Display Components
+```typescript
+// ✅ CORRECT - Reusable error display components
+interface FieldErrorProps {
+  error?: string;
+  touched?: boolean;
+  fieldId: string;
+}
+
+export const FieldError: React.FC<FieldErrorProps> = ({ error, touched, fieldId }) => {
+  if (!error || !touched) return null;
+  
+  return (
+    <div 
+      id={`${fieldId}-error`} 
+      className="field-error" 
+      role="alert"
+      aria-live="polite"
+    >
+      {error}
+    </div>
+  );
+};
+
+interface FormErrorSummaryProps {
+  errors: Record<string, string>;
+  touched: Record<string, boolean>;
+  fieldLabels: Record<string, string>;
+}
+
+export const FormErrorSummary: React.FC<FormErrorSummaryProps> = ({ 
+  errors, 
+  touched, 
+  fieldLabels 
+}) => {
+  const visibleErrors = Object.entries(errors).filter(([field, error]) => 
+    error && touched[field]
+  );
+  
+  if (visibleErrors.length === 0) return null;
+  
+  return (
+    <div className="form-error-summary" role="alert" aria-labelledby="error-summary-title">
+      <h3 id="error-summary-title">Please correct the following errors:</h3>
+      <ul>
+        {visibleErrors.map(([field, error]) => (
+          <li key={field}>
+            <a href={`#${field}`}>
+              {fieldLabels[field] || field}: {error}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+### Server Error Integration
+```typescript
+// ✅ CORRECT - Server error handling
+interface ServerValidationError {
+  field: string;
+  message: string;
+}
+
+interface ApiError {
+  message: string;
+  fieldErrors?: ServerValidationError[];
+  code?: string;
+}
+
+export class ValidationError extends Error {
+  fieldErrors: ServerValidationError[];
+  
+  constructor(message: string, fieldErrors: ServerValidationError[] = []) {
+    super(message);
+    this.name = 'ValidationError';
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+export const handleApiError = (error: any): ValidationError => {
+  if (error.response?.data?.fieldErrors) {
+    return new ValidationError(
+      error.response.data.message || 'Validation failed',
+      error.response.data.fieldErrors
+    );
+  }
+  
+  return new ValidationError(
+    error.message || 'An unexpected error occurred'
+  );
+};
+
+// Usage in form submission
+const handleSubmit = async (formData: ContactFormData) => {
+  try {
+    await submitContactForm(formData);
+    showSuccessMessage('Message sent successfully!');
+  } catch (error) {
+    const validationError = handleApiError(error);
+    
+    if (validationError.fieldErrors.length > 0) {
+      validationError.fieldErrors.forEach(({ field, message }) => {
+        setFieldError(field, message);
+      });
+    } else {
+      showErrorMessage(validationError.message);
+    }
+  }
+};
+```
+
+## Accessibility Requirements
+
+### Form Accessibility Standards
+```typescript
+// ✅ CORRECT - Accessible form field component
+interface FormFieldProps {
+  id: string;
+  name: string;
+  label: string;
+  type?: string;
+  value: string;
+  error?: string;
+  touched?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  helpText?: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
+}
+
+export const FormField: React.FC<FormFieldProps> = ({
+  id,
+  name,
+  label,
+  type = 'text',
+  value,
+  error,
+  touched,
+  required = false,
+  disabled = false,
+  placeholder,
+  helpText,
+  onChange,
+  onBlur,
+}) => {
+  const hasError = !!(error && touched);
+  const describedBy = [
+    hasError ? `${id}-error` : null,
+    helpText ? `${id}-help` : null,
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className="form-field">
+      <label htmlFor={id} className="form-label">
+        {label}
+        {required && <span className="required-indicator" aria-label="required">*</span>}
+      </label>
+      
+      {helpText && (
+        <div id={`${id}-help`} className="form-help-text">
+          {helpText}
+        </div>
+      )}
+      
+      <input
+        type={type}
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={`form-input ${hasError ? 'form-input--error' : ''}`}
+        aria-describedby={describedBy || undefined}
+        aria-invalid={hasError}
+        aria-required={required}
+        required={required}
+      />
+      
+      {hasError && (
+        <div id={`${id}-error`} className="form-error" role="alert">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### Keyboard Navigation
+```typescript
+// ✅ CORRECT - Form keyboard navigation
+export const useFormKeyboardNavigation = (formRef: React.RefObject<HTMLFormElement>) => {
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Submit form on Ctrl+Enter
+      if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (submitButton && !submitButton.disabled) {
+          submitButton.click();
+        }
+      }
+      
+      // Navigate between fields with Ctrl+Arrow keys
+      if (event.ctrlKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        event.preventDefault();
+        const formElements = Array.from(
+          form.querySelectorAll('input, textarea, select, button')
+        ) as HTMLElement[];
+        
+        const currentIndex = formElements.indexOf(event.target as HTMLElement);
+        if (currentIndex === -1) return;
+        
+        const nextIndex = event.key === 'ArrowDown' 
+          ? Math.min(currentIndex + 1, formElements.length - 1)
+          : Math.max(currentIndex - 1, 0);
+          
+        formElements[nextIndex]?.focus();
+      }
+    };
+
+    form.addEventListener('keydown', handleKeyDown);
+    return () => form.removeEventListener('keydown', handleKeyDown);
+  }, [formRef]);
+};
+```
+
+## Performance Optimization
+
+### Form Performance Patterns
+```typescript
+// ✅ CORRECT - Optimized form rendering
+import { memo, useMemo } from 'react';
+
+interface OptimizedFormFieldProps extends FormFieldProps {
+  // Additional props for optimization
+}
+
+export const OptimizedFormField = memo<OptimizedFormFieldProps>(({
+  id,
+  name,
+  label,
+  value,
+  error,
+  touched,
+  onChange,
+  onBlur,
+  ...props
+}) => {
+  // Memoize error state to prevent unnecessary re-renders
+  const errorState = useMemo(() => ({
+    hasError: !!(error && touched),
+    errorMessage: error && touched ? error : null,
+  }), [error, touched]);
+
+  // Memoize describedBy calculation
+  const describedBy = useMemo(() => {
+    const parts = [];
+    if (errorState.hasError) parts.push(`${id}-error`);
+    if (props.helpText) parts.push(`${id}-help`);
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }, [id, errorState.hasError, props.helpText]);
+
+  return (
+    <div className="form-field">
+      <label htmlFor={id} className="form-label">
+        {label}
+        {props.required && <span className="required-indicator">*</span>}
+      </label>
+      
+      <input
+        type={props.type || 'text'}
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        className={`form-input ${errorState.hasError ? 'form-input--error' : ''}`}
+        aria-describedby={describedBy}
+        aria-invalid={errorState.hasError}
+        {...props}
+      />
+      
+      {errorState.errorMessage && (
+        <div id={`${id}-error`} className="form-error" role="alert">
+          {errorState.errorMessage}
+        </div>
+      )}
+    </div>
+  );
+});
+
+// Debounced validation for expensive operations
+export const useDebouncedValidation = (
+  value: any,
+  validator: (value: any) => Promise<string | null>,
+  delay: number = 500
+) => {
+  const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+
+  useEffect(() => {
+    if (!value) {
+      setError(null);
+      return;
+    }
+
+    setIsValidating(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const validationError = await validator(value);
+        setError(validationError);
+      } catch (err) {
+        setError('Validation failed');
+      } finally {
+        setIsValidating(false);
+      }
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsValidating(false);
+    };
+  }, [value, validator, delay]);
+
+  return { error, isValidating };
+};
+```
+
+## Form Testing Patterns
+
+### Form Testing Utilities
+```typescript
+// ✅ CORRECT - Form testing helpers
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+export const fillForm = async (formData: Record<string, any>) => {
+  const user = userEvent.setup();
+  
+  for (const [fieldName, value] of Object.entries(formData)) {
+    const field = screen.getByLabelText(new RegExp(fieldName, 'i'));
+    
+    if (field.tagName === 'INPUT' && field.getAttribute('type') === 'checkbox') {
+      if (value) {
+        await user.click(field);
+      }
+    } else {
+      await user.clear(field);
+      await user.type(field, String(value));
+    }
+  }
+};
+
+export const submitForm = async () => {
+  const user = userEvent.setup();
+  const submitButton = screen.getByRole('button', { name: /submit|send/i });
+  await user.click(submitButton);
+};
+
+export const expectFieldError = (fieldName: string, errorMessage: string) => {
+  const field = screen.getByLabelText(new RegExp(fieldName, 'i'));
+  expect(field).toHaveAttribute('aria-invalid', 'true');
+  expect(screen.getByText(errorMessage)).toBeInTheDocument();
+};
+
+// Example test
+describe('ContactForm', () => {
+  it('validates required fields', async () => {
+    const mockSubmit = jest.fn();
+    render(<ContactForm onSubmit={mockSubmit} />);
+    
+    await submitForm();
+    
+    expectFieldError('name', 'Name is required');
+    expectFieldError('email', 'Email is required');
+    expect(mockSubmit).not.toHaveBeenCalled();
+  });
+  
+  it('submits valid form data', async () => {
+    const mockSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<ContactForm onSubmit={mockSubmit} />);
+    
+    await fillForm({
+      name: 'John Doe',
+      email: 'john@example.com',
+      subject: 'Test Subject',
+      message: 'Test message',
+    });
+    
+    await submitForm();
+    
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        name: 'John Doe',
+        email: 'john@example.com',
+        subject: 'Test Subject',
+        message: 'Test message',
+      });
+    });
+  });
+});
+```
+
+## Forbidden Patterns
+
+### ❌ AVOID These Anti-Patterns
+```typescript
+// ❌ WRONG - Uncontrolled form inputs
+<input type="text" defaultValue="initial" />
+
+// ❌ WRONG - Missing validation
+<form onSubmit={handleSubmit}>
+  <input type="email" name="email" />
+  <button type="submit">Submit</button>
+</form>
+
+// ❌ WRONG - Poor error handling
+const handleSubmit = (data) => {
+  fetch('/api/submit', { method: 'POST', body: JSON.stringify(data) })
+    .then(() => alert('Success!'))
+    .catch(() => alert('Error!')); // Generic error handling
+};
+
+// ❌ WRONG - Inaccessible form fields
+<div>
+  <span>Email</span>
+  <input type="email" />
+</div>
+
+// ❌ WRONG - Validation on every keystroke
+<input 
+  onChange={(e) => {
+    setValue(e.target.value);
+    validateField(e.target.value); // Too aggressive
+  }}
+/>
+
+// ❌ WRONG - Mutating form state directly
+const handleChange = (field, value) => {
+  formData[field] = value; // Direct mutation
+  setFormData(formData);
+};
+```
+
+## Form Development Checklist
+
+### Before Form Creation
+- [ ] Form purpose and data structure are clearly defined
+- [ ] Validation requirements are documented
+- [ ] Accessibility requirements are considered
+- [ ] Error handling strategy is planned
+
+### During Development
+- [ ] All form fields are properly controlled
+- [ ] Validation schema is comprehensive
+- [ ] Error messages are user-friendly and specific
+- [ ] Form is keyboard navigable
+- [ ] Loading and disabled states are handled
+- [ ] Form data is properly typed with TypeScript
+
+### Before Code Review
+- [ ] Form has proper ARIA attributes
+- [ ] Error messages have proper roles and live regions
+- [ ] Form is tested with screen readers
+- [ ] Validation works on both client and server
+- [ ] Form handles network errors gracefully
+- [ ] Performance is optimized for large forms
+
+### Accessibility Checklist
+- [ ] All form fields have associated labels
+- [ ] Required fields are properly marked
+- [ ] Error messages are announced to screen readers
+- [ ] Form can be completed using only keyboard
+- [ ] Focus management is implemented correctly
+- [ ] Color is not the only way to indicate errors
+
+**Remember: Forms are critical user interaction points. They should be accessible, performant, and provide clear feedback to users throughout the interaction process.**

@@ -1,0 +1,339 @@
+/* Overlay that covers the entire screen */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(212, 175, 55, 0.15) 0%,
+    rgba(212, 175, 55, 0.25) 50%,
+    rgba(212, 175, 55, 0.35) 100%
+  );
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+/* Main modal container */
+.modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: slideIn 0.4s ease-out;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Logo section */
+.logoSection {
+  margin-bottom: 2rem;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #D4AF37;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.breweryName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #D4AF37;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Content section */
+.content {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.message {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.subMessage {
+  font-size: 1rem;
+  color: #b0b0b0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Button container */
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-direction: column;
+}
+
+/* Base button styles */
+.buttonContainer button {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Yes button (primary) */
+.yesButton {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  color: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.yesButton:hover {
+  background: linear-gradient(135deg, #E6C048 0%, #D4AF37 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+}
+
+.yesButton:active {
+  transform: translateY(0);
+}
+
+/* No button (secondary) */
+.noButton {
+  background: transparent;
+  color: #e0e0e0;
+  border: 2px solid #666;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.noButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #888;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.noButton:active {
+  transform: translateY(0);
+}
+
+/* Footer section */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+}
+
+.disclaimer {
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+  .modal {
+    padding: 4rem;
+    max-width: 520px;
+  }
+  
+  .buttonContainer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .buttonContainer button {
+    flex: 1;
+  }
+  
+  .breweryName {
+    font-size: 2rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .message {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 2rem;
+    margin: 1rem;
+    width: calc(100% - 2rem);
+  }
+  
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .breweryName {
+    font-size: 1.5rem;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+  }
+  
+  .message {
+    font-size: 1rem;
+  }
+  
+  .buttonContainer button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Focus styles for accessibility */
+.yesButton:focus,
+.noButton:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(212, 175, 55, 0.5),
+    0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .modal {
+    background: #000;
+    border: 2px solid #fff;
+  }
+  
+  .yesButton {
+    background: #D4AF37;
+    color: #000;
+  }
+  
+  .noButton {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+  }
+}
+
+/* Pure CSS Bubble Animation */
+.bubbleContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.bubble {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation: bubbleFloat var(--bubble-duration) linear infinite;
+  animation-delay: var(--bubble-delay);
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  left: var(--bubble-left);
+  bottom: -10px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, var(--bubble-opacity)) 0%,
+    rgba(255, 255, 255, calc(var(--bubble-opacity) * 0.3)) 100%
+  );
+}
+
+@keyframes bubbleFloat {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: calc(var(--bubble-opacity) * 0.875);
+  }
+  40% {
+    opacity: var(--bubble-opacity);
+  }
+  70% {
+    opacity: calc(var(--bubble-opacity) * 0.7);
+  }
+  100% {
+    transform: translateY(-110vh);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .modal,
+  .buttonContainer button {
+    animation: none;
+    transition: none;
+  }
+  
+  .buttonContainer button:hover {
+    transform: none;
+  }
+  
+  .bubbleContainer {
+    display: none;
+  }
+} 

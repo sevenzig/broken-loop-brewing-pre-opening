@@ -1,0 +1,100 @@
+/* MobileActionButtons Component CSS Module */
+
+.mobileActionButtons {
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 10;
+}
+
+.buttonContainer {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding-mobile);
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.orderButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-timing);
+  min-height: var(--touch-target-min);
+  background: var(--color-secondary);
+  color: white;
+}
+
+.orderButton:hover,
+.orderButton:focus {
+  background: var(--color-secondary-hover);
+  transform: translateY(-1px);
+}
+
+.buttonText {
+  line-height: 1;
+}
+
+/* Mobile Portrait - 320px to 480px */
+@media (max-width: 480px) {
+  .mobileActionButtons {
+    padding: 0.5rem 0;
+  }
+  
+  .buttonContainer {
+    flex-direction: column;
+  }
+  
+  .orderButton {
+    width: 100%;
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* Mobile Landscape / Small Tablet - 481px to 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+  .buttonContainer {
+    padding: 0 var(--container-padding-tablet);
+  }
+  
+  .orderButton {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-base);
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* Hide on tablet and desktop - only show on mobile */
+@media (min-width: 769px) {
+  .mobileActionButtons {
+    display: none;
+  }
+}
+
+/* Accessibility for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .orderButton {
+    transition: none;
+  }
+  
+  .orderButton:hover,
+  .orderButton:focus {
+    transform: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.orderButton:focus-visible {
+  outline: 2px solid var(--color-background);
+  outline-offset: 2px;
+} 

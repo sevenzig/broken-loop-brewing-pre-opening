@@ -1,0 +1,456 @@
+/* Header Component CSS Module */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: var(--color-background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Desktop Header Styles */
+.headerDesktop {
+  display: none;
+}
+
+.headerRow1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--container-padding-desktop);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.headerRow2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(var(--spacing-sm) * 1.5) var(--container-padding-desktop);
+  background: var(--color-background-secondary);
+}
+
+.logo img {
+  height: 75px;
+  width: auto;
+}
+
+/* Mobile logo - 3x larger than desktop */
+.headerMobile .logo img {
+  height: 150px;
+  width: auto;
+  margin: 0;
+  padding: var(--spacing-md);
+  display: block;
+  line-height: 0;
+}
+
+/* Mobile text variants for smallest screens */
+.businessStatusTextShort,
+.directionsTextShort {
+  display: none;
+}
+
+.businessStatusTextFull,
+.directionsTextFull {
+  display: inline;
+}
+
+/* Smallest mobile - show shortened text */
+@media (max-width: 480px) {
+  .businessStatusTextShort,
+  .directionsTextShort {
+    display: inline;
+  }
+  
+  .businessStatusTextFull,
+  .directionsTextFull {
+    display: none;
+  }
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.navLink {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 500;
+  transition: color var(--transition-speed) ease;
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+}
+
+.onlineStoreButton, .mobileLinkButton {
+  background: #1a6a7b;
+  color: #fff;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  transition: background 0.18s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 2px 12px 0 rgba(23,80,92,0.13);
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  letter-spacing: 0.01em;
+  border: none;
+}
+
+.onlineStoreButton:hover, .onlineStoreButton:focus,
+.mobileLinkButton:hover, .mobileLinkButton:focus {
+  background: #17505c;
+  box-shadow: 0 4px 24px 0 rgba(23,80,92,0.18);
+  color: #fff;
+  outline: none;
+}
+
+.businessStatus {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  position: relative;
+  cursor: pointer;
+  padding: calc(var(--spacing-sm) * 0.75);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed) ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.businessStatusText {
+  transition: color var(--transition-speed) ease;
+}
+
+.businessStatus:hover {
+  background: var(--color-background-hover);
+  border-color: var(--color-primary);
+}
+
+.businessStatus:hover .businessStatusText {
+  color: var(--color-primary);
+}
+
+.clockIcon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-speed) ease;
+}
+
+.businessStatus:hover .clockIcon {
+  color: var(--color-primary);
+}
+
+.businessStatusButton {
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: calc(var(--spacing-sm) * 1.5);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed) ease;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-decoration: none;
+  gap: var(--spacing-xs);
+  width: 0;
+  min-width: 0;
+}
+
+.businessStatusButton:hover {
+  background: var(--color-background-hover);
+  color: var(--color-primary);
+}
+
+.directionsLink {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+  padding: calc(var(--spacing-sm) * 0.75);
+  border-radius: var(--border-radius);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.directionsLink:hover {
+  color: var(--color-primary-hover);
+  background: var(--color-background-hover);
+  border-color: var(--color-primary);
+}
+
+.mapIcon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  transition: color var(--transition-speed) ease;
+}
+
+.directionsLink:hover .mapIcon {
+  color: var(--color-primary-hover);
+}
+
+.directionsText {
+  transition: color var(--transition-speed) ease;
+}
+
+.directionsShort {
+  display: none;
+}
+
+.directionsFull {
+  display: inline;
+}
+
+/* Responsive directions text - show short version on smaller screens */
+@media (max-width: 768px) {
+  .directionsShort {
+    display: inline;
+  }
+  
+  .directionsFull {
+    display: none;
+  }
+}
+
+/* Mobile Header Styles */
+.headerMobile {
+  position: relative;
+  display: block;
+}
+
+.mobileRow1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--container-padding-mobile);
+  margin: 0;
+  line-height: 0;
+}
+
+.headerMobile .logo {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Mobile row hiding on scroll */
+.mobileRow2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(var(--spacing-sm) * 1.5) var(--container-padding-mobile);
+  background: var(--color-background-secondary);
+  border-top: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
+  transition: opacity var(--transition-speed) var(--transition-timing), transform var(--transition-speed) var(--transition-timing);
+  /* Ensure smooth hiding animation */
+  will-change: opacity, transform;
+  /* Ensure proper layout flow */
+  position: relative;
+  overflow: hidden;
+}
+
+.mobileRow2.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+  /* Use position absolute to remove from layout flow */
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  /* Ensure hidden items don't interfere with layout */
+  visibility: hidden;
+  height: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.mobileCallButton,
+.mobileDirectionsButton {
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: calc(var(--spacing-sm) * 1.5);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed) ease;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-decoration: none;
+  gap: var(--spacing-xs);
+  width: 0;
+  min-width: 0;
+}
+
+.mobileCallButton:hover,
+.mobileDirectionsButton:hover {
+  background: var(--color-background-hover);
+  color: var(--color-primary);
+}
+
+.phoneIcon,
+.mapIcon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-speed) ease;
+}
+
+.mobileCallButton:hover .phoneIcon,
+.mobileDirectionsButton:hover .mapIcon {
+  color: var(--color-primary);
+}
+
+.hamburgerButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-sm);
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  justify-content: center;
+  align-items: center;
+}
+
+.hamburgerLine {
+  width: 37.5px;
+  height: 4px;
+  background: var(--color-text);
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburgerButton:hover .hamburgerLine {
+  background: var(--color-primary);
+}
+
+/* Hamburger to X animation */
+.hamburgerButton.open .hamburgerLine:nth-child(1) {
+  transform: translateY(10.5px) rotate(45deg);
+}
+
+.hamburgerButton.open .hamburgerLine:nth-child(2) {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.hamburgerButton.open .hamburgerLine:nth-child(3) {
+  transform: translateY(-10.5px) rotate(-45deg);
+}
+
+/* Mobile Menu Overlay */
+.mobileMenuOverlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-background);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-dropdown);
+  animation: slideDown var(--transition-speed) ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mobileNavigation {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+.mobileNavLink {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 500;
+  padding: var(--spacing-md);
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  border-radius: var(--border-radius);
+  transition: background var(--transition-speed) ease;
+}
+
+.mobileNavLink:hover {
+  background: var(--color-background-hover);
+  color: var(--color-primary);
+}
+
+.mobileLinkButton {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-speed) ease;
+}
+
+.mobileLinkButton:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Tablet and Desktop Breakpoints */
+@media (min-width: 769px) {
+  .headerDesktop {
+    display: block;
+  }
+  
+  .headerMobile {
+    display: none;
+  }
+  
+  .headerRow1 {
+    padding: var(--spacing-md) var(--container-padding-tablet);
+  }
+  
+  .headerRow2 {
+    padding: calc(var(--spacing-sm) * 1.5) var(--container-padding-tablet);
+  }
+}
+
+@media (min-width: 1025px) {
+  .headerRow1 {
+    padding: var(--spacing-md) var(--container-padding-desktop);
+  }
+  
+  .headerRow2 {
+    padding: calc(var(--spacing-sm) * 1.5) var(--container-padding-desktop);
+  }
+} 

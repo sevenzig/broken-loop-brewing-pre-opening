@@ -1,0 +1,479 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Component Architecture Standards - MANDATORY
+
+## File Structure Requirements - EXACT
+
+### Component Directory Structure
+```
+src/components/ComponentName/
+  ├── ComponentName.tsx          # Main component file
+  ├── ComponentName.module.css   # Component-specific styles
+  ├── index.ts                   # Export barrel (optional)
+  └── types.ts                   # Component-specific types (if needed)
+```
+
+### Page Structure
+```
+src/pages/
+  ├── HomePage.tsx
+  ├── AboutPage.tsx
+  └── ContactPage.tsx
+```
+
+### Global Structure
+```
+src/
+├── components/           # Reusable components
+├── pages/               # Page components
+├── hooks/               # Custom React hooks
+├── utils/               # Utility functions
+├── types/               # TypeScript type definitions
+├── data/                # Static data and content
+├── styles/              # Global styles only
+└── assets/              # Images, icons, etc.
+```
+
+## Component Naming Conventions
+
+### File Naming
+- Components: `PascalCase.tsx` (e.g., `HeaderNavigation.tsx`)
+- CSS Modules: `PascalCase.module.css` (e.g., `HeaderNavigation.module.css`)
+- Utilities: `camelCase.ts` (e.g., `formatDate.ts`)
+- Hooks: `camelCase.ts` starting with `use` (e.g., `useLocalStorage.ts`)
+
+### Component Export Pattern
+```typescript
+// Component.tsx
+import styles from './Component.module.css';
+
+interface ComponentProps {
+  title: string;
+  children?: React.ReactNode;
+}
+
+const Component: React.FC<ComponentProps> = ({ title, children }) => {
+  return (
+    <div className={styles.container}>
+      <h1 className={styles.title}>{title}</h1>
+      {children}
+    </div>
+  );
+};
+
+export default Component;
+```
+
+## CSS Modules Integration - MANDATORY
+
+### Import Pattern
+```typescript
+import styles from './Component.module.css';
+
+// Usage in JSX
+<div className={styles.container}>
+  <h1 className={styles.title}>
+  <button className={styles.primaryButton}>
+</div>
+```
+
+### CSS Module Naming
+```css
+/* Component.module.css */
+.container {
+  /* Base container styles */
+}
+
+.title {
+  /* Title styles */
+}
+
+.primaryButton {
+  /* Button styles */
+}
+
+/* Modifier classes */
+.titleLarge {
+  /* Large title variant */
+}
+
+.buttonSecondary {
+  /* Secondary button variant */
+}
+```
+
+## TypeScript Integration - REQUIRED
+
+### Props Interface
+```typescript
+interface ComponentProps {
+  // Always define prop types
+  title: string;
+  subtitle?: string;
+  isActive?: boolean;
+  onAction?: () => void;
+  children?: React.ReactNode;
+  className?: string; // For style composition
+}
+```
+
+### Component with TypeScript
+```typescript
+import React from 'react';
+import styles from './Component.module.css';
+
+interface ComponentProps {
+  title: string;
+  variant?: 'primary' | 'secondary';
+  className?: string;
+}
+
+const Component: React.FC<ComponentProps> = ({ 
+  title, 
+  variant = 'primary',
+  className 
+}) => {
+  const componentClasses = [
+    styles.component,
+    styles[variant],
+    className
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className={componentClasses}>
+      <h2 className={styles.title}>{title}</h2>
+    </div>
+  );
+};
+
+export default Component;
+```
+
+## Component Patterns
+
+### Layout Components
+```typescript
+// src/components/Layout/Layout.tsx
+interface LayoutProps {
+  children: React.ReactNode;
+  variant?: 'default' | 'wide' | 'narrow';
+}
+
+const Layout: React.FC<LayoutProps> = ({ children, variant = 'default' }) => {
+  return (
+    <div className={styles[variant]}>
+      {children}
+    </div>
+  );
+};
+```
+
+### Page Components
+```typescript
+// src/pages/HomePage.tsx
+import Layout from '@components/Layout/Layout';
+import HeroSection from '@components/HeroSection/HeroSection';
+
+const HomePage: React.FC = () => {
+  return (
+    <Layout>
+      <HeroSection />
+      {/* Other page sections */}
+    </Layout>
+  );
+};
+```
+
+### Reusable Components
+```typescript
+// src/components/Button/Button.tsx
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
+  children: React.ReactNode;
+}
+
+const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'medium',
+  children,
+  className,
+  ...props
+}) => {
+  const buttonClasses = [
+    styles.button,
+    styles[variant],
+    styles[size],
+    className
+  ].filter(Boolean).join(' ');
+
+  return (
+    <button className={buttonClasses} {...props}>
+      {children}
+    </button>
+  );
+};
+```
+
+## Hooks Pattern
+
+### Custom Hook Structure
+```typescript
+// src/hooks/useLocalStorage.ts
+import { useState, useEffect } from 'react';
+
+interface UseLocalStorageReturn<T> {
+  value: T;
+  setValue: (value: T) => void;
+  removeValue: () => void;
+}
+
+function useLocalStorage<T>(key: string, initialValue: T): UseLocalStorageReturn<T> {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
+
+  const setStoredValue = (value: T) => {
+    try {
+      setValue(value);
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}":`, error);
+    }
+  };
+
+  const removeStoredValue = () => {
+    try {
+      setValue(initialValue);
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error removing localStorage key "${key}":`, error);
+    }
+  };
+
+  return {
+    value,
+    setValue: setStoredValue,
+    removeValue: removeStoredValue
+  };
+}
+
+export default useLocalStorage;
+```
+
+## Data Loading Pattern
+
+### Content Loading Utility
+```typescript
+// src/utils/contentLoader.ts
+import { remark } from 'remark';
+import html from 'remark-html';
+import matter from 'gray-matter';
+
+export interface ContentItem {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  content: string;
+  [key: string]: any;
+}
+
+export async function loadContent(directory: string): Promise<ContentItem[]> {
+  const files = import.meta.glob('../data/**/*.md', { as: 'raw' });
+  const items: ContentItem[] = [];
+
+  for (const path in files) {
+    if (path.includes(directory)) {
+      const fileContent = await files[path]();
+      const { data, content } = matter(fileContent);
+      
+      const processedContent = await remark().use(html).process(content);
+      
+      items.push({
+        slug: path.split('/').pop()?.replace('.md', '') || '',
+        content: processedContent.toString(),
+        ...data
+      } as ContentItem);
+    }
+  }
+
+  return items;
+}
+```
+
+## Error Handling Pattern
+
+### Error Boundary Component
+```typescript
+// src/components/ErrorBoundary/ErrorBoundary.tsx
+import React from 'react';
+import styles from './ErrorBoundary.module.css';
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className={styles.errorContainer}>
+          <h2 className={styles.errorTitle}>Something went wrong</h2>
+          <p className={styles.errorMessage}>
+            We're sorry, but something unexpected happened. Please try refreshing the page.
+          </p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+```
+
+## Component Composition Rules
+
+### Composition Over Inheritance
+```typescript
+// Good: Composition
+interface CardProps {
+  children: React.ReactNode;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+const Card: React.FC<CardProps> = ({ children, header, footer }) => (
+  <div className={styles.card}>
+    {header && <div className={styles.header}>{header}</div>}
+    <div className={styles.content}>{children}</div>
+    {footer && <div className={styles.footer}>{footer}</div>}
+  </div>
+);
+
+// Usage
+<Card 
+  header={<h2>Card Title</h2>}
+  footer={<Button>Action</Button>}
+>
+  Card content here
+</Card>
+```
+
+### Render Props Pattern
+```typescript
+interface RenderProps<T> {
+  data: T;
+  loading: boolean;
+  error?: string;
+}
+
+interface DataFetcherProps<T> {
+  url: string;
+  children: (props: RenderProps<T>) => React.ReactNode;
+}
+
+function DataFetcher<T>({ url, children }: DataFetcherProps<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
+
+  // Fetch logic here...
+
+  return <>{children({ data, loading, error })}</>;
+}
+```
+
+## Performance Optimization
+
+### Memoization Pattern
+```typescript
+import React, { memo, useMemo, useCallback } from 'react';
+
+interface ExpensiveComponentProps {
+  items: Item[];
+  onItemClick: (id: string) => void;
+}
+
+const ExpensiveComponent = memo<ExpensiveComponentProps>(({ items, onItemClick }) => {
+  const processedItems = useMemo(() => {
+    return items.map(item => ({
+      ...item,
+      processed: true
+    }));
+  }, [items]);
+
+  const handleClick = useCallback((id: string) => {
+    onItemClick(id);
+  }, [onItemClick]);
+
+  return (
+    <div className={styles.container}>
+      {processedItems.map(item => (
+        <div key={item.id} onClick={() => handleClick(item.id)}>
+          {item.name}
+        </div>
+      ))}
+    </div>
+  );
+});
+```
+
+## Testing Considerations
+
+### Component Testing Setup
+```typescript
+// Component.test.tsx
+import { render, screen } from '@testing-library/react';
+import Component from './Component';
+
+describe('Component', () => {
+  it('renders with correct title', () => {
+    render(<Component title="Test Title" />);
+    expect(screen.getByText('Test Title')).toBeInTheDocument();
+  });
+});
+```
+
+## Validation Checklist
+
+- [ ] Component has proper TypeScript interfaces
+- [ ] CSS Modules are used exclusively
+- [ ] Component follows naming conventions
+- [ ] Props are properly typed
+- [ ] Component is exported correctly
+- [ ] Error handling is implemented where needed
+- [ ] Component is memoized if expensive
+- [ ] Accessibility attributes are included
+- [ ] Component is responsive
+- [ ] Component follows composition patterns

@@ -1,0 +1,256 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Responsive Breakpoint Standards - MANDATORY
+
+## Standard Breakpoints (EXACT Values Required)
+
+```css
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  /* Single column, touch-optimized */
+}
+
+/* Mobile Landscape / Small Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+  /* Transitional layout */
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Multi-column, larger touch targets */
+}
+
+/* Desktop Small */
+@media (min-width: 1025px) and (max-width: 1200px) {
+  /* Full desktop features */
+}
+
+/* Desktop Large */
+@media (min-width: 1201px) {
+  /* Maximum width containers */
+}
+```
+
+## Breakpoint Implementation Rules
+
+### Mobile-First Approach - MANDATORY
+- Start with mobile styles (no media query)
+- Enhance progressively upward
+- Never use max-width only (except for mobile-only styles)
+
+### Container Behavior by Breakpoint
+
+**Mobile Portrait (≤ 480px):**
+- Single column layouts
+- Full-width components
+- Touch-friendly interactions (44px minimum)
+- 1rem horizontal padding
+
+**Mobile Landscape (481px - 768px):**
+- May use 2-column grids where appropriate
+- Maintain touch-friendly sizing
+- Slightly larger spacing
+- 1.5rem horizontal padding
+
+**Tablet (769px - 1024px):**
+- 2-3 column layouts
+- Larger touch targets maintained
+- More generous spacing
+- 2rem horizontal padding
+
+**Desktop Small (1025px - 1200px):**
+- 3-4 column layouts
+- Standard interaction patterns
+- Full feature set
+- 2rem horizontal padding
+
+**Desktop Large (≥ 1201px):**
+- Maximum container width: 1200px, centered
+- Optimal spacing and typography
+- 2rem horizontal padding
+
+## CSS Custom Properties for Breakpoints
+
+```css
+:root {
+  --breakpoint-mobile: 480px;
+  --breakpoint-mobile-landscape: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1200px;
+  
+  /* Container padding */
+  --container-padding-mobile: 1rem;
+  --container-padding-tablet: 2rem;
+  --container-padding-desktop: 2rem;
+  
+  /* Maximum width */
+  --container-max-width: 1200px;
+}
+```
+
+## Component Responsive Patterns
+
+### Header Behavior
+```css
+/* Mobile header - hamburger menu */
+@media (max-width: 768px) {
+  .header {
+    /* Mobile navigation */
+  }
+}
+
+/* Desktop header - full navigation */
+@media (min-width: 769px) {
+  .header {
+    /* Desktop navigation */
+  }
+}
+```
+
+### Grid Layouts
+```css
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr; /* Mobile: 1 column */
+}
+
+@media (min-width: 481px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* Tablet: 2 columns */
+  }
+}
+
+@media (min-width: 1025px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Desktop: flexible */
+  }
+}
+```
+
+### Typography Scaling
+```css
+.title {
+  font-size: 1.5rem; /* Mobile */
+}
+
+@media (min-width: 769px) {
+  .title {
+    font-size: 2rem; /* Tablet */
+  }
+}
+
+@media (min-width: 1025px) {
+  .title {
+    font-size: 2.5rem; /* Desktop */
+  }
+}
+```
+
+## Touch Target Requirements
+
+### Minimum Sizes
+- Touch targets: 44px × 44px minimum
+- Interactive elements: 48px × 48px preferred
+- Text links: 44px touch area (padding/margin)
+
+### Implementation
+```css
+.touchTarget {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+}
+
+@media (min-width: 1025px) {
+  .touchTarget {
+    /* Can be smaller on desktop */
+    min-height: auto;
+    min-width: auto;
+    padding: 8px 12px;
+  }
+}
+```
+
+## Full-Width Section Pattern
+
+```css
+.section {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.sectionContent {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding-mobile);
+}
+
+@media (min-width: 769px) {
+  .sectionContent {
+    padding: 0 var(--container-padding-tablet);
+  }
+}
+```
+
+## Content Layout Guidelines
+
+### Mobile (≤ 768px)
+- Single column content
+- Vertical navigation
+- Stacked elements
+- Minimal whitespace
+- Touch-optimized interactions
+
+### Tablet (769px - 1024px)
+- 2-3 column layouts
+- Horizontal navigation options
+- Balanced whitespace
+- Hybrid touch/mouse interactions
+
+### Desktop (≥ 1025px)
+- Multi-column layouts
+- Full navigation menus
+- Generous whitespace
+- Mouse-optimized interactions
+
+## Testing Requirements
+
+### Breakpoint Testing Checklist
+- [ ] Layout works at exactly 480px
+- [ ] Layout works at exactly 768px  
+- [ ] Layout works at exactly 1024px
+- [ ] Layout works at exactly 1200px
+- [ ] Touch targets are ≥44px on mobile
+- [ ] Text is readable at all sizes
+- [ ] Navigation works at all breakpoints
+- [ ] Content doesn't overflow containers
+
+### Performance Considerations
+- Use `em` units in media queries for accessibility
+- Minimize breakpoint-specific CSS
+- Avoid layout shifts between breakpoints
+- Test with slow connections on mobile
+
+## Common Mistakes to Avoid
+
+❌ **Don't:**
+- Use arbitrary breakpoint values
+- Mix max-width and min-width inconsistently  
+- Forget touch target sizing
+- Use desktop-first approach
+- Ignore intermediate breakpoints
+
+✅ **Do:**
+- Use standard breakpoint values exactly
+- Follow mobile-first methodology
+- Test on real devices
+- Consider performance implications
+- Design for accessibility at all sizes

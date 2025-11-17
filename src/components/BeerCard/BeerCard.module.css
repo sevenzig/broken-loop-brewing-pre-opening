@@ -1,0 +1,452 @@
+/* BeerCard Component CSS Module */
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  height: 100%;
+  transition: transform var(--transition-speed) var(--transition-timing);
+}
+
+.cardLink:hover {
+  transform: translateY(-4px);
+}
+
+.cardLink:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius);
+}
+
+.card {
+  background: var(--color-background);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all var(--transition-speed) var(--transition-timing);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cardLink:hover .card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: scale(1.02);
+}
+
+.cardFeatured {
+  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-background-secondary) 100%);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(26, 77, 92, 0.1);
+  overflow: hidden;
+  transition: all var(--transition-speed) var(--transition-timing);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+}
+
+.cardFeatured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  z-index: 1;
+}
+
+.cardLink:hover .cardFeatured {
+  box-shadow: 0 12px 32px rgba(26, 77, 92, 0.2);
+  transform: scale(1.02);
+}
+
+.imageContainer {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.beerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-speed) var(--transition-timing);
+}
+
+.cardLink:hover .beerImage {
+  transform: scale(1.05);
+}
+
+.limitedBadge,
+.featuredBadge,
+.retiredBadge,
+.onTapBadge,
+.barrelAgedBadge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--color-secondary);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.featuredBadge {
+  background: var(--color-primary);
+}
+
+.retiredBadge {
+  background: var(--color-text-secondary);
+}
+
+.onTapBadge {
+  background: var(--color-primary);
+}
+
+.barrelAgedBadge {
+  background: linear-gradient(135deg, #8B4513, #D2691E);
+  color: white;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.3);
+}
+
+/* Retired and Archive Beer Styling */
+.retired .beerImage,
+.archived .beerImage {
+  filter: grayscale(100%) opacity(0.7);
+}
+
+.retired,
+.archived {
+  opacity: 0.8;
+}
+
+.retired .beerName,
+.archived .beerName {
+  color: var(--color-text-secondary);
+}
+
+.content {
+  padding: var(--spacing-lg);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  background: var(--color-background);
+}
+
+.cardHeader {
+  margin-bottom: 0;
+}
+
+.beerName {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.1;
+  transition: color var(--transition-speed) var(--transition-timing);
+}
+
+.cardLink:hover .beerName {
+  color: var(--color-primary);
+}
+
+.beerStyle {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-style: normal;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.beerStats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+  flex-wrap: wrap;
+  line-height: 1.2;
+}
+
+.abv {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.ibu {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.srm {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.srmSquare {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.description {
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+  margin: 0;
+  flex-grow: 1;
+  font-size: var(--font-size-sm);
+}
+
+.tappedInfo {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+.tappedLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.tappedDate {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+}
+
+.detailsLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: color var(--transition-speed) var(--transition-timing);
+}
+
+.detailsLink:hover {
+  color: var(--color-primary-hover);
+}
+
+.linkArrow {
+  transition: transform var(--transition-speed) var(--transition-timing);
+}
+
+.detailsLink:hover .linkArrow {
+  transform: translateX(4px);
+}
+
+/* Mobile Single-Column Text-Only Layout */
+@media (max-width: 768px) {
+  .cardLink {
+    transform: none;
+  }
+  
+  .cardLink:hover {
+    transform: none;
+  }
+  
+  .card,
+  .cardFeatured {
+    display: block;
+    background: var(--color-background);
+    padding: var(--spacing-lg);
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .cardFeatured {
+    background: var(--color-background);
+    border: 1px solid var(--color-primary);
+    box-shadow: 0 2px 8px rgba(26, 77, 92, 0.1);
+  }
+  
+  .cardFeatured::before {
+    display: none;
+  }
+  
+  /* Hide image container completely */
+  .imageContainer {
+    display: none;
+  }
+  
+  /* Hide all badges */
+  .limitedBadge,
+  .featuredBadge,
+  .retiredBadge,
+  .onTapBadge,
+  .barrelAgedBadge {
+    display: none;
+  }
+  
+  /* Hide tapped info */
+  .tappedInfo {
+    display: none;
+  }
+  
+  .content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .cardHeader {
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .beerName {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-xs) 0;
+    line-height: 1.3;
+  }
+  
+  .beerStyle {
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    font-weight: 600;
+    font-style: normal;
+    margin: 0 0 var(--spacing-sm) 0;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Stats on one line */
+  .beerStats {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+    line-height: 1.2;
+  }
+  
+  .abv {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  
+  .ibu {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  
+  .srm {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  
+  .srmSquare {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+  }
+  
+  .description {
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-normal);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-style: italic;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: var(--spacing-xs);
+  }
+  
+  .beerName {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .description {
+    font-size: var(--font-size-xs);
+    -webkit-line-clamp: 2;
+  }
+  
+  .beerMeta {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .cardFooter {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: flex-start;
+  }
+}
+
+@media (min-width: 769px) {
+  .cardLink:hover .card,
+  .cardLink:hover .cardFeatured {
+    transform: translateY(-2px);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .card,
+  .cardFeatured {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid var(--color-border);
+  }
+  
+  .limitedBadge,
+  .featuredBadge {
+    background: transparent;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+} 

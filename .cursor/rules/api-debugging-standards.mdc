@@ -1,0 +1,97 @@
+---
+description: "Standardized practices for debugging API responses and ensuring JSON output"
+globs: src/api/**/*.ts, tests/api/**/*.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-09-04"
+lastUpdated: "2025-09-04"
+author: "Scott Thurston <https://clickboost.us>"
+tags: api, debugging, json, error-handling
+---
+
+# API Debugging Standards
+
+## Purpose and Scope
+
+This rule enforces consistent debugging practices for API endpoints.  
+It ensures all responses are reliably JSON, errors are traceable, and developers have a clear methodology for diagnosing non-JSON responses.
+
+---
+
+## Standards and Requirements
+
+### 1. Content-Type Enforcement
+* All API endpoints **must** return `Content-Type: application/json`.
+* Middleware should verify this header for both success and error responses.
+
+### 2. Error Handling
+* Errors must be returned as structured JSON objects, never HTML or plaintext.
+* Include `status`, `message`, and optionally `details`.
+
+### 3. Logging
+* Log raw request and response headers when debugging.
+* Log stack traces only in development, never in production.
+
+### 4. Debugging Steps
+* Verify raw response with `curl -i` or equivalent.
+* Inspect `Content-Type` header and payload.
+* Confirm client parsing aligns with server output.
+
+---
+
+## Examples
+
+### Good Example
+
+```ts
+// Express handler
+app.get("/api/data", (req, res) => {
+  try {
+    res.status(200).json({ success: true, data: [1, 2, 3] });
+  } catch (err) {
+    res.status(500).json({ status: 500, message: "Internal error", details: err.message });
+  }
+});
+```
+
+*Ensures JSON output for both success and error cases.*
+
+### Bad Example
+
+```ts
+// Express handler
+app.get("/api/data", (req, res) => {
+  throw new Error("Something broke"); // No structured error response
+});
+```
+
+*Fails: returns framework-generated HTML error page instead of JSON.*
+
+---
+
+## Implementation Guidelines
+
+* Always use `.json()` methods over `.send()` for JSON responses.
+* Centralize error handling in middleware.
+* Validate headers during integration testing.
+* Use API clients (e.g., Insomnia, Postman) to confirm JSON output under failure conditions.
+
+---
+
+## Related Rules
+
+* @typescript-standards.mdc
+* @git-commit-format.mdc
+
+---
+
+## Changelog
+
+* **1.0.0 (2025-09-04)**: Initial release of API Debugging Standards rule.
+
+<!--
+ API Debugging Standards
+ Copyright (c) 2025 Scott Thurston
+ SPDX-License-Identifier: Proprietary
+-->

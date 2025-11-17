@@ -1,0 +1,64 @@
+# Allow all web crawlers and AI bots
+User-agent: *
+Allow: /
+
+# Specific AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OpenAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: BingBot
+Allow: /
+
+User-agent: Bard
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: anthropic-ai  
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Block unwanted training crawlers
+User-agent: Bytespider
+Disallow: /
+
+# Sitemap location
+Sitemap: https://brokenloopbrewing.com/sitemap.xml
+
+# Optional: Disallow admin areas but allow public content
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+
+# Allow important brewery pages
+Allow: /
+Allow: /beer
+Allow: /food
+Allow: /events
+Allow: /about
+Allow: /contact

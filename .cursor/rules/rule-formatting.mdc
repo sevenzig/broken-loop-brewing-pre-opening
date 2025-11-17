@@ -1,0 +1,161 @@
+---
+description: "Standardized structure and validation for all Cursor rule files"
+globs: .cursor/rules/*.mdc
+alwaysApply: false
+version: "1.1.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-08-13"
+author: "Scott Thurston <https://clickboost.us>"
+tags: cursor, rules, formatting, meta
+---
+
+# Rule Formatting Standards
+
+## Purpose and Scope
+
+This rule enforces a consistent structure, style, and metadata standard for all `.mdc` rule files in the Cursor IDE ecosystem.  
+It exists to ensure rules remain maintainable, machine-parseable, and human-readable over time.
+
+---
+
+## Standards and Requirements
+
+### 1. Required Frontmatter
+
+Every rule file must begin with **YAML frontmatter** containing **exactly** the following fields:
+
+```yaml
+---
+description: "Clear, one-sentence description of rule"
+globs: src/**/*.ts, tests/**/*.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "YYYY-MM-DD"
+lastUpdated: "YYYY-MM-DD"
+author: "Full Name <url-or-email>"
+tags: comma,separated,keywords
+---
+````
+
+#### Frontmatter Rules
+
+* **description**: ≤100 characters, one sentence, double-quoted.
+* **globs**: Comma-separated list of patterns; no quotes, no brackets, no spaces after commas.
+* **alwaysApply**: `true` or `false` (lowercase).
+* **version**: Must follow `^\d+\.\d+\.\d+$` (semantic versioning).
+* **enforcement**: Must be one of `strict`, `advisory`, or `warning`.
+* **created**, **lastUpdated**: Must follow `^\d{4}-\d{2}-\d{2}$`.
+* **author**: Name and URL/email in the form `Name <contact>`.
+* **tags**: Comma-separated list; no spaces except after commas.
+
+---
+
+### 2. Section Order
+
+After frontmatter, the following **section order is mandatory**:
+
+1. H1 Title
+2. Purpose and Scope
+3. Standards and Requirements
+4. Examples (with “Good” and “Bad” subsections)
+5. Implementation Guidelines
+6. Related Rules (optional)
+7. Changelog (mandatory)
+
+---
+
+### 3. Examples Section
+
+#### Good Examples
+
+* Must be fenced code blocks with language identifier (` ```ts `, ` ```md `, etc.).
+* Must show compliant code **exactly** as it should appear.
+
+#### Bad Examples
+
+* Must be fenced code blocks with language identifier.
+* Must include a **single-line explanation directly after** each example describing why it fails.
+
+---
+
+### 4. File Naming Rules
+
+* Kebab-case only: `[domain]-[purpose].mdc`
+* Examples:
+
+  * `typescript-standards.mdc`
+  * `git-commit-format.mdc`
+
+---
+
+### 5. Length & Formatting
+
+* Keep rules under **500 lines**.
+* Max line length: **100 characters**.
+* Use **2-space indentation**, no tabs.
+
+---
+
+## Examples
+
+### Good Example
+
+```markdown
+---
+description: "Standardized TypeScript code style"
+globs: src/**/*.ts, tests/**/*.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-02-01"
+lastUpdated: "2025-08-10"
+author: "Jane Doe <https://janedoe.dev>"
+tags: typescript, formatting
+---
+
+# TypeScript Standards
+
+## Purpose and Scope
+Ensures all TypeScript files follow project code style...
+
+```
+
+### Bad Example
+
+```markdown
+description: 'Bad frontmatter without quotes'
+globs: "src/**/*.ts"
+alwaysApply: "False"
+version: "v1"
+enforcement: "Strict"
+created: 25-02-01
+```
+
+*Fails: missing triple-dash delimiters, wrong date format, wrong enums.*
+
+---
+
+## Implementation Guidelines
+
+* Ensure **section order** matches exactly.
+
+---
+
+## Related Rules
+
+* @git-conventional-commits.mdc
+
+---
+
+## Changelog
+
+* **1.1.0 (2025-08-13)**: Added validation rules, required changelog, example formatting rules.
+* **1.0.0 (2025-01-27)**: Initial release.
+
+<!--
+ Rule Formatting Standards
+ Copyright (c) 2025 Scott Thurston <https://clickboost.us>
+ SPDX-License-Identifier: Proprietary
+-->

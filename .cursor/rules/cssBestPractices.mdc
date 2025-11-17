@@ -1,0 +1,520 @@
+---
+description: "CSS Module standards, component scoping, and performance optimization patterns"
+globs: src/**/*.css,src/**/*.tsx,src/**/*.ts
+alwaysApply: false
+version: "1.0.0"
+enforcement: "strict"
+created: "2025-01-27"
+lastUpdated: "2025-01-27"
+author: "Broken Loop Brewing Team <https://brokenloopbrewing.com>"
+tags: css, modules, styling, components, performance
+---
+
+# CSS Best Practices & Component Scoping
+
+## Purpose and Scope
+
+This rule enforces CSS Module standards, component scoping patterns, and performance optimization for the Broken Loop Brewing website. It ensures consistent styling architecture, prevents CSS conflicts, and maintains high performance through proper CSS practices.
+
+## Standards and Requirements
+
+### CSS Module Requirements - STRICTLY ENFORCE
+
+#### File Structure Requirements
+```
+src/components/ComponentName/
+  ├── ComponentName.tsx
+  └── ComponentName.module.css
+```
+
+#### CSS Module Class Usage
+```tsx
+// ✅ CORRECT - CSS Modules
+import styles from './Component.module.css';
+
+export function Component({ variant = 'default' }) {
+  const componentClass = variant === 'primary' 
+    ? styles.componentPrimary 
+    : styles.component;
+    
+  return (
+    <div className={componentClass}>
+      <h2 className={styles.title}>Title</h2>
+      <div className={styles.content}>Content</div>
+    </div>
+  );
+}
+```
+
+```tsx
+// ❌ INCORRECT - Global classes
+export function Component() {
+  return (
+    <div className="component"> {/* ❌ Global class */}
+      <h2 className="title">Title</h2> {/* ❌ Global class */}
+    </div>
+  );
+}
+```
+
+#### Global CSS Restrictions
+- **globals.css**: ONLY CSS resets, typography, and CSS custom properties
+- **variables.css**: ONLY :root custom properties
+- **NO** component-specific styles in global files
+- **NO** utility classes (use CSS Modules instead)
+
+### CSS Best Practices - STRICTLY ENFORCE
+
+#### NEVER Use `!important`
+> **Reference**: See [CSS No Important Rule](./cssNoImportant.mdc) for detailed guidance on avoiding `!important` and managing CSS specificity.
+
+- **NEVER** use `!important` declarations - refactor specificity instead
+- Use CSS Modules scoping to prevent conflicts
+- Use CSS custom properties for overrides
+- Follow proper cascade order
+
+#### CSS Property Order
+1. **Display & positioning**
+2. **Box model** (width, height, padding, margin)
+3. **Typography**
+4. **Visual** (background, border, shadow)
+5. **Animations & transitions**
+
+#### Forbidden Patterns
+- ❌ `!important` declarations
+- ❌ Global CSS classes for components
+- ❌ Inline styles (except dynamic values)
+- ❌ Deep selector nesting (max 2 levels)
+- ❌ Fixed z-index values (use CSS custom properties)
+- ❌ Magic numbers (use named variables)
+
+#### Required Patterns
+- ✅ CSS Modules for all component styles
+- ✅ CSS custom properties for reusable values
+- ✅ Semantic class names
+- ✅ Mobile-first responsive design
+- ✅ Consistent spacing scale
+- ✅ Proper accessibility (focus states, contrast)
+
+### Advanced CSS Module Patterns
+
+#### CSS Module Composition
+```css
+/* Base.module.css */
+.button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+/* Button.module.css */
+.primaryButton {
+  composes: button from './Base.module.css';
+  background: var(--color-primary);
+  color: white;
+}
+
+.secondaryButton {
+  composes: button from './Base.module.css';
+  background: var(--color-secondary);
+  color: white;
+}
+```
+
+#### Dynamic Class Names
+```tsx
+// ✅ CORRECT - Dynamic class composition
+const getComponentClasses = (variant: string, size: string, className?: string) => {
+  const baseClass = styles.component;
+  const variantClass = styles[`component${variant.charAt(0).toUpperCase() + variant.slice(1)}`];
+  const sizeClass = styles[`component${size.charAt(0).toUpperCase() + size.slice(1)}`];
+  
+  return [baseClass, variantClass, sizeClass, className]
+    .filter(Boolean)
+    .join(' ');
+};
+
+// Usage
+<div className={getComponentClasses('primary', 'large', customClass)}>
+  Content
+</div>
+```
+
+#### CSS Module with TypeScript
+```typescript
+// ComponentName.d.ts
+export interface ComponentNameProps {
+  variant?: 'default' | 'primary' | 'secondary';
+  size?: 'small' | 'medium' | 'large';
+  className?: string;
+  children?: React.ReactNode;
+}
+
+// ComponentName.tsx
+import styles from './ComponentName.module.css';
+
+export const ComponentName: React.FC<ComponentNameProps> = ({
+  variant = 'default',
+  size = 'medium',
+  className = '',
+  children,
+  ...props
+}) => {
+  const componentClasses = [
+    styles.component,
+    styles[`component${variant.charAt(0).toUpperCase() + variant.slice(1)}`],
+    styles[`component${size.charAt(0).toUpperCase() + size.slice(1)}`],
+    className
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className={componentClasses} {...props}>
+      {children}
+    </div>
+  );
+};
+```
+
+### Performance Optimization
+
+#### CSS Performance Best Practices
+```css
+/* ✅ GOOD - Use will-change sparingly */
+.animatedElement {
+  will-change: transform; /* Only for elements that will actually change */
+}
+
+/* ✅ GOOD - Use contain for isolated components */
+.isolatedComponent {
+  contain: layout style paint; /* Isolate component rendering */
+}
+
+/* ✅ GOOD - GPU-accelerated animations */
+.smoothAnimation {
+  transform: translateZ(0); /* Force GPU acceleration */
+  transition: transform var(--transition-speed) ease;
+}
+```
+
+```css
+/* ❌ BAD - Avoid layout thrashing */
+.badAnimation {
+  width: 100px;
+  height: 100px;
+  /* Don't animate width/height - use transform instead */
+}
+```
+
+#### Critical CSS Patterns
+```css
+/* ✅ GOOD - Critical CSS for above-the-fold content */
+.heroSection {
+  /* Inline critical styles */
+  background: var(--color-primary);
+  padding: var(--spacing-xl) 0;
+  min-height: 60vh;
+}
+
+/* ✅ GOOD - Defer non-critical styles */
+.nonCriticalStyles {
+  /* Load these styles asynchronously */
+  display: none; /* Hidden until loaded */
+}
+```
+
+### Accessibility in CSS
+
+#### Focus Management
+```css
+/* ✅ GOOD - Visible focus indicators */
+.interactiveElement:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ✅ GOOD - High contrast focus states */
+.button:focus-visible {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
+}
+```
+
+```css
+/* ❌ BAD - Remove focus outline */
+.button:focus {
+  outline: none; /* ❌ Never remove focus outline without replacement */
+}
+```
+
+#### Reduced Motion Support
+```css
+/* ✅ GOOD - Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animatedElement {
+    animation: none;
+    transition: none;
+  }
+  
+  .smoothScroll {
+    scroll-behavior: auto;
+  }
+}
+```
+
+#### High Contrast Mode
+```css
+/* ✅ GOOD - High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid var(--color-text);
+    background: var(--color-background);
+  }
+  
+  .button {
+    border: 2px solid currentColor;
+  }
+}
+```
+
+### Error Prevention & Validation
+
+#### CSS Module Import Validation
+```typescript
+// ✅ GOOD - Validate CSS Module imports
+import styles from './Component.module.css';
+
+// TypeScript will catch missing classes at compile time
+const componentClass = styles.component; // Error if .component doesn't exist
+```
+
+#### CSS Linting Rules
+```json
+// .stylelintrc.json
+{
+  "rules": {
+    "declaration-no-important": true,
+    "selector-max-depth": 2,
+    "selector-max-specificity": "0,3,0",
+    "declaration-block-no-duplicate-properties": true,
+    "declaration-block-no-redundant-longhand-properties": true
+  }
+}
+```
+
+#### Build-time Validation
+```typescript
+// ✅ GOOD - Validate CSS custom properties usage
+const validateCSSProperties = () => {
+  const styleSheets = Array.from(document.styleSheets);
+  
+  styleSheets.forEach(sheet => {
+    try {
+      const rules = Array.from(sheet.cssRules);
+      rules.forEach(rule => {
+        if (rule instanceof CSSStyleRule) {
+          // Check for hardcoded colors
+          if (rule.style.color && !rule.style.color.includes('var(--')) {
+            console.warn('Hardcoded color found:', rule.selectorText);
+          }
+        }
+      });
+    } catch (e) {
+      // Cross-origin stylesheets will throw
+    }
+  });
+};
+```
+
+### Debugging CSS Modules
+
+#### Browser DevTools
+```css
+/* ✅ GOOD - Add debugging classes temporarily */
+.debugElement {
+  background: red !important; /* Remove after debugging */
+  border: 1px solid blue !important; /* Remove after debugging */
+}
+
+/* ✅ GOOD - Use CSS custom properties for debugging */
+.debugMode {
+  --debug-border: 1px solid red;
+  --debug-background: rgba(255, 0, 0, 0.1);
+}
+```
+
+#### CSS Module Class Inspection
+```typescript
+// ✅ GOOD - Inspect generated class names
+console.log('CSS Module classes:', styles);
+console.log('Generated class name:', styles.component);
+```
+
+## Examples
+
+### Good Examples
+
+```tsx
+// Proper CSS Module usage with TypeScript
+import styles from './Button.module.css';
+
+interface ButtonProps {
+  variant?: 'primary' | 'secondary';
+  size?: 'small' | 'medium' | 'large';
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'medium',
+  children,
+  onClick
+}) => {
+  const buttonClass = [
+    styles.button,
+    styles[`button${variant.charAt(0).toUpperCase() + variant.slice(1)}`],
+    styles[`button${size.charAt(0).toUpperCase() + size.slice(1)}`]
+  ].join(' ');
+
+  return (
+    <button className={buttonClass} onClick={onClick}>
+      {children}
+    </button>
+  );
+};
+```
+
+```css
+/* Proper CSS Module structure */
+.button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.buttonPrimary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.buttonPrimary:hover {
+  background: var(--color-primary-dark);
+}
+
+.buttonSecondary {
+  background: var(--color-secondary);
+  color: white;
+}
+
+.buttonSmall {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.buttonLarge {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-lg);
+}
+```
+
+### Bad Examples
+
+```tsx
+// Global CSS classes - violates scoping
+export function BadComponent() {
+  return (
+    <div className="bad-component">
+      <h2 className="title">Title</h2>
+      <p className="content">Content</p>
+    </div>
+  );
+}
+```
+
+*Fails: Uses global CSS classes instead of CSS Modules.*
+
+```css
+/* Global CSS - violates component scoping */
+.bad-component {
+  background: #1a4d5c;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.title {
+  color: white;
+  font-size: 24px;
+}
+
+.content {
+  color: #333;
+  line-height: 1.6;
+}
+```
+
+*Fails: Global CSS classes that can conflict with other components.*
+
+```css
+/* Using !important - violates specificity rules */
+.button {
+  background: var(--color-primary) !important;
+  color: white !important;
+  padding: 10px 20px !important;
+}
+```
+
+*Fails: Uses !important declarations instead of proper CSS specificity.*
+
+## Implementation Guidelines
+
+### CSS Module Setup
+1. Create component directory with `.tsx` and `.module.css` files
+2. Import CSS Module in component file
+3. Use semantic class names in CSS Module
+4. Apply classes using `styles.className` syntax
+5. Use CSS custom properties for consistent values
+
+### Performance Optimization
+1. Use `will-change` sparingly and only for elements that will actually change
+2. Implement `contain` property for isolated components
+3. Use `transform` and `opacity` for animations (GPU-accelerated)
+4. Avoid layout thrashing by batching DOM reads/writes
+5. Use `content-visibility: auto` for off-screen content
+
+### Accessibility Implementation
+1. Always provide visible focus indicators
+2. Support `prefers-reduced-motion` media query
+3. Ensure proper color contrast ratios
+4. Use semantic HTML elements
+5. Test with screen readers and keyboard navigation
+
+### Validation and Testing
+1. Use TypeScript for CSS Module class validation
+2. Implement CSS linting rules
+3. Test across different browsers and devices
+4. Validate accessibility with automated tools
+5. Performance test with Core Web Vitals
+
+## Related Rules
+
+- **[CSS Scoping Enforcement](./cssScopingEnforcement.mdc)** - Component styling architecture
+- **[CSS No Important Rule](./cssNoImportant.mdc)** - CSS specificity management
+- **[Responsive Breakpoint Standards](./responsiveBreakpointStandards.mdc)** - Responsive design patterns
+- **[Main .cursorrules](../.cursorrules)** - Comprehensive development guidelines
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with CSS Module standards, performance optimization, and accessibility patterns.
+
+<!--
+ CSS Best Practices & Component Scoping
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->

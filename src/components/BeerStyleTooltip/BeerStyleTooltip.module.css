@@ -1,0 +1,541 @@
+/* Container for the tooltip trigger and tooltip */
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Trigger element styling */
+.trigger {
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: color 0.2s ease;
+}
+
+.trigger:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Clickable indicator for mobile only */
+.trigger {
+  position: relative;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* Mobile/tablet clickable styling */
+@media (max-width: 768px) {
+  .trigger::after {
+    content: ' 📋';
+    font-size: 0.9em;
+    opacity: 0.6;
+    margin-left: 2px;
+    transition: opacity 0.2s ease;
+  }
+
+  .trigger:hover::after {
+    opacity: 0.9;
+  }
+}
+
+/* Main tooltip container - JavaScript-controlled positioning */
+.tooltip {
+  position: absolute;
+  top: 100%;
+  width: 320px; /* Conservative width for smaller screens */
+  max-width: calc(100vw - 2rem); /* Emergency constraint */
+  max-height: calc(100vh - 2rem);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--color-border);
+  z-index: 10000;
+  animation: fadeInUp 0.3s ease-out;
+  margin-top: var(--spacing-xs);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left-aligned tooltip (default) */
+.tooltipLeft {
+  left: 0;
+}
+
+/* Right-aligned tooltip (when near viewport edge) */
+.tooltipRight {
+  left: auto;
+  right: 0;
+}
+
+/* Desktop Large - 1201px+ */
+@media (min-width: 1201px) {
+  .tooltip {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 650px;
+    max-width: calc(100vw - 2rem);
+    max-height: min(60vh, 500px);
+    animation: fadeInUpCentered 0.3s ease-out;
+  }
+}
+
+/* Tablet - 769px to 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tooltip {
+    width: 480px;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+/* Desktop Small - 1025px to 1200px */
+@media (min-width: 1025px) and (max-width: 1200px) {
+  .tooltip {
+    width: 550px;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Mobile Portrait and Landscape - 320px to 768px */
+@media (max-width: 768px) {
+  .tooltip {
+    position: fixed !important;
+    top: 5vh !important;
+    left: 5vw !important;
+    right: 5vw !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 85vh !important;
+    margin: 0 !important;
+    animation: fadeInScale 0.3s ease-out;
+    overflow-y: auto !important;
+    z-index: 99999 !important;
+  }
+  
+  /* Reset all text alignment to left */
+  .tooltip,
+  .tooltip * {
+    text-align: left !important;
+    direction: ltr !important;
+  }
+  
+  .header,
+  .headerContent,
+  .title,
+  .category,
+  .content,
+  .section,
+  .sectionTitle,
+  .sectionContent,
+  .sectionContent p,
+  .sectionContent div,
+  .sectionContent strong {
+    text-align: left !important;
+    direction: ltr !important;
+  }
+  
+  /* Keep specific elements centered */
+  .stats {
+    text-align: center !important;
+  }
+  
+  .statItem,
+  .statLabel,
+  .statValue {
+    text-align: center !important;
+  }
+  
+  .attribution {
+    text-align: center !important;
+  }
+  
+  /* Ensure proper layout */
+  .header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+  
+  .headerContent {
+    flex: 1 !important;
+    text-align: left !important;
+  }
+  
+  .closeButton {
+    flex-shrink: 0 !important;
+    text-align: center !important;
+  }
+}
+
+/* Header section */
+.header {
+  padding: var(--spacing-md);
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0;
+  text-align: left;
+  direction: ltr;
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  direction: ltr;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: var(--spacing-sm);
+}
+
+.closeButton:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text);
+}
+
+.closeButton:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+  text-align: left;
+  direction: ltr;
+}
+
+.category {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-align: left;
+  direction: ltr;
+}
+
+/* Content section */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  min-height: 0;
+  text-align: left;
+  direction: ltr;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-md) 0;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Error state */
+.error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-md) 0;
+}
+
+/* Content sections */
+.section {
+  margin-bottom: var(--spacing-md);
+  text-align: left;
+  direction: ltr;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+/* Desktop Small and Large - 1025px+ */
+@media (min-width: 1025px) {
+  .section {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .content {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .footer {
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+  
+  .sectionContent {
+    font-size: var(--font-size-sm);
+    line-height: 1.3;
+  }
+}
+
+.sectionTitle {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  font-variant: small-caps;
+  letter-spacing: 0.3px;
+  text-align: left;
+  direction: ltr;
+}
+
+.sectionContent {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  color: var(--color-text);
+  font-variant: normal;
+  text-transform: none;
+  text-align: left;
+  direction: ltr;
+}
+
+.sectionContent p {
+  font-variant: normal;
+  text-transform: none;
+  text-align: left;
+  direction: ltr;
+}
+
+.sectionContent div {
+  text-align: left;
+  direction: ltr;
+}
+
+.sectionContent strong {
+  font-variant: normal;
+  text-transform: none;
+  text-align: left;
+  direction: ltr;
+}
+
+/* Statistics grid */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+/* Wider stats on larger tooltips */
+@media (min-width: 1025px) {
+  .stats {
+    gap: var(--spacing-md);
+  }
+  
+  .statItem {
+    padding: var(--spacing-sm);
+  }
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-xs);
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-sm);
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.statValue {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Footer */
+.footer {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-background-secondary);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.attribution {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Arrow pointing up (desktop only) */
+.arrow {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--color-background);
+}
+
+.arrow::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--color-border);
+}
+
+/* Hide arrow on mobile and tablets */
+@media (max-width: 768px) {
+  .arrow {
+    display: none !important;
+  }
+  
+  /* Ensure tooltip container doesn't interfere */
+  .container {
+    position: static !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation for centered tooltips */
+@keyframes fadeInUpCentered {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+  
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tooltip {
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.6),
+      0 0 0 1px var(--color-border);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .trigger {
+    text-decoration-style: solid;
+    text-decoration-thickness: 2px;
+  }
+  
+  .tooltip {
+    border: 2px solid var(--color-border);
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+} 

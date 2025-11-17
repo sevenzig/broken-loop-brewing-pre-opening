@@ -1,0 +1,214 @@
+/**
+ * Toast Component Styles
+ * Modern, accessible toast notification styling
+ */
+
+.toastContainer {
+  position: fixed;
+  z-index: var(--z-toast, 1200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  pointer-events: none;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Container positioning */
+.containerTopRight {
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+}
+
+.containerTopLeft {
+  top: var(--spacing-lg);
+  left: var(--spacing-lg);
+}
+
+.containerBottomRight {
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+}
+
+.containerBottomLeft {
+  bottom: var(--spacing-lg);
+  left: var(--spacing-lg);
+}
+
+.containerTopCenter {
+  top: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.containerBottomCenter {
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Toast styles */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid var(--toast-accent-color);
+  pointer-events: auto;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.toast:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Toast visibility states */
+.toastVisible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toastExiting {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Toast type variants */
+.toastSuccess {
+  --toast-accent-color: var(--color-success, #10b981);
+  --toast-icon-color: var(--color-success, #10b981);
+}
+
+.toastError {
+  --toast-accent-color: var(--color-error, #ef4444);
+  --toast-icon-color: var(--color-error, #ef4444);
+}
+
+.toastWarning {
+  --toast-accent-color: var(--color-warning, #f59e0b);
+  --toast-icon-color: var(--color-warning, #f59e0b);
+}
+
+.toastInfo {
+  --toast-accent-color: var(--color-primary);
+  --toast-icon-color: var(--color-primary);
+}
+
+/* Toast icon */
+.toastIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--toast-icon-color);
+  margin-top: 2px;
+}
+
+/* Toast content */
+.toastContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.toastTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+.toastMessage {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, #6b7280);
+  line-height: 1.4;
+}
+
+/* Close button */
+.toastCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  margin-top: 2px;
+}
+
+.toastCloseButton:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
+}
+
+.toastCloseButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .toastContainer {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    max-width: none;
+  }
+  
+  .containerTopRight,
+  .containerTopLeft {
+    top: var(--spacing-md);
+  }
+  
+  .containerBottomRight,
+  .containerBottomLeft {
+    bottom: var(--spacing-md);
+  }
+  
+  .containerTopCenter,
+  .containerBottomCenter {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    transform: none;
+  }
+  
+  .toast {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .toastTitle {
+    font-size: var(--font-size-xs);
+  }
+  
+  .toastMessage {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: opacity 0.2s ease;
+  }
+  
+  .toastVisible {
+    transform: none;
+  }
+  
+  .toastExiting {
+    transform: none;
+  }
+}
+

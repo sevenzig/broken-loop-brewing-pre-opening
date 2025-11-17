@@ -1,0 +1,436 @@
+/* About Page Styles */
+.aboutPage {
+  min-height: 100vh;
+}
+
+/* Container for centered content */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Hero Section */
+.heroSection {
+  background: linear-gradient(rgba(26, 77, 92, 0.8), rgba(26, 77, 92, 0.8)), 
+              url('/images/hero-bg.jpg') center/cover;
+  color: white;
+  padding: 8rem 0 6rem;
+  text-align: center;
+  position: relative;
+}
+
+.heroContent h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+.heroSubtitle {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+/* Story Section */
+.storySection {
+  padding: 6rem 0;
+  background: white;
+}
+
+.storyGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.storyText h2 {
+  font-size: 2.5rem;
+  color: #1a4d5c;
+  margin-bottom: 2rem;
+}
+
+.storyText p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.storyImage img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Mission Section */
+.missionSection {
+  padding: 6rem 0;
+  background: #f8f9fa;
+}
+
+.missionSection h2 {
+  font-size: 2.5rem;
+  color: #1a4d5c;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.missionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.missionCard {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.missionCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+.missionIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.missionCard h3 {
+  font-size: 1.5rem;
+  color: #1a4d5c;
+  margin-bottom: 1rem;
+}
+
+.missionCard p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Staff Section */
+.staffSection {
+  padding: 6rem 0;
+  background: white;
+}
+
+.staffSection h2 {
+  font-size: 2.5rem;
+  color: #1a4d5c;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.staffIntro {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
+.staffGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.staffCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.staffCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+.staffImageContainer {
+  height: 300px;
+  overflow: hidden;
+}
+
+.staffImageContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.staffCard:hover .staffImageContainer img {
+  transform: scale(1.05);
+}
+
+.staffInfo {
+  padding: 1.5rem;
+}
+
+.staffInfo h3 {
+  font-size: 1.3rem;
+  color: #1a4d5c;
+  margin-bottom: 0.5rem;
+}
+
+.staffInfo h4 {
+  font-size: 1rem;
+  color: #d4af37;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.staffInfo p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Values Section */
+.valuesSection {
+  padding: 6rem 0;
+  background: #1a4d5c;
+  color: white;
+}
+
+.valuesSection h2 {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.valuesList {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.valueItem {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.valueItem:last-child {
+  border-bottom: none;
+}
+
+.valueItem strong {
+  color: #d4af37;
+}
+
+/* Visit Section */
+.visitSection {
+  padding: 6rem 0;
+  background: #f8f9fa;
+}
+
+.visitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.visitText h2 {
+  font-size: 2.5rem;
+  color: #1a4d5c;
+  margin-bottom: 2rem;
+}
+
+.visitText p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.visitInfo {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #d4af37;
+  margin-top: 2rem;
+}
+
+.visitInfo p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.visitInfo p:last-child {
+  margin-bottom: 0;
+}
+
+.visitImage img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+  
+  .heroContent h1 {
+    font-size: 3rem;
+  }
+  
+  .storyGrid,
+  .visitGrid {
+    gap: 3rem;
+  }
+  
+  .staffGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Landscape / Small Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+  .heroSection {
+    padding: 6rem 0 4rem;
+  }
+  
+  .heroContent h1 {
+    font-size: 2.5rem;
+  }
+  
+  .storyGrid,
+  .visitGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .storyImage img,
+  .visitImage img {
+    height: 300px;
+  }
+  
+  .staffGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .missionGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .missionCard {
+    padding: 2rem;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .heroSection {
+    padding: 4rem 0 3rem;
+  }
+  
+  .heroContent h1 {
+    font-size: 2rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+  
+  .storySection,
+  .missionSection,
+  .staffSection,
+  .valuesSection,
+  .visitSection {
+    padding: 4rem 0;
+  }
+  
+  .storyGrid,
+  .visitGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .storyText h2,
+  .missionSection h2,
+  .staffSection h2,
+  .valuesSection h2,
+  .visitText h2 {
+    font-size: 2rem;
+  }
+  
+  .storyImage img,
+  .visitImage img {
+    height: 250px;
+  }
+  
+  .staffGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .staffImageContainer {
+    height: 250px;
+  }
+  
+  .missionGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .missionCard {
+    padding: 1.5rem;
+  }
+  
+  .valueItem {
+    font-size: 1rem;
+    padding: 1rem 0;
+  }
+  
+  .visitInfo {
+    padding: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .aboutPage {
+    background: white !important;
+  }
+  
+  .heroSection {
+    background: #1a4d5c !important;
+    color: white !important;
+    padding: 2rem 0 !important;
+  }
+  
+  .missionSection,
+  .valuesSection,
+  .visitSection {
+    background: white !important;
+  }
+  
+  .staffCard,
+  .missionCard {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+} 

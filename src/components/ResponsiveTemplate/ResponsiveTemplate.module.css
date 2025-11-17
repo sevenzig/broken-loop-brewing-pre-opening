@@ -1,0 +1,126 @@
+/* ResponsiveTemplate Component CSS Module */
+/* This component demonstrates the standardized responsive design patterns */
+
+.responsiveTemplate {
+  width: 100%;
+  padding: var(--spacing-lg) 0;
+  background: var(--color-background);
+}
+
+.sectionContent {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding-mobile);
+}
+
+.contentGrid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* Mobile Portrait - 320px to 480px */
+@media (max-width: var(--breakpoint-mobile-max)) {
+  .responsiveTemplate {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .contentGrid {
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Mobile Landscape / Small Tablet - 481px to 768px */
+@media (min-width: var(--breakpoint-mobile-landscape-min)) and (max-width: var(--breakpoint-mobile-landscape-max)) {
+  .sectionContent {
+    padding: 0 var(--container-padding-tablet);
+  }
+  
+  .contentGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+/* Tablet - 769px to 1024px */
+@media (min-width: var(--breakpoint-tablet-min)) and (max-width: var(--breakpoint-tablet-max)) {
+  .sectionContent {
+    padding: 0 var(--container-padding-tablet);
+  }
+  
+  .contentGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  .title {
+    font-size: var(--font-size-xxl);
+  }
+}
+
+/* Desktop Small - 1025px to 1200px */
+@media (min-width: var(--breakpoint-desktop-min)) and (max-width: var(--breakpoint-desktop-max)) {
+  .sectionContent {
+    padding: 0 var(--container-padding-desktop);
+  }
+  
+  .contentGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Desktop Large - 1201px+ */
+@media (min-width: var(--breakpoint-desktop-large-min)) {
+  .sectionContent {
+    padding: 0 var(--container-padding-desktop);
+  }
+  
+  .contentGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+  }
+  
+  .title {
+    font-size: var(--font-size-xxxl);
+  }
+}
+
+/* Accessibility for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .responsiveTemplate {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .responsiveTemplate {
+    background: white;
+    color: black;
+  }
+  
+  .title {
+    color: black;
+  }
+  
+  .description {
+    color: #333;
+  }
+} 

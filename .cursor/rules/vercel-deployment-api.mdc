@@ -1,0 +1,515 @@
+# Vercel Deployment API Rules
+
+## Purpose and Scope
+
+This rule provides comprehensive guidelines for deploying applications to Vercel with proper API configuration, routing middleware implementation, and deployment best practices. It covers Vercel-specific features, middleware patterns, and deployment optimization strategies based on the official Vercel documentation.
+
+## Standards and Requirements
+
+### Vercel Middleware Configuration
+
+#### 1. Middleware File Structure - MANDATORY
+- **ALWAYS** place middleware in `middleware.ts` at project root
+- **ALWAYS** export a default function as the middleware handler
+- **ALWAYS** include a `config` object for route matching
+- **NEVER** use `.js` extension without `"type": "module"` in package.json
+
+#### 2. Route Matching Configuration
+```typescript
+// ✅ CORRECT - Proper config object
+export const config = {
+  matcher: [
+    '/',
+    '/api/:path*',
+    '/admin/:path*'
+  ]
+};
+
+// ✅ CORRECT - Single path matching
+export const config = {
+  matcher: '/about'
+};
+
+// ✅ CORRECT - Regex pattern matching
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)'
+  ]
+};
+```
+
+#### 3. Middleware Function Signature
+```typescript
+// ✅ CORRECT - Standard middleware signature
+export default function middleware(request: Request, context: RequestContext) {
+  // Middleware logic
+  return new Response('Hello World');
+}
+
+// ✅ CORRECT - Next.js specific signature
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export default function middleware(request: NextRequest) {
+  return NextResponse.next();
+}
+```
+
+### Vercel-Specific Helper Methods
+
+#### 4. Geolocation Access
+```typescript
+// ✅ CORRECT - Access geolocation data
+export default function middleware(request: Request) {
+  const country = request.geo?.country || 'US';
+  const city = request.geo?.city || 'Unknown';
+  const region = request.geo?.region || 'Unknown';
+  
+  // Use geolocation for routing decisions
+  if (country === 'SE') {
+    return new Response('Blocked', { status: 403 });
+  }
+  
+  return new Response('Allowed');
+}
+```
+
+#### 5. IP Address Access
+```typescript
+// ✅ CORRECT - Get client IP address
+import { ipAddress } from '@vercel/functions';
+
+export default function middleware(request: Request) {
+  const ip = ipAddress(request);
+  
+  // Log or use IP for rate limiting
+  console.log(`Request from IP: ${ip}`);
+  
+  return new Response('OK');
+}
+```
+
+#### 6. RequestContext Usage
+```typescript
+// ✅ CORRECT - Use waitUntil for background tasks
+import type { RequestContext } from '@vercel/functions';
+
+export default function handler(request: Request, context: RequestContext) {
+  // Send response immediately
+  const response = new Response('Processing...');
+  
+  // Keep function running for background task
+  context.waitUntil(
+    fetch('https://api.example.com/webhook', {
+      method: 'POST',
+      body: JSON.stringify({ url: request.url })
+    })
+  );
+  
+  return response;
+}
+```
+
+### Response Handling Patterns
+
+#### 7. Rewrite Responses
+```typescript
+// ✅ CORRECT - Rewrite to different URL
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export default function middleware(request: NextRequest) {
+  // Rewrite to different path
+  request.nextUrl.pathname = '/new-path';
+  return NextResponse.rewrite(request.nextUrl);
+}
+```
+
+#### 8. Continue Middleware Chain
+```typescript
+// ✅ CORRECT - Continue with custom headers
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export default function middleware(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-custom-header', 'value');
+  
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  
+  response.headers.set('x-response-header', 'value');
+  return response;
+}
+```
+
+#### 9. Redirect Responses
+```typescript
+// ✅ CORRECT - Redirect with status code
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export default function middleware(request: NextRequest) {
+  return NextResponse.redirect(new URL('/login', request.url), 302);
+}
+```
+
+### Deployment Configuration
+
+#### 10. Vercel Configuration File
+```json
+// vercel.json - ✅ CORRECT configuration
+{
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/beers/:path*",
+      "destination": "/api/beers/:path*"
+    }
+  ]
+}
+```
+
+#### 11. Environment Variables
+```typescript
+// ✅ CORRECT - Access environment variables
+export default function middleware(request: Request) {
+  const apiKey = process.env.VERCEL_API_KEY;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (!apiKey && isProduction) {
+    return new Response('Missing API key', { status: 500 });
+  }
+  
+  return new Response('OK');
+}
+```
+
+### Performance Optimization
+
+#### 12. Edge Runtime Configuration
+```typescript
+// ✅ CORRECT - Use Edge Runtime for better performance
+export const config = {
+  runtime: 'edge',
+  matcher: '/api/:path*'
+};
+
+export default function middleware(request: Request) {
+  // Edge runtime provides better performance
+  return new Response('Edge response');
+}
+```
+
+#### 13. Caching Strategies
+```typescript
+// ✅ CORRECT - Implement proper caching
+export default function middleware(request: Request) {
+  const response = new Response('Cached content', {
+    headers: {
+      'Cache-Control': 'public, max-age=3600',
+      'CDN-Cache-Control': 'max-age=3600',
+      'Vercel-CDN-Cache-Control': 'max-age=3600'
+    }
+  });
+  
+  return response;
+}
+```
+
+### Security Best Practices
+
+#### 14. Rate Limiting Implementation
+```typescript
+// ✅ CORRECT - Basic rate limiting
+const rateLimitMap = new Map();
+
+export default function middleware(request: Request) {
+  const ip = ipAddress(request) || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100;
+  
+  const requests = rateLimitMap.get(ip) || [];
+  const validRequests = requests.filter((time: number) => now - time < windowMs);
+  
+  if (validRequests.length >= maxRequests) {
+    return new Response('Too Many Requests', { status: 429 });
+  }
+  
+  validRequests.push(now);
+  rateLimitMap.set(ip, validRequests);
+  
+  return new Response('OK');
+}
+```
+
+#### 15. Authentication Middleware
+```typescript
+// ✅ CORRECT - JWT authentication
+import { jwtVerify } from 'jose';
+
+export default async function middleware(request: Request) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    await jwtVerify(token, secret);
+    return new Response('OK');
+  } catch (error) {
+    return new Response('Invalid token', { status: 401 });
+  }
+}
+```
+
+### Error Handling
+
+#### 16. Comprehensive Error Handling
+```typescript
+// ✅ CORRECT - Proper error handling
+export default function middleware(request: Request) {
+  try {
+    // Middleware logic
+    const result = processRequest(request);
+    return new Response(JSON.stringify(result));
+  } catch (error) {
+    console.error('Middleware error:', error);
+    
+    return new Response(
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
+```
+
+### Monitoring and Logging
+
+#### 17. Request Logging
+```typescript
+// ✅ CORRECT - Comprehensive logging
+export default function middleware(request: Request, context: RequestContext) {
+  const startTime = Date.now();
+  const ip = ipAddress(request);
+  const userAgent = request.headers.get('user-agent');
+  
+  // Log request details
+  console.log({
+    method: request.method,
+    url: request.url,
+    ip,
+    userAgent,
+    timestamp: new Date().toISOString()
+  });
+  
+  const response = new Response('OK');
+  
+  // Log response time
+  context.waitUntil(
+    Promise.resolve().then(() => {
+      const duration = Date.now() - startTime;
+      console.log(`Request completed in ${duration}ms`);
+    })
+  );
+  
+  return response;
+}
+```
+
+## Examples
+
+### Good Examples
+
+```typescript
+// Complete middleware example
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { ipAddress } from '@vercel/functions';
+
+export const config = {
+  matcher: [
+    '/api/:path*',
+    '/admin/:path*'
+  ]
+};
+
+export default function middleware(request: NextRequest) {
+  const ip = ipAddress(request);
+  const country = request.geo?.country;
+  
+  // Rate limiting
+  if (isRateLimited(ip)) {
+    return new Response('Too Many Requests', { status: 429 });
+  }
+  
+  // Geographic restrictions
+  if (country === 'XX' && request.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.redirect(new URL('/blocked', request.url));
+  }
+  
+  // Add custom headers
+  const response = NextResponse.next();
+  response.headers.set('x-request-id', generateRequestId());
+  response.headers.set('x-server-region', request.geo?.region || 'unknown');
+  
+  return response;
+}
+```
+
+```typescript
+// API route with proper error handling
+export default async function handler(request: Request) {
+  try {
+    const { method } = request;
+    
+    if (method !== 'GET') {
+      return new Response('Method not allowed', { status: 405 });
+    }
+    
+    const data = await fetchData();
+    
+    return new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300'
+      }
+    });
+  } catch (error) {
+    console.error('API error:', error);
+    return new Response('Internal server error', { status: 500 });
+  }
+}
+```
+
+### Bad Examples
+
+```typescript
+// ❌ INCORRECT - Missing config object
+export default function middleware(request: Request) {
+  return new Response('OK');
+}
+```
+*Fails: Missing config object means middleware won't run on any routes.*
+
+```typescript
+// ❌ INCORRECT - Wrong file extension without module type
+// middleware.js - without "type": "module" in package.json
+export default function middleware(request) {
+  return new Response('OK');
+}
+```
+*Fails: JavaScript files need "type": "module" in package.json or use .mjs extension.*
+
+```typescript
+// ❌ INCORRECT - No error handling
+export default function middleware(request: Request) {
+  const result = riskyOperation(request); // Could throw
+  return new Response(JSON.stringify(result));
+}
+```
+*Fails: No error handling could crash the middleware.*
+
+## Implementation Guidelines
+
+### Deployment Checklist
+
+Before deploying to Vercel, verify:
+- [ ] Middleware file is named `middleware.ts` and placed at project root
+- [ ] Config object is properly defined with appropriate matchers
+- [ ] Environment variables are set in Vercel dashboard
+- [ ] Error handling is implemented for all middleware functions
+- [ ] Rate limiting is configured for public APIs
+- [ ] Security headers are properly set
+- [ ] Caching strategies are implemented where appropriate
+- [ ] Logging is configured for monitoring
+- [ ] Performance budgets are respected
+
+### Vercel-Specific Considerations
+
+#### Function Limits
+- **Execution time**: 10 seconds for Hobby, 60 seconds for Pro
+- **Memory**: 1024MB for Hobby, 3008MB for Pro
+- **Request size**: 4.5MB for request body
+- **Response size**: 4.5MB for response body
+
+#### Edge Runtime Benefits
+- Faster cold starts
+- Lower latency
+- Global distribution
+- Better performance for simple operations
+
+#### Monitoring Integration
+```typescript
+// ✅ CORRECT - Vercel Analytics integration
+import { Analytics } from '@vercel/analytics';
+
+export default function middleware(request: Request) {
+  // Track custom events
+  Analytics.track('middleware_execution', {
+    path: request.url,
+    method: request.method
+  });
+  
+  return new Response('OK');
+}
+```
+
+### Performance Optimization
+
+#### Bundle Size Optimization
+- Use dynamic imports for large dependencies
+- Implement tree shaking for unused code
+- Use Vercel's automatic code splitting
+- Optimize images with Vercel's Image Optimization
+
+#### Caching Strategies
+- Use Vercel's Edge Network for static content
+- Implement ISR (Incremental Static Regeneration) where appropriate
+- Use Vercel's Data Cache for API responses
+- Configure proper cache headers
+
+## Related Rules
+
+* @api-integration-patterns.mdc
+* @error-handling-standards.mdc
+* @security-guidelines.mdc
+* @performance-optimization.mdc
+
+## Changelog
+
+* **1.0.0 (2025-01-27)**: Initial release with comprehensive Vercel deployment API rules, middleware patterns, and best practices.
+
+<!--
+ Vercel Deployment API Rules
+ Copyright (c) 2025 Broken Loop Brewing Team <https://brokenloopbrewing.com>
+ SPDX-License-Identifier: Proprietary
+-->
