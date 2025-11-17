@@ -11,7 +11,7 @@
     "dev:vite": "vite --host",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:vite\"",
     "build": "npm run build:content && vite build && npm run build:api",
-    "build:api": "cd api && npm run build",
+    "build:api": "cd api && npm install && npm run build",
     "build:content": "node scripts/build-content-data.js",
     "build:full": "npm run build:content && npm run build",
     "lint": "eslint .",

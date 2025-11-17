@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { AdminService } from './lib/services/AdminService';
 import { BeerService } from './lib/services/BeerService';
@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/content', contentRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -31,7 +31,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Admin APIs
-app.get('/api/admin/beers', async (req, res) => {
+app.get('/api/admin/beers', async (req: Request, res: Response) => {
   try {
     const {
       status,
@@ -70,7 +70,7 @@ app.get('/api/admin/beers', async (req, res) => {
   }
 });
 
-app.get('/api/admin/metadata-simple', async (req, res) => {
+app.get('/api/admin/metadata-simple', async (req: Request, res: Response) => {
   try {
     const metadata = await adminService.getMetadata();
     
@@ -88,7 +88,7 @@ app.get('/api/admin/metadata-simple', async (req, res) => {
 });
 
 // Public Beer APIs
-app.get('/api/beers', async (req, res) => {
+app.get('/api/beers', async (req: Request, res: Response) => {
   try {
     const {
       status,
@@ -124,7 +124,7 @@ app.get('/api/beers', async (req, res) => {
   }
 });
 
-app.get('/api/beers/:uuid', async (req, res) => {
+app.get('/api/beers/:uuid', async (req: Request, res: Response) => {
   try {
     const { uuid } = req.params;
     
@@ -149,7 +149,7 @@ app.get('/api/beers/:uuid', async (req, res) => {
 });
 
 // Business Status API
-app.get('/api/business-status', async (req, res) => {
+app.get('/api/business-status', async (req: Request, res: Response) => {
   try {
     // Simple business status - always open for now
     const status = {
