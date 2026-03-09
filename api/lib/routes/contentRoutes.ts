@@ -72,7 +72,7 @@ router.get('/:type', async (req: Request, res: Response) => {
 router.get('/:type/:id', async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
+    const id = req.params.id as string;
     const validate = req.query.validate === 'true';
 
     const item = await contentManager.getContent(type, id, { validate });
@@ -128,7 +128,7 @@ router.post('/:type', requireAuth, async (req: Request, res: Response) => {
 router.put('/:type/:id', requireAuth, async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
+    const id = req.params.id as string;
     const updates = req.body;
     
     const options: ContentCRUDOptions = {
@@ -156,7 +156,7 @@ router.put('/:type/:id', requireAuth, async (req: Request, res: Response) => {
 router.delete('/:type/:id', requireAuth, async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
+    const id = req.params.id as string;
     
     const options: ContentCRUDOptions = {
       commitMessage: req.body.commitMessage || `Delete ${type}: ${id}`
@@ -201,7 +201,7 @@ router.post('/batch', requireAuth, async (req: Request, res: Response) => {
 router.post('/:type/:id/validate', async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
+    const id = req.params.id as string;
 
     const item = await contentManager.getContent(type, id);
     if (!item) {
@@ -230,8 +230,8 @@ router.post('/:type/:id/validate', async (req: Request, res: Response) => {
 router.get('/:type/:id/conflicts/:other', async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
-    const otherId = req.params.other;
+    const id = req.params.id as string;
+    const otherId = req.params.other as string;
 
     const [existing, other] = await Promise.all([
       contentManager.getContent(type, id),
@@ -264,7 +264,7 @@ router.get('/:type/:id/conflicts/:other', async (req: Request, res: Response) =>
 router.post('/:type/:id/resolve-conflicts', requireAuth, async (req: Request, res: Response) => {
   try {
     const type = req.params.type as ContentType;
-    const id = req.params.id;
+    const id = req.params.id as string;
     const { otherContent, strategy } = req.body;
 
     const existing = await contentManager.getContent(type, id);

@@ -74,7 +74,7 @@ app.get('/api/beers', async (req: Request, res: Response) => {
 
 app.get('/api/beers/:slug', async (req: Request, res: Response) => {
   try {
-    const beer = await beerRepo.findBySlug(req.params.slug);
+    const beer = await beerRepo.findBySlug(req.params.slug as string);
     if (!beer) {
       return res.status(404).json({ error: 'Beer not found' });
     }
@@ -123,7 +123,7 @@ app.get('/api/admin/beers', requireAuth, async (req: Request, res: Response) => 
 
 app.get('/api/admin/beers/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const beer = await beerRepo.findByUuid(req.params.id);
+    const beer = await beerRepo.findByUuid(req.params.id as string);
     if (!beer) {
       return res.status(404).json({ success: false, error: 'Beer not found' });
     }
@@ -147,7 +147,7 @@ app.post('/api/admin/beers', requireAuth, async (req: Request, res: Response) =>
 
 app.put('/api/admin/beers/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const beer = await beerRepo.update(req.params.id, req.body);
+    const beer = await beerRepo.update(req.params.id as string, req.body);
     if (!beer) {
       return res.status(404).json({ success: false, error: 'Beer not found' });
     }
@@ -161,7 +161,7 @@ app.put('/api/admin/beers/:id', requireAuth, async (req: Request, res: Response)
 
 app.delete('/api/admin/beers/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const deleted = await beerRepo.delete(req.params.id);
+    const deleted = await beerRepo.delete(req.params.id as string);
     if (!deleted) {
       return res.status(404).json({ success: false, error: 'Beer not found' });
     }
@@ -203,7 +203,7 @@ app.get('/api/food', async (req: Request, res: Response) => {
 
 app.get('/api/food/:slug', async (req: Request, res: Response) => {
   try {
-    const foodItem = await foodRepo.findBySlug(req.params.slug);
+    const foodItem = await foodRepo.findBySlug(req.params.slug as string);
     if (!foodItem) {
       return res.status(404).json({ error: 'Food item not found' });
     }
@@ -250,7 +250,7 @@ app.get('/api/admin/food', requireAuth, async (req: Request, res: Response) => {
 
 app.get('/api/admin/food/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const food = await foodRepo.findByUuid(req.params.id);
+    const food = await foodRepo.findByUuid(req.params.id as string);
     if (!food) {
       return res.status(404).json({ success: false, error: 'Food item not found' });
     }
@@ -274,7 +274,7 @@ app.post('/api/admin/food', requireAuth, async (req: Request, res: Response) => 
 
 app.put('/api/admin/food/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const food = await foodRepo.update(req.params.id, req.body);
+    const food = await foodRepo.update(req.params.id as string, req.body);
     if (!food) {
       return res.status(404).json({ success: false, error: 'Food item not found' });
     }
@@ -288,7 +288,7 @@ app.put('/api/admin/food/:id', requireAuth, async (req: Request, res: Response) 
 
 app.delete('/api/admin/food/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const deleted = await foodRepo.delete(req.params.id);
+    const deleted = await foodRepo.delete(req.params.id as string);
     if (!deleted) {
       return res.status(404).json({ success: false, error: 'Food item not found' });
     }
@@ -331,7 +331,7 @@ app.get('/api/events', async (req: Request, res: Response) => {
 
 app.get('/api/events/:slug', async (req: Request, res: Response) => {
   try {
-    const event = await eventRepo.findBySlug(req.params.slug);
+    const event = await eventRepo.findBySlug(req.params.slug as string);
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
@@ -379,7 +379,7 @@ app.get('/api/admin/events', requireAuth, async (req: Request, res: Response) =>
 
 app.get('/api/admin/events/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const event = await eventRepo.findByUuid(req.params.id);
+    const event = await eventRepo.findByUuid(req.params.id as string);
     if (!event) {
       return res.status(404).json({ success: false, error: 'Event not found' });
     }
@@ -403,7 +403,7 @@ app.post('/api/admin/events', requireAuth, async (req: Request, res: Response) =
 
 app.put('/api/admin/events/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const event = await eventRepo.update(req.params.id, req.body);
+    const event = await eventRepo.update(req.params.id as string, req.body);
     if (!event) {
       return res.status(404).json({ success: false, error: 'Event not found' });
     }
@@ -417,7 +417,7 @@ app.put('/api/admin/events/:id', requireAuth, async (req: Request, res: Response
 
 app.delete('/api/admin/events/:id', requireAuth, async (req: Request, res: Response) => {
   try {
-    const deleted = await eventRepo.delete(req.params.id);
+    const deleted = await eventRepo.delete(req.params.id as string);
     if (!deleted) {
       return res.status(404).json({ success: false, error: 'Event not found' });
     }
