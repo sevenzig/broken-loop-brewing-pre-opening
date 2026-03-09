@@ -515,7 +515,7 @@ const staticDir = process.env.STATIC_DIR || path.join(__dirname, '..', 'dist');
 if (process.env.SERVE_STATIC === 'true') {
   app.use(express.static(staticDir, { index: 'index.html' }));
 
-  app.get('*', (_req: Request, res: Response) => {
+  app.get('{*path}', (_req: Request, res: Response) => {
     res.sendFile(path.join(staticDir, 'index.html'));
   });
 }
