@@ -11,9 +11,12 @@ export async function runMigrations(): Promise<void> {
   const schema = fs.readFileSync(schemaPath, 'utf-8');
 
   const statements = schema
+    .split('\n')
+    .filter(line => !line.trimStart().startsWith('--'))
+    .join('\n')
     .split(';')
     .map(s => s.trim())
-    .filter(s => s.length > 0 && !s.startsWith('--'));
+    .filter(s => s.length > 0);
 
   for (const statement of statements) {
     try {
