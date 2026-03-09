@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # ---------------------------------------------------------------------------
 #  Stage 1 -- Build the Vite frontend  (parallel with stage 2 under BuildKit)
 # ---------------------------------------------------------------------------
