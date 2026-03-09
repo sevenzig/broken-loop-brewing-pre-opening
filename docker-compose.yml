@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: blb_local_dev
       POSTGRES_DB: broken_loop_brewing
     ports:
-      - "5432:5432"
+      - "9998:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

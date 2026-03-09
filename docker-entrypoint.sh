@@ -4,24 +4,29 @@ set -e
 echo "=== Broken Loop Brewing - Docker Entrypoint ==="
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-  echo "Waiting for database..."
-  RETRIES=15
+  DB_HOST=$(echo "$DATABASE_URL" | sed 's|.*@\([^:]*\):.*|\1|')
+  DB_PORT=$(echo "$DATABASE_URL" | sed 's|.*:\([0-9]*\)/.*|\1|')
+  echo "Waiting for database at ${DB_HOST}:${DB_PORT}..."
+
+  RETRIES=20
   until node -e "
-    const sql = require('postgres')('$DATABASE_URL', { connect_timeout: 3 });
-    sql\`SELECT 1\`.then(() => { sql.end(); process.exit(0); })
-      .catch(() => { sql.end(); process.exit(1); });
-  " 2>/dev/null; do
+    const net = require('net');
+    const s = net.connect(${DB_PORT}, '${DB_HOST}');
+    s.on('connect', () => { s.end(); process.exit(0); });
+    s.on('error', () => process.exit(1));
+    setTimeout(() => process.exit(1), 2000);
+  "; do
     RETRIES=$((RETRIES - 1))
     if [ "$RETRIES" -le 0 ]; then
-      echo "ERROR: Could not connect to database after multiple attempts."
+      echo "ERROR: Could not reach database after multiple attempts."
       exit 1
     fi
-    echo "  Database not ready, retrying in 2s... ($RETRIES attempts left)"
+    echo "  Not ready, retrying in 2s... ($RETRIES attempts left)"
     sleep 2
   done
   echo "Database is reachable."
 
-  echo "Running database migrations and seed..."
+  echo "Running migrations and seed..."
   node api/dist/db/seed.js
   echo "Migrations and seed complete."
 fi
