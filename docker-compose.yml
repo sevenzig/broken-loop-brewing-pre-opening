@@ -29,8 +29,8 @@ services:
       PORT: "3000"
       SERVE_STATIC: "true"
       STATIC_DIR: /app/dist
+      RUN_MIGRATIONS: "true"
       JWT_SECRET: docker-local-dev-secret-change-in-production
-      NODE_ENV: production
 
 volumes:
   pgdata:

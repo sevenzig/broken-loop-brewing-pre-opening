@@ -38,7 +38,7 @@ RUN apk add --no-cache wget
 
 WORKDIR /app
 
-# Carry over pre-pruned node_modules from the API build stage
+# Carry over pre-pruned node_modules and compiled API from build stage
 COPY --from=build-api /app/api/package.json ./api/
 COPY --from=build-api /app/api/node_modules/ ./api/node_modules/
 COPY --from=build-api /app/api/dist/ ./api/dist/
@@ -46,18 +46,14 @@ COPY --from=build-api /app/api/dist/ ./api/dist/
 # Copy built frontend from stage 1
 COPY --from=build-frontend /app/dist/ ./dist/
 
-# Copy schema + seed data for migration/seed at boot
-COPY api/db/schema.sql ./api/dist/db/schema.sql
+# Copy schema (from build stage) + seed data for migration/seed at boot
+COPY --from=build-api /app/api/db/schema.sql ./api/dist/db/schema.sql
 COPY public/data/ ./public/data/
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
 ENV NODE_ENV=production
-ENV PORT=3000
-ENV SERVE_STATIC=true
-ENV STATIC_DIR=/app/dist
-ENV RUN_MIGRATIONS=true
 
 EXPOSE 3000
 
