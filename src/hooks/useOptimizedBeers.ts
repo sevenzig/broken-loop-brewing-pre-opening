@@ -23,8 +23,8 @@ export interface Beer {
   seasonal?: boolean;
   limited_edition?: boolean;
   barrel_aged?: boolean;
-  content?: string; // Pre-processed HTML content
-  markdown?: string; // Original markdown for admin editing
+  content?: string;
+  markdown?: string;
   uuid: string;
 }
 
@@ -38,10 +38,6 @@ export interface BeerStats {
   retired: number;
 }
 
-/**
- * Optimized hook that uses pre-processed JSON data instead of runtime markdown processing
- * This eliminates gray-matter, remark, and remark-html from the client bundle
- */
 export function useOptimizedBeers() {
   const [allBeers, setAllBeers] = useState<Beer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,14 +47,14 @@ export function useOptimizedBeers() {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('/data/beers.json');
+
+      const response = await fetch('/api/beers?limit=200');
       if (!response.ok) {
         throw new Error(`Failed to load beers: ${response.status} ${response.statusText}`);
       }
-      
-      const beersData = await response.json();
-      setAllBeers(beersData);
+
+      const result = await response.json();
+      setAllBeers(result.beers ?? result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load beers';
       setError(errorMessage);
@@ -72,43 +68,41 @@ export function useOptimizedBeers() {
     loadBeers();
   }, []);
 
-  // Memoized filtered beer arrays for performance
-  const featuredOnTapBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'on-tap' && beer.featured), 
+  const featuredOnTapBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'on-tap' && beer.featured),
     [allBeers]
   );
 
-  const onTapBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'on-tap'), 
+  const onTapBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'on-tap'),
     [allBeers]
   );
 
-  const comingSoonBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'coming-soon'), 
+  const comingSoonBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'coming-soon'),
     [allBeers]
   );
 
-  const seasonalBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'seasonal'), 
+  const seasonalBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'seasonal'),
     [allBeers]
   );
 
-  const archivedBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'archived'), 
+  const archivedBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'archived'),
     [allBeers]
   );
 
-  const limitedEditionBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'limited-edition'), 
+  const limitedEditionBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'limited-edition'),
     [allBeers]
   );
 
-  const retiredBeers = useMemo(() => 
-    allBeers.filter(beer => beer.status === 'retired'), 
+  const retiredBeers = useMemo(() =>
+    allBeers.filter(beer => beer.status === 'retired'),
     [allBeers]
   );
 
-  // Memoized statistics
   const stats = useMemo<BeerStats>(() => ({
     total: allBeers.length,
     onTap: onTapBeers.length,
@@ -135,32 +129,50 @@ export function useOptimizedBeers() {
   };
 }
 
-/**
- * Optimized hook for getting a single beer by slug using pre-processed data
- */
 export function useOptimizedBeer(slug: string) {
-  const { allBeers, loading, error } = useOptimizedBeers();
+  const [beer, setBeer] = useState<Beer | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const beer = useMemo(() => 
-    allBeers.find(beer => beer.slug === slug) || null, 
-    [allBeers, slug]
-  );
+  useEffect(() => {
+    if (!slug) return;
 
-  return {
-    beer,
-    loading,
-    error,
-  };
+    const loadBeer = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/beers/${encodeURIComponent(slug)}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Beer not found');
+          } else {
+            throw new Error(`Failed to load beer: ${response.status}`);
+          }
+          return;
+        }
+
+        const result = await response.json();
+        setBeer(result.beer ?? result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load beer');
+        console.error('Error loading beer:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBeer();
+  }, [slug]);
+
+  return { beer, loading, error };
 }
 
-/**
- * Optimized hook for filtering beers with custom criteria using pre-processed data
- */
 export function useOptimizedFilteredBeers(filterFn: (beer: Beer) => boolean) {
   const { allBeers, loading, error } = useOptimizedBeers();
 
-  const filteredBeers = useMemo(() => 
-    allBeers.filter(filterFn), 
+  const filteredBeers = useMemo(() =>
+    allBeers.filter(filterFn),
     [allBeers, filterFn]
   );
 
@@ -171,4 +183,3 @@ export function useOptimizedFilteredBeers(filterFn: (beer: Beer) => boolean) {
     total: filteredBeers.length,
   };
 }
-

@@ -1,3 +1,8 @@
+/**
+ * LEGACY SCRIPT -- Content is now served from the DB via the API.
+ * Run `npm run db:migrate` and `npm run db:seed` (in api/) instead.
+ * This script is kept only for offline/fallback JSON generation.
+ */
 import { promises as fs } from 'fs';
 import path from 'path';
 import matter from 'gray-matter';

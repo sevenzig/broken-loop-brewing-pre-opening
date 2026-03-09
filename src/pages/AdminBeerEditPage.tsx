@@ -76,93 +76,87 @@ export const AdminBeerEditPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const getAuthHeaders = (): HeadersInit => {
+    const token = localStorage.getItem('auth-token');
+    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  };
+
   const loadBeerData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      // Load pre-processed beer data
-      const beersResponse = await fetch('/data/beers.json');
-      const beers = await beersResponse.json();
-      
-      // Find the specific beer by UUID
-      const foundBeer = beers.find((beer: any) => beer.uuid === uuid);
-      
-      if (foundBeer) {
-        setFormData({
-          name: foundBeer.name || '',
-          slug: foundBeer.slug || '',
-          image: foundBeer.image || '',
-          availability: foundBeer.availability || 'Year-round',
-          status: foundBeer.status || 'on-tap',
-          tapped_on: foundBeer.tapped_on || '',
-          style: foundBeer.style || '',
-          abv: foundBeer.abv || '',
-          ibu: foundBeer.ibu || '',
-          srm: foundBeer.srm || '',
-          featured: foundBeer.featured || false,
-          barrel_aged: foundBeer.barrel_aged || false,
-          brief_description: foundBeer.brief_description || '',
-          aroma: foundBeer.aroma || '',
-          flavor_profile: foundBeer.flavor_profile || '',
-          appearance: foundBeer.appearance || '',
-          malts: foundBeer.malts || '',
-          hops: foundBeer.hops || '',
-          yeast: foundBeer.yeast || '',
-          content: foundBeer.markdown || '', // Use original markdown for editing
-          awards: foundBeer.awards || ''
-        });
-      } else {
-        setError('Beer not found');
+      const [beerRes, metaRes] = await Promise.all([
+        fetch(`/api/admin/beers/${uuid}`, { headers: getAuthHeaders() }),
+        fetch('/api/admin/metadata-simple', { headers: getAuthHeaders() }),
+      ]);
+
+      if (!beerRes.ok) {
+        setError(beerRes.status === 404 ? 'Beer not found' : 'Failed to load beer');
+        setLoading(false);
+        return;
       }
 
-      // Extract metadata from pre-processed beer data
-      const stylesSet = new Set<string>();
-      const statusesSet = new Set<string>();
-      
-      beers.forEach((beer: any) => {
-        if (beer.style) stylesSet.add(beer.style);
-        if (beer.status) statusesSet.add(beer.status);
+      const beerResult = await beerRes.json();
+      const foundBeer = beerResult.data ?? beerResult;
+
+      setFormData({
+        name: foundBeer.name || '',
+        slug: foundBeer.slug || '',
+        image: foundBeer.image || '',
+        availability: foundBeer.availability || 'Year-round',
+        status: foundBeer.status || 'on-tap',
+        tapped_on: foundBeer.tapped_on || '',
+        style: foundBeer.style || '',
+        abv: foundBeer.abv || '',
+        ibu: foundBeer.ibu || '',
+        srm: foundBeer.srm || '',
+        featured: foundBeer.featured || false,
+        barrel_aged: foundBeer.barrel_aged || false,
+        brief_description: foundBeer.brief_description || '',
+        aroma: foundBeer.aroma || '',
+        flavor_profile: foundBeer.flavor_profile || '',
+        appearance: foundBeer.appearance || '',
+        malts: foundBeer.malts || '',
+        hops: foundBeer.hops || '',
+        yeast: foundBeer.yeast || '',
+        content: foundBeer.markdown || '',
+        awards: foundBeer.awards || '',
       });
 
-      // Load pre-processed beer styles data
-      const stylesResponse = await fetch('/data/beer-styles.json');
-      const beerStyles = await stylesResponse.json();
-      
-      // Transform beer styles for dropdown
-      const styleGuideStyles: Array<{ value: string; label: string; category: string }> = [];
-      beerStyles.forEach((style: any) => {
-        if (style.style_name) {
-          styleGuideStyles.push({
-            value: style.style_name,
-            label: `${style.style_code}. ${style.style_name}`,
-            category: style.category_name || 'Other'
-          });
-        }
-      });
+      if (metaRes.ok) {
+        const metaResult = await metaRes.json();
+        const data = metaResult.data ?? metaResult;
 
-      setMetadata({
-        dropdowns: {
-          statuses: Array.from(statusesSet).map(status => ({
-            value: status,
-            label: status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' '),
-            color: status === 'on-tap' ? '#28a745' : status === 'coming-soon' ? '#ffc107' : '#6c757d'
-          })),
-          styles: styleGuideStyles.sort(sortStyles),
-          availability: [
-            { value: 'Year-round', label: 'Year-round' },
-            { value: 'Seasonal', label: 'Seasonal' },
-            { value: 'Limited', label: 'Limited Release' },
-            { value: 'One-off', label: 'One-off' }
-          ]
-        },
-        stats: {
-          totalBeers: beers.length,
-          onTap: beers.filter((beer: any) => beer.status === 'on-tap').length,
-          seasonal: beers.filter((beer: any) => beer.availability === 'Seasonal').length,
-          featured: beers.filter((beer: any) => beer.featured).length
-        }
-      });
+        const defaultStatuses = [
+          { value: 'on-tap', label: 'On Tap', color: '#28a745' },
+          { value: 'coming-soon', label: 'Coming Soon', color: '#ffc107' },
+          { value: 'seasonal', label: 'Seasonal', color: '#17a2b8' },
+          { value: 'limited-edition', label: 'Limited Edition', color: '#6f42c1' },
+          { value: 'sold-out', label: 'Sold Out', color: '#dc3545' },
+          { value: 'archived', label: 'Archived', color: '#6c757d' },
+          { value: 'retired', label: 'Retired', color: '#343a40' },
+        ];
+
+        setMetadata({
+          dropdowns: {
+            statuses: data.dropdowns?.statuses ?? defaultStatuses,
+            styles: (data.dropdowns?.styles ?? []).sort(sortStyles),
+            availability: data.dropdowns?.availability ?? [
+              { value: 'Year-round', label: 'Year-round' },
+              { value: 'Seasonal', label: 'Seasonal' },
+              { value: 'Limited', label: 'Limited Release' },
+              { value: 'One-off', label: 'One-off' },
+            ],
+          },
+          stats: {
+            totalBeers: data.stats?.total ?? 0,
+            onTap: data.stats?.onTap ?? 0,
+            seasonal: data.stats?.seasonal ?? 0,
+            featured: 0,
+          },
+        });
+      }
     } catch (err) {
       setError('Failed to load beer data');
       console.error('Error loading beer data:', err);
@@ -184,41 +178,44 @@ export const AdminBeerEditPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    
+    setError(null);
+
     try {
-      // Generate markdown content
-      const markdown = `---
-name: '${formData.name}'
-image: '${formData.image}'
-slug: '${formData.slug}'
-abv: '${formData.abv}'
-ibu: '${formData.ibu}'
-srm: '${formData.srm}'
-style: '${formData.style}'
-status: '${formData.status}'
-availability: '${formData.availability}'
-tapped_on: '${formData.tapped_on}'
-featured: ${formData.featured}
-barrel_aged: ${formData.barrel_aged}
-brief_description: '${formData.brief_description}'
-aroma: '${formData.aroma}'
-flavor_profile: '${formData.flavor_profile}'
-appearance: '${formData.appearance}'
-malts: '${formData.malts}'
-hops: '${formData.hops}'
-yeast: '${formData.yeast}'
-awards: '${formData.awards}'
----
+      const response = await fetch(`/api/admin/beers/${uuid}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+          image: formData.image,
+          abv: formData.abv,
+          ibu: formData.ibu,
+          srm: formData.srm,
+          style: formData.style,
+          status: formData.status,
+          availability: formData.availability,
+          tapped_on: formData.tapped_on || null,
+          featured: formData.featured,
+          barrel_aged: formData.barrel_aged,
+          brief_description: formData.brief_description,
+          aroma: formData.aroma,
+          flavor_profile: formData.flavor_profile,
+          appearance: formData.appearance,
+          malts: formData.malts,
+          hops: formData.hops,
+          yeast: formData.yeast,
+          markdown: formData.content,
+        }),
+      });
 
-${formData.content}`;
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Failed to save beer');
+      }
 
-      // For now, just log the markdown (in production, this would save to file)
-      console.log('Generated markdown:', markdown);
-      
-      // Navigate back to admin panel
       navigate('/admin');
     } catch (err) {
-      setError('Failed to save beer');
+      setError(err instanceof Error ? err.message : 'Failed to save beer');
       console.error('Error saving beer:', err);
     } finally {
       setSaving(false);

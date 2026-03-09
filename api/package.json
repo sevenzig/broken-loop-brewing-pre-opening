@@ -7,6 +7,8 @@
     "start": "node dist/server.js",
     "dev": "node simple-server.js",
     "build": "tsc",
+    "db:migrate": "ts-node db/migrate.ts",
+    "db:seed": "ts-node db/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -26,6 +28,7 @@
     "formidable": "^3.5.1",
     "gray-matter": "^4.0.3",
     "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.8",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "slugify": "^1.6.6",

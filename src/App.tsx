@@ -26,6 +26,10 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const AdminBeerCreatePage = lazy(() => import('./pages/AdminBeerCreatePage'));
 const AdminBeerEditPage = lazy(() => import('./pages/AdminBeerEditPage'));
+const AdminFoodCreatePage = lazy(() => import('./pages/AdminFoodCreatePage'));
+const AdminFoodEditPage = lazy(() => import('./pages/AdminFoodEditPage'));
+const AdminEventCreatePage = lazy(() => import('./pages/AdminEventCreatePage'));
+const AdminEventEditPage = lazy(() => import('./pages/AdminEventEditPage'));
 
 // Lazy load demo/style guide pages (development-only routes)
 const DebugPage = lazy(() => import('./pages/DebugPage'));
@@ -245,6 +249,42 @@ function App() {
                       <ProtectedRoute requiredPermissions={['admin:access', 'beer:update']}>
                         <ErrorBoundary>
                           <AdminBeerEditPage />
+                        </ErrorBoundary>
+                      </ProtectedRoute>
+                    </Suspense>
+                  } />
+                  <Route path="/admin/food/new" element={
+                    <Suspense fallback={<RouteLoader message="Loading food creation form..." />}>
+                      <ProtectedRoute requiredPermissions={['admin:access']}>
+                        <ErrorBoundary>
+                          <AdminFoodCreatePage />
+                        </ErrorBoundary>
+                      </ProtectedRoute>
+                    </Suspense>
+                  } />
+                  <Route path="/admin/food/:uuid/edit" element={
+                    <Suspense fallback={<RouteLoader message="Loading food edit form..." />}>
+                      <ProtectedRoute requiredPermissions={['admin:access']}>
+                        <ErrorBoundary>
+                          <AdminFoodEditPage />
+                        </ErrorBoundary>
+                      </ProtectedRoute>
+                    </Suspense>
+                  } />
+                  <Route path="/admin/events/new" element={
+                    <Suspense fallback={<RouteLoader message="Loading event creation form..." />}>
+                      <ProtectedRoute requiredPermissions={['admin:access']}>
+                        <ErrorBoundary>
+                          <AdminEventCreatePage />
+                        </ErrorBoundary>
+                      </ProtectedRoute>
+                    </Suspense>
+                  } />
+                  <Route path="/admin/events/:uuid/edit" element={
+                    <Suspense fallback={<RouteLoader message="Loading event edit form..." />}>
+                      <ProtectedRoute requiredPermissions={['admin:access']}>
+                        <ErrorBoundary>
+                          <AdminEventEditPage />
                         </ErrorBoundary>
                       </ProtectedRoute>
                     </Suspense>

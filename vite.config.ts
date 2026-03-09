@@ -66,7 +66,7 @@ export default defineConfig({
     proxy: {
       // Proxy ALL /api requests to Vercel dev server
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
         ws: true,

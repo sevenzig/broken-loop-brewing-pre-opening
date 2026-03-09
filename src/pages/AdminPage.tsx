@@ -26,6 +26,35 @@ interface Beer {
   updated_at: string;
 }
 
+interface FoodItem {
+  uuid: string;
+  name: string;
+  slug: string;
+  category: string;
+  price: string;
+  brief_description: string;
+  available: boolean;
+  featured: boolean;
+  seasonal: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface EventItem {
+  uuid: string;
+  name: string;
+  slug: string;
+  date: string;
+  time: string;
+  status: string;
+  category: string;
+  brief_description: string;
+  featured: boolean;
+  recurring?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Admin Beers API Response
 interface AdminBeersResponse {
   beers: Beer[];
@@ -40,6 +69,27 @@ interface AdminBeersResponse {
     style: string | null;
     availability: string | null;
     search: string | null;
+  };
+}
+
+interface AdminFoodResponse {
+  food: FoodItem[];
+  total: number;
+  stats: {
+    total: number;
+    available: number;
+    featured: number;
+  };
+}
+
+interface AdminEventsResponse {
+  events: EventItem[];
+  total: number;
+  stats: {
+    total: number;
+    active: number;
+    upcoming: number;
+    featured: number;
   };
 }
 
@@ -196,12 +246,20 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
   } = useAgeVerificationSettings();
   
   const [beers, setBeers] = useState<Beer[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [foodStats, setFoodStats] = useState<{ total: number; available: number; featured: number }>({ total: 0, available: 0, featured: 0 });
+  const [eventStats, setEventStats] = useState<{ total: number; active: number; upcoming: number; featured: number }>({ total: 0, active: 0, upcoming: 0, featured: 0 });
   const [metadata, setMetadata] = useState<AdminMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [styleFilter, setStyleFilter] = useState<string>('all');
+  const [foodSearchTerm, setFoodSearchTerm] = useState('');
+  const [foodCategoryFilter, setFoodCategoryFilter] = useState<string>('all');
+  const [eventSearchTerm, setEventSearchTerm] = useState('');
+  const [eventCategoryFilter, setEventCategoryFilter] = useState<string>('all');
   const [activeSection, setActiveSection] = useState<'general' | 'beer' | 'food' | 'events'>('general');
   const [localBusinessStatus, setLocalBusinessStatus] = useState<boolean | null>(null);
   const [statusSaving, setStatusSaving] = useState(false);
@@ -214,10 +272,11 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
       setLoading(true);
       setError(null);
 
-      // Load beers and metadata from proper admin APIs
-      const [beersResponse, metadataResponse] = await Promise.all([
+      const [beersResponse, metadataResponse, foodResponse, eventsResponse] = await Promise.all([
         apiClient.get<AdminBeersResponse>('/api/admin/beers'),
-        apiClient.get<AdminMetadata>('/api/admin/metadata')
+        apiClient.get<AdminMetadata>('/api/admin/metadata'),
+        apiClient.get<AdminFoodResponse>('/api/admin/food'),
+        apiClient.get<AdminEventsResponse>('/api/admin/events'),
       ]);
       
       if (beersResponse.success && beersResponse.data) {
@@ -230,6 +289,20 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
         setMetadata(metadataResponse.data as AdminMetadata);
       } else {
         throw new Error(metadataResponse.message || 'Failed to load metadata');
+      }
+
+      if (foodResponse.success && foodResponse.data) {
+        setFoodItems(foodResponse.data.food || []);
+        if (foodResponse.data.stats) {
+          setFoodStats(foodResponse.data.stats);
+        }
+      }
+
+      if (eventsResponse.success && eventsResponse.data) {
+        setEvents(eventsResponse.data.events || []);
+        if (eventsResponse.data.stats) {
+          setEventStats(eventsResponse.data.stats);
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load admin data';
@@ -359,6 +432,54 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
     }
   };
 
+  const handleDeleteFood = async (foodUuid: string, foodName: string) => {
+    if (!confirm(`Are you sure you want to delete "${foodName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiClient.delete(`/api/admin/food/${foodUuid}`);
+      
+      if (response.success) {
+        showSuccess('Success', `Food item "${foodName}" deleted successfully`);
+        await loadAdminData();
+      } else {
+        throw new Error(response.message || 'Failed to delete food item');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete food item';
+      showError('Error', errorMessage);
+      console.error('Error deleting food item:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async (eventUuid: string, eventName: string) => {
+    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiClient.delete(`/api/admin/events/${eventUuid}`);
+      
+      if (response.success) {
+        showSuccess('Success', `Event "${eventName}" deleted successfully`);
+        await loadAdminData();
+      } else {
+        throw new Error(response.message || 'Failed to delete event');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete event';
+      showError('Error', errorMessage);
+      console.error('Error deleting event:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filter beers based on search and filters
   const filteredBeers = beers.filter(beer => {
     const matchesSearch = beer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -368,6 +489,24 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
     
     return matchesSearch && matchesStatus && matchesStyle;
   });
+
+  const filteredFood = foodItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(foodSearchTerm.toLowerCase()) ||
+                         item.brief_description.toLowerCase().includes(foodSearchTerm.toLowerCase());
+    const matchesCategory = foodCategoryFilter === 'all' || item.category === foodCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const foodCategories = Array.from(new Set(foodItems.map(item => item.category))).sort();
+
+  const filteredEvents = events.filter(ev => {
+    const matchesSearch = ev.name.toLowerCase().includes(eventSearchTerm.toLowerCase()) ||
+                         ev.brief_description.toLowerCase().includes(eventSearchTerm.toLowerCase());
+    const matchesCategory = eventCategoryFilter === 'all' || ev.category === eventCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const eventCategories = Array.from(new Set(events.map(ev => ev.category))).sort();
 
   if (!user) {
     return (
@@ -713,16 +852,111 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
       case 'food':
         return (
           <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>Food Management</h2>
-            <div className={styles.placeholderSection}>
-              <p>Food management features coming soon...</p>
-              <p>This section will include:</p>
-              <ul>
-                <li>Menu item management</li>
-                <li>Category organization</li>
-                <li>Pricing updates</li>
-                <li>Availability status</li>
-              </ul>
+            <div className={styles.beerManagementHeader}>
+              <h2 className={styles.sectionTitle}>Food Management</h2>
+              <div className={styles.quickStats}>
+                <span className={styles.statBadge}>Total: {foodStats.total}</span>
+                <span className={styles.statBadge}>Available: {foodStats.available}</span>
+                <span className={styles.statBadge}>Featured: {foodStats.featured}</span>
+              </div>
+            </div>
+
+            <div className={styles.addBeerSection}>
+              <button
+                className={styles.addBeerButton}
+                onClick={() => window.location.href = '/admin/food/new'}
+              >
+                + Add Food Item
+              </button>
+            </div>
+
+            <div className={styles.controlsSection}>
+              <div className={styles.searchSection}>
+                <input
+                  type="text"
+                  placeholder="Search food items..."
+                  value={foodSearchTerm}
+                  onChange={(e) => setFoodSearchTerm(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+
+              <div className={styles.filterSection}>
+                <select
+                  value={foodCategoryFilter}
+                  onChange={(e) => setFoodCategoryFilter(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  <option value="all">All Categories</option>
+                  {foodCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.beerTableContainer}>
+              <table className={styles.beerTable}>
+                <caption>Food Menu Management</caption>
+                <thead>
+                  <tr>
+                    <th className={styles.beerNameHeader}>Name</th>
+                    <th className={styles.beerStyleHeader}>Category</th>
+                    <th className={styles.beerAbvHeader}>Price</th>
+                    <th className={styles.beerStatusHeader}>Status</th>
+                    <th className={styles.beerActionsHeader}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredFood.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className={styles.noData}>
+                        No food items found matching your criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredFood.map(item => (
+                      <tr key={item.uuid} className={styles.beerRow}>
+                        <td className={styles.beerNameCell}>
+                          <div className={styles.beerName}>{item.name}</div>
+                          <div className={styles.beerDescription}>{item.brief_description}</div>
+                        </td>
+                        <td className={styles.beerStyleCell}>{item.category}</td>
+                        <td className={styles.beerAbvCell}>{item.price}</td>
+                        <td className={styles.beerStatusCell}>
+                          <span className={`${styles.statusBadge} ${item.available ? styles.statusontap : styles.statusretired}`}>
+                            {item.available ? 'Available' : 'Unavailable'}
+                          </span>
+                        </td>
+                        <td className={styles.beerActionsCell}>
+                          <div className={styles.actionButtons}>
+                            <button
+                              className={styles.editButton}
+                              onClick={() => window.location.href = `/admin/food/${item.uuid}/edit`}
+                              title="Edit food item"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className={styles.deleteButton}
+                              onClick={() => handleDeleteFood(item.uuid, item.name)}
+                              title="Delete food item"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={styles.beerManagementFooter}>
+              <div className={styles.tableInfo}>
+                Showing {filteredFood.length} of {foodItems.length} food items
+              </div>
             </div>
           </div>
         );
@@ -730,16 +964,119 @@ export const AdminPage: React.FC<AdminPageProps> = () => {
       case 'events':
         return (
           <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>Event Management</h2>
-            <div className={styles.placeholderSection}>
-              <p>Event management features coming soon...</p>
-              <p>This section will include:</p>
-              <ul>
-                <li>Event creation and editing</li>
-                <li>Date and time management</li>
-                <li>Event descriptions</li>
-                <li>RSVP tracking</li>
-              </ul>
+            <div className={styles.beerManagementHeader}>
+              <h2 className={styles.sectionTitle}>Event Management</h2>
+              <div className={styles.quickStats}>
+                <span className={styles.statBadge}>Total: {eventStats.total}</span>
+                <span className={styles.statBadge}>Active: {eventStats.active}</span>
+                <span className={styles.statBadge}>Upcoming: {eventStats.upcoming}</span>
+              </div>
+            </div>
+
+            <div className={styles.addBeerSection}>
+              <button
+                className={styles.addBeerButton}
+                onClick={() => window.location.href = '/admin/events/new'}
+              >
+                + Add Event
+              </button>
+            </div>
+
+            <div className={styles.controlsSection}>
+              <div className={styles.searchSection}>
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={eventSearchTerm}
+                  onChange={(e) => setEventSearchTerm(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+
+              <div className={styles.filterSection}>
+                <select
+                  value={eventCategoryFilter}
+                  onChange={(e) => setEventCategoryFilter(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  <option value="all">All Categories</option>
+                  {eventCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.beerTableContainer}>
+              <table className={styles.beerTable}>
+                <caption>Event Management</caption>
+                <thead>
+                  <tr>
+                    <th className={styles.beerNameHeader}>Name</th>
+                    <th className={styles.beerStyleHeader}>Category</th>
+                    <th className={styles.beerAbvHeader}>Date</th>
+                    <th className={styles.beerIbuHeader}>Time</th>
+                    <th className={styles.beerStatusHeader}>Status</th>
+                    <th className={styles.beerActionsHeader}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEvents.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className={styles.noData}>
+                        No events found matching your criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredEvents.map(ev => (
+                      <tr key={ev.uuid} className={styles.beerRow}>
+                        <td className={styles.beerNameCell}>
+                          <div className={styles.beerName}>{ev.name}</div>
+                          <div className={styles.beerDescription}>{ev.brief_description}</div>
+                        </td>
+                        <td className={styles.beerStyleCell}>{ev.category}</td>
+                        <td className={styles.beerAbvCell}>
+                          {ev.date ? new Date(ev.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-'}
+                        </td>
+                        <td className={styles.beerIbuCell}>{ev.time || '-'}</td>
+                        <td className={styles.beerStatusCell}>
+                          <span className={`${styles.statusBadge} ${
+                            ev.status === 'active' ? styles.statusontap :
+                            ev.status === 'upcoming' ? styles.statuscomingsoon :
+                            styles.statusretired
+                          }`}>
+                            {ev.status}
+                          </span>
+                        </td>
+                        <td className={styles.beerActionsCell}>
+                          <div className={styles.actionButtons}>
+                            <button
+                              className={styles.editButton}
+                              onClick={() => window.location.href = `/admin/events/${ev.uuid}/edit`}
+                              title="Edit event"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className={styles.deleteButton}
+                              onClick={() => handleDeleteEvent(ev.uuid, ev.name)}
+                              title="Delete event"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={styles.beerManagementFooter}>
+              <div className={styles.tableInfo}>
+                Showing {filteredEvents.length} of {events.length} events
+              </div>
             </div>
           </div>
         );

@@ -18,15 +18,13 @@ export interface Event {
   featured?: boolean;
   recurring?: string;
   organizer?: string;
-  content?: string; // Pre-processed HTML content
-  markdown?: string; // Original markdown for admin editing
+  artist?: string;
+  genre?: string;
+  content?: string;
+  markdown?: string;
   uuid: string;
 }
 
-/**
- * Optimized hook that uses pre-processed JSON data instead of runtime markdown processing
- * This eliminates gray-matter, remark, and remark-html from the client bundle
- */
 export function useOptimizedEvents() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,14 +34,14 @@ export function useOptimizedEvents() {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('/data/events.json');
+
+      const response = await fetch('/api/events?limit=200');
       if (!response.ok) {
         throw new Error(`Failed to load events: ${response.status} ${response.statusText}`);
       }
-      
-      const eventsData = await response.json();
-      setAllEvents(eventsData);
+
+      const result = await response.json();
+      setAllEvents(result.events ?? result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load events';
       setError(errorMessage);
@@ -57,9 +55,8 @@ export function useOptimizedEvents() {
     loadEvents();
   }, []);
 
-  // Memoized filtered event arrays for performance
-  const featuredEvents = useMemo(() => 
-    allEvents.filter(event => event.featured), 
+  const featuredEvents = useMemo(() =>
+    allEvents.filter(event => event.featured),
     [allEvents]
   );
 
@@ -71,27 +68,26 @@ export function useOptimizedEvents() {
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [allEvents]);
 
-  const recurringEvents = useMemo(() => 
-    allEvents.filter(event => event.recurring), 
+  const recurringEvents = useMemo(() =>
+    allEvents.filter(event => event.recurring),
     [allEvents]
   );
 
-  const triviaEvents = useMemo(() => 
-    allEvents.filter(event => event.category === 'trivia'), 
+  const triviaEvents = useMemo(() =>
+    allEvents.filter(event => event.category === 'trivia'),
     [allEvents]
   );
 
-  const liveMusicEvents = useMemo(() => 
-    allEvents.filter(event => event.category === 'live-music'), 
+  const liveMusicEvents = useMemo(() =>
+    allEvents.filter(event => event.category === 'live-music'),
     [allEvents]
   );
 
-  const tastingEvents = useMemo(() => 
-    allEvents.filter(event => event.category === 'tasting'), 
+  const tastingEvents = useMemo(() =>
+    allEvents.filter(event => event.category === 'tasting'),
     [allEvents]
   );
 
-  // Event statistics
   const stats = useMemo(() => ({
     total: allEvents.length,
     upcoming: upcomingEvents.length,
@@ -117,27 +113,45 @@ export function useOptimizedEvents() {
   };
 }
 
-/**
- * Optimized hook for getting a single event by slug using pre-processed data
- */
 export function useOptimizedEvent(slug: string) {
-  const { allEvents, loading, error } = useOptimizedEvents();
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const event = useMemo(() => 
-    allEvents.find(event => event.slug === slug) || null, 
-    [allEvents, slug]
-  );
+  useEffect(() => {
+    if (!slug) return;
 
-  return {
-    event,
-    loading,
-    error,
-  };
+    const loadEvent = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/events/${encodeURIComponent(slug)}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Event not found');
+          } else {
+            throw new Error(`Failed to load event: ${response.status}`);
+          }
+          return;
+        }
+
+        const result = await response.json();
+        setEvent(result.event ?? result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load event');
+        console.error('Error loading event:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvent();
+  }, [slug]);
+
+  return { event, loading, error };
 }
 
-/**
- * Get next upcoming events (used by business info)
- */
 export function getNextUpcomingEvents(events: Event[], limit: number = 3): Event[] {
   const now = new Date();
   return events

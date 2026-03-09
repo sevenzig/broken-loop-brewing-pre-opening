@@ -1,0 +1,13 @@
+node_modules
+api/node_modules
+api/dist
+dist
+.git
+.cursor
+.claude
+.env
+.env.local
+*.log
+docs
+.vercelignore
+vercel.json

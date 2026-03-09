@@ -54,13 +54,13 @@ export function useBeersOptimized() {
       setLoading(true);
       setError(null);
       
-      // Fetch pre-processed JSON data instead of processing markdown at runtime
-      const response = await fetch('/data/beers.json');
+      const response = await fetch('/api/beers?limit=200');
       if (!response.ok) {
         throw new Error(`Failed to fetch beers: ${response.status}`);
       }
       
-      const beers: Beer[] = await response.json();
+      const result = await response.json();
+      const beers: Beer[] = result.beers ?? result;
       setAllBeers(beers);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load beers');
@@ -118,18 +118,20 @@ export function useBeerOptimized(slug: string) {
         setLoading(true);
         setError(null);
         
-        // Fetch pre-processed JSON data
-        const response = await fetch('/data/beers.json');
+        const response = await fetch(`/api/beers/${encodeURIComponent(slug)}`);
+        if (response.status === 404) {
+          setError(`Beer with slug "${slug}" not found`);
+          setLoading(false);
+          return;
+        }
         if (!response.ok) {
-          throw new Error(`Failed to fetch beers: ${response.status}`);
+          throw new Error(`Failed to fetch beer: ${response.status}`);
         }
         
-        const allBeers: Beer[] = await response.json();
-        const foundBeer = allBeers.find(b => b.slug === slug);
+        const result = await response.json();
+        const foundBeer = result.beer ?? result;
         
-        if (!foundBeer) {
-          setError(`Beer with slug "${slug}" not found`);
-        } else {
+        if (foundBeer) {
           setBeer(foundBeer);
         }
       } catch (err) {

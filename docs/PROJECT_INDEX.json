@@ -1,0 +1,387 @@
+{
+  "projectName": "broken-loop-brewing",
+  "generatedAt": "2026-03-09",
+  "structure": {
+    "root": [
+      "src/",
+      "api/",
+      "lib/",
+      "public/",
+      "docs/",
+      "scripts/",
+      "config-and-root-files"
+    ],
+    "src": [
+      "main.tsx",
+      "App.tsx",
+      "components/",
+      "pages/",
+      "hooks/",
+      "contexts/",
+      "utils/",
+      "data/",
+      "types/",
+      "config/"
+    ],
+    "api": [
+      "server.ts",
+      "lib/services/",
+      "lib/auth/",
+      "lib/routes/",
+      "lib/types/",
+      "lib/utils/"
+    ],
+    "lib": [
+      "services/",
+      "auth/",
+      "types/",
+      "utils/"
+    ],
+    "public": [
+      "data/"
+    ],
+    "docs": "markdown documentation and guides",
+    "scripts": "content and tooling scripts"
+  },
+  "entryPoints": [
+    {
+      "type": "frontend",
+      "path": "src/main.tsx",
+      "description": "Vite React bootstrap and router mounting point."
+    },
+    {
+      "type": "frontend-shell",
+      "path": "src/App.tsx",
+      "description": "Top-level React app shell and route composition."
+    },
+    {
+      "type": "api",
+      "path": "api/server.ts",
+      "description": "Node/Vercel API server entry."
+    },
+    {
+      "type": "tooling",
+      "path": "scripts/build-content-data.js",
+      "description": "Aggregates markdown content into JSON for runtime use."
+    }
+  ],
+  "coreModules": {
+    "frontend": {
+      "routesAndPages": {
+        "paths": [
+          "src/pages/HomePage.tsx",
+          "src/pages/BeerPage.tsx",
+          "src/pages/FoodPage.tsx",
+          "src/pages/EventsPage.tsx",
+          "src/pages/EventDetailPage.tsx",
+          "src/pages/IndividualBeerPage.tsx",
+          "src/pages/IndividualFoodPage.tsx",
+          "src/pages/StyleDetailPage.tsx",
+          "src/pages/StyleGuidePage.tsx",
+          "src/pages/AboutPage.tsx",
+          "src/pages/AdminPage.tsx",
+          "src/pages/AdminLoginPage.tsx",
+          "src/pages/AdminBeerCreatePage.tsx",
+          "src/pages/AdminBeerEditPage.tsx",
+          "src/pages/ComingSoonDemoPage.tsx",
+          "src/pages/InfoTabsDemoPage.tsx",
+          "src/pages/ButtonDemoPage.tsx",
+          "src/pages/ResponsiveTestPage.tsx",
+          "src/pages/DebugPage.tsx",
+          "src/pages/faq.tsx"
+        ],
+        "purpose": "Route-level React pages for public, admin, and debug views."
+      },
+      "layoutAndUI": {
+        "paths": [
+          "src/components/Header/Header.tsx",
+          "src/components/Footer/Footer.tsx",
+          "src/components/HeroSection/HeroSection.tsx",
+          "src/components/OnTapSection/OnTapSection.tsx",
+          "src/components/EventsSection/EventsSection.tsx",
+          "src/components/FoodSection/FoodSection.tsx",
+          "src/components/InstagramSection/InstagramSection.tsx",
+          "src/components/BeerCard/BeerCard.tsx",
+          "src/components/EventCard/EventCard.tsx",
+          "src/components/FoodCard/FoodCard.tsx",
+          "src/components/InfoTabs/InfoTabs.tsx",
+          "src/components/InfoTabs/index.ts",
+          "src/components/Button/Button.tsx",
+          "src/components/Button/index.ts",
+          "src/components/Button/ButtonExample.tsx",
+          "src/components/Toast/Toast.tsx",
+          "src/components/RouteLoader/RouteLoader.tsx",
+          "src/components/ScrollToTop/ScrollToTop.tsx",
+          "src/components/ResponsiveTemplate/ResponsiveTemplate.tsx",
+          "src/components/ComingSoonSplash/ComingSoonSplash.tsx",
+          "src/components/MobileActionButtons/MobileActionButtons.tsx",
+          "src/components/BusinessHoursModal/BusinessHoursModal.tsx",
+          "src/components/BusinessHoursTooltip/BusinessHoursTooltip.tsx",
+          "src/components/BeerStyleTooltip/BeerStyleTooltip.tsx",
+          "src/components/AgeVerificationModal/AgeVerificationModal.tsx",
+          "src/components/AdminHeader/AdminHeader.tsx",
+          "src/components/PreloadManager/PreloadManager.tsx",
+          "src/components/ErrorBoundary/ErrorBoundary.tsx",
+          "src/components/ProtectedRoute/ProtectedRoute.tsx",
+          "src/components/LazyRoute/LazyRoute.tsx"
+        ],
+        "purpose": "Shared layout and reusable UI components for the marketing site, listing pages, and admin tools."
+      },
+      "stateAndContext": {
+        "paths": [
+          "src/contexts/AuthContext.tsx",
+          "src/contexts/ToastContext.tsx",
+          "src/hooks/useBeers.ts",
+          "src/hooks/useBeersOptimized.ts",
+          "src/hooks/useOptimizedBeers.ts",
+          "src/hooks/useOptimizedBeerStyles.ts",
+          "src/hooks/useFood.ts",
+          "src/hooks/useOptimizedFood.ts",
+          "src/hooks/useEvents.ts",
+          "src/hooks/useBusinessStatus.ts",
+          "src/hooks/useOptimizedEvents.ts",
+          "src/hooks/useViewportConstraints.ts",
+          "src/hooks/useAgeVerificationSettings.ts",
+          "src/hooks/useOptimizedEvents.ts",
+          "src/hooks/index.ts"
+        ],
+        "purpose": "React context and hooks for auth, toasts, content fetching, viewport constraints, and business status."
+      },
+      "dataAndUtils": {
+        "paths": [
+          "src/data/**",
+          "src/utils/api/apiClient.ts",
+          "src/utils/api/authClient.ts",
+          "src/utils/api/devApiClient.ts",
+          "src/utils/api/mockData.ts",
+          "src/utils/businessHours.ts",
+          "src/utils/styleSorting.ts",
+          "src/utils/*Loader.d.ts",
+          "src/config/auth.ts",
+          "src/types/*"
+        ],
+        "purpose": "Typed data sources and utilities for markdown-backed content, API access, and display logic."
+      }
+    },
+    "backend": {
+      "serverAndRoutes": {
+        "paths": [
+          "api/server.ts",
+          "api/lib/routes/contentRoutes.ts"
+        ],
+        "purpose": "HTTP server entry and REST/CRUD routes for content management and retrieval."
+      },
+      "authAndSecurity": {
+        "paths": [
+          "api/lib/auth/config.ts",
+          "api/lib/auth/config.d.ts",
+          "api/lib/auth/jwt.ts",
+          "api/lib/auth/password.ts",
+          "api/lib/auth/rateLimiter.ts",
+          "api/lib/auth/middleware.ts"
+        ],
+        "purpose": "Authentication, authorization, JWT, password hashing, and rate limiting for API endpoints."
+      },
+      "services": {
+        "paths": [
+          "api/lib/services/BeerService.ts",
+          "api/lib/services/AdminService.ts",
+          "api/lib/services/FileService.ts",
+          "api/lib/services/GitHubService.ts",
+          "api/lib/services/ContentManagerService.ts",
+          "api/lib/services/ValidationService.ts",
+          "api/lib/services/ConflictResolutionService.ts"
+        ],
+        "purpose": "Business logic layer for beers, admins, files, GitHub CRUD, content, validation, and conflict resolution."
+      },
+      "typesAndUtils": {
+        "paths": [
+          "api/lib/types/Beer.ts",
+          "api/lib/types/Admin.ts",
+          "api/lib/types/ContentManager.ts",
+          "api/lib/utils/validation.ts",
+          "api/lib/utils/dropdowns.ts",
+          "api/lib/utils/markdown.ts",
+          "api/lib/utils/businessStatus.ts",
+          "api/lib/config/dropdowns.json"
+        ],
+        "purpose": "Type-safe models and utilities for validation, dropdowns, markdown processing, and business status checks."
+      }
+    },
+    "sharedLib": {
+      "paths": [
+        "lib/services/*.ts",
+        "lib/auth/*",
+        "lib/types/*.ts",
+        "lib/utils/{validation,dropdowns,markdown}.ts",
+        "lib/config/dropdowns.json"
+      ],
+      "purpose": "Reusable Node/TypeScript modules shared between the API and supporting tools."
+    },
+    "content": {
+      "paths": [
+        "public/data/beers.json",
+        "public/data/beer-styles.json",
+        "public/data/food.json",
+        "public/data/events.json",
+        "public/data/business-status.json",
+        "public/data/age-verification.json",
+        "public/data/**.md",
+        "src/data/**.md",
+        "public/data/templates/**",
+        "src/data/templates/**"
+      ],
+      "purpose": "Primary content layer for beers, styles, food, events, templates, and age verification."
+    },
+    "scripts": {
+      "paths": [
+        "scripts/build-content-data.js",
+        "scripts/extract-bjcp-*.cjs",
+        "scripts/extract-bjcp-*.js",
+        "scripts/extract-style-content.js",
+        "scripts/extract-styles-content.cjs",
+        "scripts/extract-all-styles.cjs",
+        "scripts/kellerbier-test.cjs",
+        "scripts/test-patterns.cjs",
+        "scripts/generatePasswordHash.js"
+      ],
+      "purpose": "One-off and repeatable scripts for content extraction, transformation, and auth helper tasks."
+    }
+  },
+  "configuration": {
+    "root": [
+      "package.json",
+      "tsconfig.json",
+      "tsconfig.app.json",
+      "tsconfig.node.json",
+      "vercel.json",
+      ".prettierrc.json",
+      ".env.example"
+    ],
+    "api": [
+      "api/package.json",
+      "api/tsconfig.json",
+      "api/lib/config/dropdowns.json",
+      "api/foundational-test-results.json",
+      "api/comprehensive-test-report.json"
+    ],
+    "content": [
+      "lib/config/dropdowns.json",
+      "public/data/*.json"
+    ]
+  },
+  "documentation": {
+    "root": [
+      "README.md",
+      "src/components/Button/README.md",
+      "src/components/InfoTabs/README.md",
+      "src/data/templates/README.md",
+      "public/data/templates/README.md",
+      "api/TEST_INVESTIGATION_REPORT.md"
+    ],
+    "docsFolder": [
+      "docs/AUTHENTICATION_SETUP.md",
+      "docs/QUICK_START_AUTH.md",
+      "docs/API_DOCUMENTATION.md",
+      "docs/ENVIRONMENT_VARIABLES.md",
+      "docs/DEPLOYMENT_SOLUTION.md",
+      "docs/PRODUCTION_DEPLOYMENT_CHECKLIST.md",
+      "docs/CSS_CUSTOM_PROPERTIES.md",
+      "docs/CSS_VARIABLES_QUICK_REFERENCE.md",
+      "docs/RESPONSIVE_DESIGN_STANDARDS.md",
+      "docs/BREAKPOINT_STANDARDIZATION_SUMMARY.md",
+      "docs/PRETTIER_GUIDE.md",
+      "docs/PERFORMANCE_OPTIMIZATION_SUMMARY.md",
+      "docs/DEBUG_INFO_TABS.md",
+      "docs/github_integration.md",
+      "docs/github-crud-system.md",
+      "docs/github-crud-setup.md",
+      "docs/CURSOR_RULES_CONSOLIDATION_SUMMARY.md"
+    ]
+  },
+  "tests": {
+    "unitTestFiles": [],
+    "integrationTestFiles": [],
+    "reports": [
+      "api/foundational-test-results.json",
+      "api/comprehensive-test-report.json"
+    ],
+    "summary": {
+      "unitTestCount": 0,
+      "integrationTestCount": 0,
+      "coverage": "unknown"
+    }
+  },
+  "dependenciesSummary": {
+    "runtime": [
+      "@octokit/rest",
+      "@phosphor-icons/react",
+      "@types/bcryptjs",
+      "@types/formidable",
+      "@types/jsonwebtoken",
+      "@types/node",
+      "@vercel/analytics",
+      "@vercel/node",
+      "bcryptjs",
+      "formidable",
+      "gray-matter",
+      "jsonwebtoken",
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "remark",
+      "remark-html",
+      "slugify",
+      "uuid"
+    ],
+    "tooling": [
+      "@eslint/js",
+      "@types/react",
+      "@types/react-dom",
+      "@types/uuid",
+      "@vitejs/plugin-react",
+      "concurrently",
+      "eslint",
+      "eslint-plugin-react-hooks",
+      "eslint-plugin-react-refresh",
+      "globals",
+      "markdownlint-cli",
+      "prettier",
+      "rollup-plugin-visualizer",
+      "typescript",
+      "typescript-eslint",
+      "vercel",
+      "vite",
+      "vite-plugin-vercel"
+    ]
+  },
+  "quickStart": {
+    "steps": [
+      {
+        "order": 1,
+        "title": "Install dependencies",
+        "commands": [
+          "npm install",
+          "cd api && npm install"
+        ]
+      },
+      {
+        "order": 2,
+        "title": "Run the app locally",
+        "commands": [
+          "npm run dev"
+        ],
+        "notes": "Starts both the Vite frontend and Node API server; open the printed localhost URL."
+      },
+      {
+        "order": 3,
+        "title": "Verify code quality and API behavior",
+        "commands": [
+          "npm run lint"
+        ],
+        "notes": "For backend verification, reference the API test reports in api/foundational-test-results.json and api/comprehensive-test-report.json."
+      }
+    ]
+  }
+}
+
