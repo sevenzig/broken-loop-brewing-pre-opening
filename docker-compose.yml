@@ -10,6 +10,8 @@ services:
       - "9998:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - blb
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U blb -d broken_loop_brewing"]
       interval: 5s
@@ -24,6 +26,8 @@ services:
         condition: service_healthy
     ports:
       - "9999:3000"
+    networks:
+      - blb
     environment:
       DATABASE_URL: postgresql://blb:blb_local_dev@db:5432/broken_loop_brewing
       PORT: "3000"
@@ -31,6 +35,10 @@ services:
       STATIC_DIR: /app/dist
       RUN_MIGRATIONS: "true"
       JWT_SECRET: docker-local-dev-secret-change-in-production
+
+networks:
+  blb:
+    driver: bridge
 
 volumes:
   pgdata:
