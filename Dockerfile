@@ -1,12 +1,14 @@
+# syntax=docker/dockerfile:1
+
 # ---------------------------------------------------------------------------
-#  Stage 1 -- Build the Vite frontend
+#  Stage 1 -- Build the Vite frontend  (parallel with stage 2 under BuildKit)
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS build-frontend
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY tsconfig*.json vite.config.ts index.html ./
 COPY src/ src/
@@ -15,25 +17,21 @@ COPY public/ public/
 RUN npm run build -- --mode production
 
 # ---------------------------------------------------------------------------
-#  Stage 2 -- Build the Express API (TypeScript -> JS)
+#  Stage 2 -- Build the Express API, then prune to prod-only deps
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS build-api
 
 WORKDIR /app/api
 
 COPY api/package.json api/package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
-COPY api/tsconfig.json ./
-COPY api/*.ts ./
-COPY api/lib/ lib/
-COPY api/db/ db/
-COPY api/auth/ auth/
+COPY api/ .
 
-RUN npx tsc
+RUN npx tsc && npm prune --omit=dev
 
 # ---------------------------------------------------------------------------
-#  Stage 3 -- Production image
+#  Stage 3 -- Production image (no npm install needed)
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS production
 
@@ -41,23 +39,18 @@ RUN apk add --no-cache wget
 
 WORKDIR /app
 
-# Install only production API dependencies
-COPY api/package.json api/package-lock.json ./api/
-RUN cd api && npm ci --omit=dev
-
-# Copy compiled API from stage 2
+# Carry over pre-pruned node_modules from the API build stage
+COPY --from=build-api /app/api/package.json ./api/
+COPY --from=build-api /app/api/node_modules/ ./api/node_modules/
 COPY --from=build-api /app/api/dist/ ./api/dist/
 
 # Copy built frontend from stage 1
 COPY --from=build-frontend /app/dist/ ./dist/
 
-# Copy schema.sql next to compiled migrate.js (it uses __dirname)
+# Copy schema + seed data for migration/seed at boot
 COPY api/db/schema.sql ./api/dist/db/schema.sql
-
-# Copy JSON seed data so db:seed can find it via process.cwd()/public/data
 COPY public/data/ ./public/data/
 
-# Copy and prepare entrypoint
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 

@@ -7,7 +7,12 @@ dist
 .claude
 .env
 .env.local
+.env.production
 *.log
 docs
 .vercelignore
 vercel.json
+.eslintrc*
+.prettierrc*
+*.md
+!README.md
