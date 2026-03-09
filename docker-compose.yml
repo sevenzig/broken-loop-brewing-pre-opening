@@ -23,7 +23,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "9999:3000"
     environment:
       DATABASE_URL: postgresql://blb:blb_local_dev@db:5432/broken_loop_brewing
       PORT: "3000"
