@@ -15,7 +15,7 @@ COPY api/tsconfig.json api/tsconfig.json
 COPY src/ src/
 COPY public/ public/
 
-RUN npm run build -- --mode production
+RUN npm run build
 
 # ---------------------------------------------------------------------------
 #  Stage 2 -- Build the Express API, then prune to prod-only deps
