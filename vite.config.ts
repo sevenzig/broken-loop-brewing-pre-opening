@@ -118,24 +118,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 500, // Reduce warning limit to catch large chunks
     rollupOptions: {
       // Ensure markdown files are included in the build
-      external: [
-        // Exclude Node.js built-in modules from bundling
-        'fs',
-        'path',
-        'crypto',
-        'os',
-        'util',
-        // Exclude API directory from build to prevent bundling serverless functions
-        /^\/api\/.*/,
-        /^api\/.*/,
-        /.*\/api\/.*/,
-        // Exclude any imports that start with api/
-        (id) => id.includes('/api/') || id.startsWith('api/') || id.includes('\\api\\'),
-        // Exclude specific API files
-        /^\.\/api\//,
-        /^api\//,
-        /\/api\//
-      ],
+      external(id: string) {
+        const builtins = ['fs', 'path', 'crypto', 'os', 'util'];
+        if (builtins.includes(id)) return true;
+        if (id.includes('/api/') || id.startsWith('api/') || id.includes('\\api\\')) return true;
+        return false;
+      },
       output: {
         // Aggressive chunking strategy for better performance
         manualChunks: (id: string) => {
