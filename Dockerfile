@@ -11,6 +11,7 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY tsconfig*.json vite.config.ts index.html ./
+COPY api/tsconfig.json api/tsconfig.json
 COPY src/ src/
 COPY public/ public/
 
