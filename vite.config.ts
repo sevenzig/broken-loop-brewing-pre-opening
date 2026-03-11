@@ -27,9 +27,7 @@ export default defineConfig(({ mode }) => {
     appType: 'spa',
     publicDir: 'public',
     resolve: {
-      alias: {
-        crypto: path.resolve(__dirname, 'src/shims/crypto.ts'),
-      },
+      alias: {},
     },
     define: {
       global: 'globalThis',
@@ -42,7 +40,7 @@ export default defineConfig(({ mode }) => {
       open: false,
       fs: {
         allow: ['..'],
-        deny: ['**/api/**', 'api/**', './api/**', '/api/**']
+        deny: ['api/**', './api/**']
       },
       proxy: {
         '/api': {
@@ -79,8 +77,9 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 500,
       rollupOptions: {
         external(id: string) {
-          if (id.includes('/api/') || id.startsWith('api/') || id.includes('\\api\\')) return true;
-          return false;
+          const backendApi = path.resolve(__dirname, 'api').replace(/\\/g, '/');
+          const normalized = id.replace(/\\/g, '/');
+          return normalized.startsWith(backendApi + '/') || normalized === backendApi;
         },
         output: {
           manualChunks: (id: string) => {
