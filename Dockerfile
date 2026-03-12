@@ -1,12 +1,12 @@
 # ---------------------------------------------------------------------------
-#  Stage 1 -- Build the Vite frontend  (parallel with stage 2 under BuildKit)
+#  Stage 1 -- Build the Vite frontend
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS build-frontend
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN npm ci
 
 COPY tsconfig*.json vite.config.ts index.html ./
 COPY api/tsconfig.json api/tsconfig.json
@@ -23,7 +23,7 @@ FROM node:22-alpine AS build-api
 WORKDIR /app/api
 
 COPY api/package.json api/package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN npm ci
 
 COPY api/ .
 
